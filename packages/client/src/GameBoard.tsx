@@ -43,25 +43,6 @@ export const GameBoard = () => {
     startTime = dateObj.toLocaleTimeString(); // This gives you a string in the form HH:MM:SS
   } 
 
-  const start = async () => {
-    console.log('starting match');
-    // const startTime = BigInt(Date.now()); 
-    const startTime = Date.now(); 
-    // deserialize startTime
-    const serializedStartTime = startTime.toString();
-    console.log("startTime: ", startTime)
-    console.log("serializedStartTime: ", serializedStartTime)
-    
-    try {
-      await startMatch(startTime)
-    } catch ( error: any ){
-      setErrorMessage((prevMessages) => [...prevMessages, error]);
-      console.log("Error calling startMatch. Reason: ", error);
-    }  
-  }
-
-  const canSpawn = useComponentValue(Player, playerEntity)?.value != true;
-
   const players = useEntityQuery([Has(Player), Has(Position)]).map((entity) => {
     const position = getComponentValueStrict(Position, entity);
     return {
@@ -71,6 +52,28 @@ export const GameBoard = () => {
       emoji: entity === playerEntity ? "🚀" : "🛸",
     };
   });
+  
+  const start = async () => {
+    console.log('starting match');
+    console.log("players length: ", players.length);
+    const playersSpawned = players.length;
+    // const startTime = BigInt(Date.now()); 
+    const startTime = Date.now(); 
+    // deserialize startTime
+    const serializedStartTime = startTime.toString();
+    console.log("startTime: ", startTime)
+    console.log("serializedStartTime: ", serializedStartTime)
+    
+    try {
+      await startMatch(playersSpawned, startTime)
+    } catch ( error: any ){
+      setErrorMessage((prevMessages) => [...prevMessages, error]);
+      console.log("Error calling startMatch. Reason: ", error);
+    }  
+  }
+
+  const canSpawn = useComponentValue(Player, playerEntity)?.value != true;
+
 
   const mapConfig = useComponentValue(MapConfig, singletonEntity);
 

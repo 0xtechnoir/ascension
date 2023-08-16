@@ -1,9 +1,11 @@
+import { useComponentValue, useEntityQuery } from "@latticexyz/react";
 import { getComponentValue } from "@latticexyz/recs";
 import { uuid } from "@latticexyz/utils";
 import { ClientComponents } from "./createClientComponents";
 import { SetupNetworkResult } from "./setupNetwork";
 import { parseError } from "../utils";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
+import { Entity, Has, getComponentValueStrict } from "@latticexyz/recs";
  
 export type SystemCalls = ReturnType<typeof createSystemCalls>;
  
@@ -44,14 +46,15 @@ export function createSystemCalls(
     }
   };
 
-  const startMatch = async (startTime: number) => {
+  const startMatch = async (playersSpawned: number, startTime: number) => {
     
     // deserialize startTime
     console.log("startTime type: ", typeof startTime);
     const bigIntStartTime = BigInt(startTime);
     console.log("bigIntStartTime type: ", typeof bigIntStartTime);
+
     try {
-      const tx = await worldContract.write.startMatch([bigIntStartTime]);
+      const tx = await worldContract.write.startMatch([playersSpawned, bigIntStartTime]);
       await waitForTransaction(tx);
       
       setInterval(() => {

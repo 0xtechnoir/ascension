@@ -9,24 +9,19 @@ import { query, QueryFragment, QueryType } from "@latticexyz/world/src/modules/k
 
 contract TurnSystem is System {
 
-  bytes32[][] private players;
-  
-  // function startMatch(uint256 startTime) public {
-  function startMatch(uint256 startTime) public {
-    // revert("startMatch called");
-    players = getKeysInTable(PlayerTableId);
-    require(players.length >= 2, "two players to start match");
+  function startMatch(uint32 playersSpawned, uint256 startTime) public {
+    require(playersSpawned > 1, "Not enough players to start match");
     GameIsLive.set(true);
     GameStartTime.set(startTime);
   }
 
   function incrementTurn() public {
-    uint32 currentTurn = Turn.get();
-    Turn.set(currentTurn + 1);
-    // get all players and increment action point by 1
-    for (uint256 i; i < players.length; i++) {
-        bytes32 player = players[i][0];
-        ActionPoint.set(player, ActionPoint.get(player) + 1);
-    }
+    // uint32 currentTurn = Turn.get();
+    // Turn.set(currentTurn + 1);
+    // // get all players and increment action point by 1
+    // for (uint256 i; i < players.length; i++) {
+    //     bytes32 player = players[i][0];
+    //     ActionPoint.set(player, ActionPoint.get(player) + 1);
+    // }
   }
 }
