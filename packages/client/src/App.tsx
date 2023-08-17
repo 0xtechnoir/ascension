@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useComponentValue } from "@latticexyz/react";
 import { useMUD } from "./MUDContext";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
@@ -8,6 +9,10 @@ export const App = () => {
     components: { SyncProgress },
   } = useMUD();
 
+   // State for error modal
+   const [showErrorModal, setShowErrorModal] = useState(true);
+   const [errorMessage, setErrorMessage] = useState("");
+
   // SyncStep enum
   enum SyncStep {  
     INITIALIZE = "initialize",
@@ -16,6 +21,23 @@ export const App = () => {
     LIVE = "live",
   }
 
+  type ErrorModalProps = {
+    message: string;
+    onClose: () => void;
+  };
+
+  const handleError = (message: string) => {
+    console.log("handleError called with message: ", message);
+    setErrorMessage(message);
+    setShowErrorModal(true);
+    console.log("errorMessage: ", errorMessage);
+  };
+
+  const closeErrorModal = () => {
+    setErrorMessage("");
+    setShowErrorModal(false);
+  };
+
   const syncProgress = useComponentValue(SyncProgress, singletonEntity, {
     step: SyncStep.INITIALIZE,
     message: "Connecting",
@@ -23,15 +45,58 @@ export const App = () => {
     latestBlockNumber: 0n,
     lastBlockNumberProcessed: 0n,
   });
+
+  const ErrorModal: React.FC<ErrorModalProps> = ({ message, onClose }) => {
+
+    const handleBackgroundClick = (event: React.MouseEvent<HTMLDivElement>) => {
+      event.stopPropagation();
+      onClose();
+    };
+  
+    const handleModalContentClick = (event: React.MouseEvent<HTMLDivElement>) => {
+      event.stopPropagation();
+    };
+  
+    useEffect(() => {
+      const handleEscapePress = (event: KeyboardEvent) => {
+        if (event.key === "Escape") {
+          onClose();
+        }
+      };
+  
+      document.addEventListener("keydown", handleEscapePress);
+      return () => {
+        // Cleanup the event listener
+        document.removeEventListener("keydown", handleEscapePress);
+      };
+    }, [onClose]);
+  
+    return (
+      <div onClick={handleBackgroundClick} style={{position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000}}>
+        <div onClick={handleModalContentClick} style={{backgroundColor: 'white', padding: '20px', borderRadius: '10px', width: '300px', textAlign: 'center', color: 'black', position: 'relative'}}>
+        <div onClick={onClose} style={{position: 'absolute', right: '10px', top: '10px', cursor: 'pointer', fontWeight: 'bold'}}>X</div>
+          <p>{message}</p>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="w-screen h-screen flex items-center justify-center">
+      {showErrorModal && (
+        <ErrorModal
+          message={errorMessage}
+          onClose={closeErrorModal}
+        />
+      )}
+
       {syncProgress.step !== SyncStep.LIVE ? (
         <div>
           {syncProgress.message} ({Math.floor(syncProgress.percentage)}%)
         </div>
       ) : (
         <div>
-          <GameBoard />
+          <GameBoard handleError={handleError}/>
         </div>  
       )}
     </div>

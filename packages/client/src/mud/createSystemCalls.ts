@@ -53,18 +53,13 @@ export function createSystemCalls(
     const bigIntStartTime = BigInt(startTime);
     console.log("bigIntStartTime type: ", typeof bigIntStartTime);
 
-    try {
+   
       const tx = await worldContract.write.startMatch([playersSpawned, bigIntStartTime]);
       await waitForTransaction(tx);
       
       setInterval(() => {
         incrementTurn();
       }, 10000);
-
-    } catch (error) {
-      // throw parseError(error);
-      throw error
-    }
   }
 
   const incrementTurn = async () => {

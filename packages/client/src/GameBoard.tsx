@@ -5,8 +5,17 @@ import { useMUD } from "./MUDContext";
 import { useKeyboardMovement } from "./useKeyboardMovement";
 import { Has, getComponentValueStrict } from "@latticexyz/recs";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
+import { parseError } from "./utils";
 
-export const GameBoard = () => {
+interface ErrorWithShortMessage {
+  shortMessage: string;
+}
+
+interface GameBoardProps {
+  handleError: (message: string) => void;
+}
+
+export const GameBoard: React.FC<GameBoardProps> = ({ handleError }) =>  {
   
   const {
     components: { MapConfig, Player, Position, Health, Range, ActionPoint, Turn, GameStartTime },
@@ -17,16 +26,16 @@ export const GameBoard = () => {
       },
   } = useMUD();
 
-  const [errorMessage, setErrorMessage] = useState<string[]>([]);
+  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [showModal, setShowModal] = useState(true);
   const moveMessage = useKeyboardMovement();
 
   useEffect(() => {
     if (moveMessage) {
       // When setting the error message, add the new message to the existing array instead of replacing it.
-      setErrorMessage((prevMessages) => [...prevMessages, moveMessage]);
+      setErrorMessage(moveMessage);
     }
   }, [moveMessage]);
-
 
   const playerHealth = useComponentValue(Health, playerEntity)?.value;
   const shipRange = useComponentValue(Range, playerEntity)?.value;
@@ -54,33 +63,30 @@ export const GameBoard = () => {
   });
   
   const start = async () => {
-    console.log('starting match');
-    console.log("players length: ", players.length);
     const playersSpawned = players.length;
-    // const startTime = BigInt(Date.now()); 
-    const startTime = Date.now(); 
-    // deserialize startTime
-    const serializedStartTime = startTime.toString();
-    console.log("startTime: ", startTime)
-    console.log("serializedStartTime: ", serializedStartTime)
-    
+    const startTime = Date.now();     
     try {
       await startMatch(playersSpawned, startTime)
-    } catch ( error: any ){
-      setErrorMessage((prevMessages) => [...prevMessages, error]);
-      console.log("Error calling startMatch. Reason: ", error);
+    } catch (error){
+
+      console.log(Object.entries([error]));
+      console.log(error);
+      if (typeof error === 'object' && error !== null) {
+        setShowModal(true); // Show the modal when an error occurs.
+        const message = (error as ErrorWithShortMessage).shortMessage;
+        console.log("error caught in createSystemCalls: ", message);
+        handleError(message);
+      }
     }  
   }
 
+  // Only allow the player to spawn if they haven't already spawned.
   const canSpawn = useComponentValue(Player, playerEntity)?.value != true;
-
-
+  // Get the map config from the singleton entity.
   const mapConfig = useComponentValue(MapConfig, singletonEntity);
-
   if (mapConfig == null) {
     throw new Error("map config not set or not ready, only use this hook after loading state === LIVE");
   }
-
   const { width , height } = mapConfig;
 
   return (
@@ -92,24 +98,15 @@ export const GameBoard = () => {
         players={players}
       />
       <button onClick={start} style={{backgroundColor: 'blue', color: 'white'}}>Start Match</button>
-          <div>Ship Health: {playerHealth}</div>
-          <div>Ship Range: {shipRange}</div>
-          <div>Action Points: {actionPoint}</div>
-          <div>Turn: {turn}</div>
-          <div>
-            {
-              gameStartTime && startDate && startTime
-              ? `Game Start Date: ${startDate}, Time: ${startTime}`
-              : ''
-            }
-          </div>
+      <div>Ship Health: {playerHealth}</div>
+      <div>Ship Range: {shipRange}</div>
+      <div>Action Points: {actionPoint}</div>
+      <div>Turn: {turn}</div>
       <div>
-        <h2>Ships Log:</h2>
         {
-          // Map over the error messages and create a paragraph for each one.
-          errorMessage.map((message, index) => (
-            <p key={index}>{message}</p>
-          ))
+          gameStartTime && startDate && startTime
+          ? `Game Start Date: ${startDate}, Time: ${startTime}`
+          : ''
         }
       </div>
     </div>
