@@ -10,7 +10,7 @@ export const App = () => {
   } = useMUD();
 
    // State for error modal
-   const [showErrorModal, setShowErrorModal] = useState(true);
+   const [showErrorModal, setShowErrorModal] = useState(false);
    const [errorMessage, setErrorMessage] = useState("");
 
   // SyncStep enum

@@ -1,15 +1,11 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useComponentValue, useEntityQuery } from "@latticexyz/react";
 import { GameMap } from "./GameMap";
 import { useMUD } from "./MUDContext";
 import { useKeyboardMovement } from "./useKeyboardMovement";
 import { Has, getComponentValueStrict } from "@latticexyz/recs";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
-import { parseError } from "./utils";
-
-interface ErrorWithShortMessage {
-  shortMessage: string;
-}
+import { ErrorWithShortMessage } from "./CustomTypes";
 
 interface GameBoardProps {
   handleError: (message: string) => void;
@@ -26,14 +22,15 @@ export const GameBoard: React.FC<GameBoardProps> = ({ handleError }) =>  {
       },
   } = useMUD();
 
-  const [errorMessage, setErrorMessage] = useState<string>("");
-  const [showModal, setShowModal] = useState(true);
-  const moveMessage = useKeyboardMovement();
+  const { moveMessage, clearMoveMessage } = useKeyboardMovement();
 
   useEffect(() => {
+    console.log("moveMessage: ", moveMessage);
     if (moveMessage) {
+      console.log("moveMessage: ", moveMessage);
       // When setting the error message, add the new message to the existing array instead of replacing it.
-      setErrorMessage(moveMessage);
+      handleError(moveMessage);
+      clearMoveMessage();
     }
   }, [moveMessage]);
 
@@ -68,13 +65,8 @@ export const GameBoard: React.FC<GameBoardProps> = ({ handleError }) =>  {
     try {
       await startMatch(playersSpawned, startTime)
     } catch (error){
-
-      console.log(Object.entries([error]));
-      console.log(error);
       if (typeof error === 'object' && error !== null) {
-        setShowModal(true); // Show the modal when an error occurs.
         const message = (error as ErrorWithShortMessage).shortMessage;
-        console.log("error caught in createSystemCalls: ", message);
         handleError(message);
       }
     }  

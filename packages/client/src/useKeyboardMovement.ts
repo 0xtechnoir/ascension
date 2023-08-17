@@ -1,17 +1,20 @@
 import { useEffect, useState } from "react";
 import { useMUD } from "./MUDContext";
-import { parseError } from "./utils";
+import { ErrorWithShortMessage } from "./CustomTypes";
 
 export const useKeyboardMovement = () => {
   const {
     systemCalls: { moveBy },
   } = useMUD();
 
-  const [moveMessage, setMoveMessage] = useState<string | null>(null);
+  const [moveMessage, setMoveMessage] = useState<string>("");
+
+  const clearMoveMessage = () => {
+    setMoveMessage("");
+  };
 
   useEffect(() => {
     const listener = async (e: KeyboardEvent) => {
-      let message;
       try {
         if (e.key === "ArrowUp") {
           await moveBy(0, -1);
@@ -26,8 +29,14 @@ export const useKeyboardMovement = () => {
           await moveBy(1, 0);
         }
       } 
-      catch (error: any) {
-        setMoveMessage(parseError(error));
+      catch (error) {
+        console.log("catch block triggerd. Error: ", error);
+        if (typeof error === 'object' && error !== null) {
+          const message = (error as ErrorWithShortMessage).shortMessage;
+          setMoveMessage(message);
+        } else {
+          console.error(error);
+        }
       }
     };
 
@@ -35,5 +44,6 @@ export const useKeyboardMovement = () => {
     return () => window.removeEventListener("keydown", listener);
   }, [moveBy]);
 
-  return moveMessage;
+  return { moveMessage, clearMoveMessage };
+
 };

@@ -36,7 +36,7 @@ contract MapSystem is System {
     require(Movable.get(player), "cannot move");
 
     // match moust hve started
-    // require(GameIsLive.get(), "Match hasn't started yet. Stay put!");
+    require(GameIsLive.get(), "Match hasn't started yet. Stay put!");
 
     // retrieve the players current position
     (uint32 fromX, uint32 fromY) = Position.get(player);

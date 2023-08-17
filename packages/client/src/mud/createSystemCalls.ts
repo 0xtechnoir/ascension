@@ -1,11 +1,8 @@
-import { useComponentValue, useEntityQuery } from "@latticexyz/react";
 import { getComponentValue } from "@latticexyz/recs";
 import { uuid } from "@latticexyz/utils";
 import { ClientComponents } from "./createClientComponents";
 import { SetupNetworkResult } from "./setupNetwork";
-import { parseError } from "../utils";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
-import { Entity, Has, getComponentValueStrict } from "@latticexyz/recs";
  
 export type SystemCalls = ReturnType<typeof createSystemCalls>;
  
