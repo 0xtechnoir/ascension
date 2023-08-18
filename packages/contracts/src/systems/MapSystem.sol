@@ -9,6 +9,9 @@ contract MapSystem is System {
 
   function spawn(uint32 x, uint32 y) public {
 
+    //TODO Stop new players from spawning if match has already started
+    //TODO: Allow the player to enter a name to associate with their piece - hovering over the piece in the UI will show the name
+
     // create a player entity using the message senders address as the key
     bytes32 player = addressToEntityKey(address(_msgSender()));
     

@@ -60,6 +60,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ handleError }) =>  {
   });
   
   const start = async () => {
+    console.log("players: ", players);
     const playersSpawned = players.length;
     const startTime = Date.now();     
     try {

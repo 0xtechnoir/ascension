@@ -60,6 +60,7 @@ export function createSystemCalls(
   }
 
   const incrementTurn = async () => {
+    console.log("incrementTurn called")
     // const tx = await worldSend("incrementTurn", []);
     // await awaitStreamValue(txReduced$, (txHash) => txHash === tx.hash);
     const tx = await worldContract.write.incrementTurn();

@@ -1,5 +1,5 @@
 import { mudConfig } from "@latticexyz/world/register";
-// import { resolveTableId } from "@latticexyz/config";
+import { resolveTableId } from "@latticexyz/config";
 
 export default mudConfig({
   enums: {},
@@ -37,11 +37,11 @@ export default mudConfig({
       }
     }
   },
-//   modules: [
-//     {
-//       name: "KeysInTableModule",
-//       root: true,
-//       args: [resolveTableId("Player")],
-//     }
-//   ]
+  modules: [
+    {
+      name: "KeysInTableModule",
+      root: true,
+      args: [resolveTableId("Player")],
+    }
+  ]
 });
