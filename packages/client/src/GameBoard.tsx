@@ -18,7 +18,8 @@ export const GameBoard: React.FC<GameBoardProps> = ({ handleError }) =>  {
     network: { playerEntity },
     systemCalls: { 
        spawn,
-       startMatch 
+       startMatch,
+       increaseRange, 
       },
   } = useMUD();
 
@@ -73,6 +74,18 @@ export const GameBoard: React.FC<GameBoardProps> = ({ handleError }) =>  {
     }  
   }
 
+  const boostRange = async () => {
+    try {
+      await increaseRange()
+    } catch (error){
+      console.log("error: ", error)
+      if (typeof error === 'object' && error !== null) {
+        const message = (error as ErrorWithShortMessage).shortMessage;
+        handleError(message);
+      }
+    }
+  }
+
   // Only allow the player to spawn if they haven't already spawned.
   const canSpawn = useComponentValue(Player, playerEntity)?.value != true;
   // Get the map config from the singleton entity.
@@ -91,6 +104,8 @@ export const GameBoard: React.FC<GameBoardProps> = ({ handleError }) =>  {
         players={players}
       />
       <button onClick={start} style={{backgroundColor: 'blue', color: 'white'}}>Start Match</button>
+      <br/>
+      <button onClick={boostRange} style={{backgroundColor: 'blue', color: 'white'}}>Increase Range (Requires 1 AP)</button>
       <div>Ship Health: {playerHealth}</div>
       <div>Ship Range: {shipRange}</div>
       <div>Action Points: {actionPoint}</div>

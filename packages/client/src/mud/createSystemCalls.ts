@@ -43,20 +43,24 @@ export function createSystemCalls(
     }
   };
 
+  const increaseRange = async () => {
+    console.log("increaseRange called")
+    if (!playerEntity) {
+      throw new Error("no player");
+    }
+    const tx = await worldContract.write.increaseRange();
+    await waitForTransaction(tx);
+  }
+
   const startMatch = async (playersSpawned: number, startTime: number) => {
-    
-    // deserialize startTime
     console.log("startTime type: ", typeof startTime);
     const bigIntStartTime = BigInt(startTime);
-    console.log("bigIntStartTime type: ", typeof bigIntStartTime);
+    const tx = await worldContract.write.startMatch([playersSpawned, bigIntStartTime]);
+    await waitForTransaction(tx);
 
-   
-      const tx = await worldContract.write.startMatch([playersSpawned, bigIntStartTime]);
-      await waitForTransaction(tx);
-      
-      setInterval(() => {
-        incrementTurn();
-      }, 10000);
+    setInterval(() => {
+      incrementTurn();
+    }, 10000);
   }
 
   const incrementTurn = async () => {
@@ -119,5 +123,6 @@ export function createSystemCalls(
     moveBy,
     spawn,
     startMatch,
+    increaseRange,
    };
 }

@@ -7,4 +7,6 @@ interface ITurnSystem {
   function startMatch(uint32 playersSpawned, uint256 startTime) external;
 
   function incrementTurn() external;
+
+  function increaseRange() external;
 }

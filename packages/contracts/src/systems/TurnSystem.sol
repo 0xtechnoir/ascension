@@ -21,10 +21,28 @@ contract TurnSystem is System {
     uint32 currentTurn = Turn.get();
     Turn.set(currentTurn + 1);
     // get all players and increment action point by 1
+    assignActionPointsToAllPlayers();
+  }
+
+  function assignActionPointsToAllPlayers() private {
+    // get all players and increment action point by 1
     bytes32[][] memory players = getKeysInTable(PlayerTableId);
     for (uint256 i; i < players.length; i++) {
         bytes32 player = players[i][0];
         ActionPoint.set(player, ActionPoint.get(player) + 1);
     }
   }
+
+  function increaseRange() public {
+    // allow players to spend action points to increase their range
+    bytes32 player = addressToEntityKey(_msgSender());
+    uint32 currentRange = Range.get(player);
+    uint32 currentActionPoints = ActionPoint.get(player);
+    require(currentActionPoints > 0, "You need an action point in order to increase your range");
+    Range.set(player, currentRange + 1);
+    ActionPoint.set(player, currentActionPoints - 1);
+  }
+  
+
+
 }
