@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
-import { useComponentValue } from "@latticexyz/react";
+import { useComponentValue, useEntityQuery } from "@latticexyz/react";
+import { Entity, Has, HasValue, getComponentValueStrict } from "@latticexyz/recs";
 import { useMUD } from "./MUDContext";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
 import { GameBoard } from "./GameBoard";
 import { PlayerStats } from "./PlayerStats";
+import { OtherPlayersStats } from "./OtherPlayerStats";
 
 export const App = () => {
   const {
-    components: { SyncProgress, Health, Range, ActionPoint },
+    components: { SyncProgress, Health, Range, ActionPoint, Player, Position },
     network: { playerEntity },
   } = useMUD();
 
@@ -20,6 +22,16 @@ export const App = () => {
   const playerHealth = useComponentValue(Health, playerEntity)?.value;
   const shipRange = useComponentValue(Range, playerEntity)?.value;
   const actionPoint = useComponentValue(ActionPoint, playerEntity)?.value;
+
+  const players = useEntityQuery([
+    Has(Player), 
+    Has(Position)
+  ])
+  const otherPlayers = players.filter((entity) => entity !== playerEntity);
+
+  
+  // console.log("players: ", players);
+  // console.log("otherPlayers: ", otherPlayers);
 
   // SyncStep enum
   enum SyncStep {  
@@ -132,10 +144,13 @@ export const App = () => {
           {syncProgress.message} ({Math.floor(syncProgress.percentage)}%)
         </div>
       ) : (
-        <div>
-          <GameBoard handleError={handleError}/>
-          <PlayerStats health={playerHealth} range={shipRange} actionPoints={actionPoint} />
-        </div>  
+        <div className="flex">
+          <div className="flex-col mr-4">
+            <PlayerStats health={playerHealth} range={shipRange} actionPoints={actionPoint} handleError={handleError} />
+            <OtherPlayersStats players={otherPlayers} />
+          </div>
+            <GameBoard handleError={handleError} players={players}/>
+        </div>    
       )}
     </div>
   );
