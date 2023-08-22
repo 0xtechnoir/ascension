@@ -1,15 +1,16 @@
-import { getComponentValue } from "@latticexyz/recs";
+import { getComponentValue, Has, HasValue } from "@latticexyz/recs";
 import { uuid } from "@latticexyz/utils";
 import { ClientComponents } from "./createClientComponents";
 import { SetupNetworkResult } from "./setupNetwork";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
+import { useEntityQuery } from "@latticexyz/react";
  
 export type SystemCalls = ReturnType<typeof createSystemCalls>;
  
 export function createSystemCalls(
   { playerEntity, worldContract, waitForTransaction }: SetupNetworkResult,
-  { MapConfig, Player, Position, GameIsLive }: ClientComponents
-) {
+  { MapConfig, Player, Position, GameIsLive }: ClientComponents) {
+
   const wrapPosition = (x: number, y: number) => {
     const mapConfig = getComponentValue(MapConfig, singletonEntity);
     if (!mapConfig) {
@@ -85,11 +86,28 @@ export function createSystemCalls(
  
     await moveTo(playerPosition.x + deltaX, playerPosition.y + deltaY);
   };
- 
+
+  
+  // simple function to display another platers playerId when their current tile is clicked on
+  // const displayPlayerId = async (inputX: number, inputY: number) => {
+  //   console.log("displayPlayerId called with coordinates: ", inputX, " ,", inputY);
+  //   // check if there is a player at the clicked on tile
+  //   try {
+  //     const tx = await worldContract.write.getPlayerAtPosition([inputX, inputY]);
+  //     await waitForTransaction(tx);
+  //     console.log("tx: ", tx);
+  //   } catch (error) {
+  //     console.log("caught error in createSystemCalls.ts: ", error);
+  //   }
+  // }
+
+
   const spawn = async (inputX: number, inputY: number) => {
     if (!playerEntity) {
       throw new Error("no player");
     }
+
+    console.log("playerEntity: ", playerEntity);
  
     const canSpawn = getComponentValue(Player, playerEntity)?.value !== true;
     if (!canSpawn) {
@@ -112,6 +130,7 @@ export function createSystemCalls(
     try {
       const tx = await worldContract.write.spawn([x, y]);
       await waitForTransaction(tx);
+      console.log("Spawn tx: ", tx);
     } finally {
       Position.removeOverride(positionId);
       Player.removeOverride(playerId);

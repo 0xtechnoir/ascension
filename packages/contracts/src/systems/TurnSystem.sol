@@ -6,6 +6,7 @@ import { addressToEntityKey } from "../addressToEntityKey.sol";
 import { positionToEntityKey } from "../positionToEntityKey.sol";
 import { getKeysInTable } from "@latticexyz/world/src/modules/keysintable/getKeysInTable.sol";
 import { query, QueryFragment, QueryType } from "@latticexyz/world/src/modules/keysintable/query.sol";
+import { PlayerTableId, Position, PositionTableId } from "../codegen/Tables.sol";
 
 contract TurnSystem is System {
 
@@ -42,6 +43,27 @@ contract TurnSystem is System {
     Range.set(player, currentRange + 1);
     ActionPoint.set(player, currentActionPoints - 1);
   }
+
+  // function getPlayerAtPosition(uint32 x, uint32 y) public view returns (bytes32[][] memory) {
+  
+  //   QueryFragment[] memory fragments = new QueryFragment[](2);
+  //   // Specify the more restrictive filter first for performance reasons
+  //   fragments[0] = QueryFragment(QueryType.HasValue, PositionTableId, abi.encode(x, y));
+  //   // The value argument is ignored in Has query fragments
+  //   fragments[1] = QueryFragment(QueryType.Has, PlayerTableId, new bytes(0));
+  //   bytes32[][] memory keyTuples = query(fragments);
+  //   require(keyTuples.length == 0, "There is a player at the given position");
+  //   return keyTuples;
+  // }
+
+  // function transferActionPoint(uint32 recipient) public {
+  //   // allow players to transfer action points to other players
+  //   bytes32 player = addressToEntityKey(_msgSender());
+  //   uint32 currentActionPoints = ActionPoint.get(player);
+  //   require(currentActionPoints > 0, "You need an action point in order to transfer an action point");
+  //   ActionPoint.set(player, currentActionPoints - 1);
+  //   ActionPoint.set(recipient, ActionPoint.get(recipient) + 1);
+  // }
   
 
 

@@ -3,12 +3,12 @@ import { useComponentValue, useEntityQuery } from "@latticexyz/react";
 import { GameMap } from "./GameMap";
 import { useMUD } from "./MUDContext";
 import { useKeyboardMovement } from "./useKeyboardMovement";
-import { Has, getComponentValueStrict } from "@latticexyz/recs";
+import { Entity, Has, HasValue, getComponentValueStrict } from "@latticexyz/recs";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
 import { ErrorWithShortMessage } from "./CustomTypes";
 
 interface GameBoardProps {
-  handleError: (message: string) => void;
+  handleError: (message: string, actionButtonText?: string, onActionButtonClick?: () => void) => void;
 }
 
 export const GameBoard: React.FC<GameBoardProps> = ({ handleError }) =>  {
@@ -19,12 +19,11 @@ export const GameBoard: React.FC<GameBoardProps> = ({ handleError }) =>  {
     systemCalls: { 
        spawn,
        startMatch,
-       increaseRange, 
+       increaseRange,
       },
   } = useMUD();
 
   const { moveMessage, clearMoveMessage } = useKeyboardMovement();
-
   useEffect(() => {
     console.log("moveMessage: ", moveMessage);
     if (moveMessage) {
@@ -35,9 +34,23 @@ export const GameBoard: React.FC<GameBoardProps> = ({ handleError }) =>  {
     }
   }, [moveMessage]);
 
-  const playerHealth = useComponentValue(Health, playerEntity)?.value;
-  const shipRange = useComponentValue(Range, playerEntity)?.value;
-  const actionPoint = useComponentValue(ActionPoint, playerEntity)?.value;
+  // Add event listener for the Escape key
+  // useEffect(() => {
+  //   const handleEscape = (event: KeyboardEvent) => {
+  //     if (event.code === 'Escape') {
+  //       setShowModal(false);
+  //     }
+  //   };
+  //   window.addEventListener("keydown", handleEscape);
+
+  //   return () => {
+  //     window.removeEventListener("keydown", handleEscape);
+  //   };
+  // }, []);
+
+  // const playerHealth = useComponentValue(Health, playerEntity)?.value;
+  // const shipRange = useComponentValue(Range, playerEntity)?.value;
+  // const actionPoint = useComponentValue(ActionPoint, playerEntity)?.value;
   const turn = useComponentValue(Turn, singletonEntity)?.value;
   const gameStartTime = useComponentValue(GameStartTime, singletonEntity)?.value;
 
@@ -50,15 +63,38 @@ export const GameBoard: React.FC<GameBoardProps> = ({ handleError }) =>  {
     startTime = dateObj.toLocaleTimeString(); // This gives you a string in the form HH:MM:SS
   } 
 
-  const players = useEntityQuery([Has(Player), Has(Position)]).map((entity) => {
-    const position = getComponentValueStrict(Position, entity);
-    return {
-      entity,
-      x: position.x,
-      y: position.y,
-      emoji: entity === playerEntity ? "🚀" : "🛸",
-    };
-  });
+  const players = useEntityQuery([
+      Has(Player), 
+      Has(Position)
+    ])
+    .map((entity) => {
+      const position = getComponentValueStrict(Position, entity);
+      return {
+        entity,
+        x: position.x,
+        y: position.y,
+        emoji: entity === playerEntity ? "🚀" : "🛸",
+      };
+    }
+  );
+
+  const donateActionPoint = async (player: Entity) => {
+    console.log("donateActionPoint called with player: ", player);
+  }
+
+   // Function to handle the button click
+  const selectPlayer = (inputX: number, inputY: number) => {
+    
+    const player = players.find(player => {
+      const position = getComponentValueStrict(Position, player.entity);
+      return position.x === inputX && position.y === inputY;
+    });
+
+    if(player) {
+      handleError('Donate an action point to this player.', 'Donate Action Point', () => donateActionPoint(player.entity));
+    }
+  };
+
   
   const start = async () => {
     console.log("players: ", players);
@@ -85,7 +121,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ handleError }) =>  {
       }
     }
   }
-
+ 
   // Only allow the player to spawn if they haven't already spawned.
   const canSpawn = useComponentValue(Player, playerEntity)?.value != true;
   // Get the map config from the singleton entity.
@@ -100,15 +136,15 @@ export const GameBoard: React.FC<GameBoardProps> = ({ handleError }) =>  {
       <GameMap 
         width={width}
         height={height}
-        onTileClick={canSpawn ? spawn : undefined} 
+        onTileClick={canSpawn ? spawn : selectPlayer} 
         players={players}
       />
       <button onClick={start} style={{backgroundColor: 'blue', color: 'white'}}>Start Match</button>
       <br/>
       <button onClick={boostRange} style={{backgroundColor: 'blue', color: 'white'}}>Increase Range (Requires 1 AP)</button>
-      <div>Ship Health: {playerHealth}</div>
+      {/* <div>Ship Health: {playerHealth}</div>
       <div>Ship Range: {shipRange}</div>
-      <div>Action Points: {actionPoint}</div>
+      <div>Action Points: {actionPoint}</div> */}
       <div>Turn: {turn}</div>
       <div>
         {
