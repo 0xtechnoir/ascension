@@ -7,6 +7,7 @@ import { MapConfig, MapConfigTableId } from "./tables/MapConfig.sol";
 import { Turn, TurnTableId } from "./tables/Turn.sol";
 import { GameStartTime, GameStartTimeTableId } from "./tables/GameStartTime.sol";
 import { GameIsLive, GameIsLiveTableId } from "./tables/GameIsLive.sol";
+import { Username, UsernameTableId } from "./tables/Username.sol";
 import { Movable, MovableTableId } from "./tables/Movable.sol";
 import { Player, PlayerTableId } from "./tables/Player.sol";
 import { Health, HealthTableId } from "./tables/Health.sol";

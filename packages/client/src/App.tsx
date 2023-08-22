@@ -146,7 +146,7 @@ export const App = () => {
       ) : (
         <div className="flex">
           <div className="flex-col mr-4">
-            <PlayerStats health={playerHealth} range={shipRange} actionPoints={actionPoint} handleError={handleError} />
+            <PlayerStats handleError={handleError} />
             <OtherPlayersStats players={otherPlayers} />
           </div>
             <GameBoard handleError={handleError} players={players}/>

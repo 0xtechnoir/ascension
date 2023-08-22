@@ -102,7 +102,9 @@ export function createSystemCalls(
   // }
 
 
-  const spawn = async (inputX: number, inputY: number) => {
+  const spawn = async (inputX: number, inputY: number, username: string) => {
+
+    console.log("spawn called with name: ", username);
     if (!playerEntity) {
       throw new Error("no player");
     }
@@ -128,7 +130,7 @@ export function createSystemCalls(
     });
  
     try {
-      const tx = await worldContract.write.spawn([x, y]);
+      const tx = await worldContract.write.spawn([x, y, username]);
       await waitForTransaction(tx);
       console.log("Spawn tx: ", tx);
     } finally {

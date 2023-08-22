@@ -24,6 +24,7 @@ export default mudConfig({
       keySchema: {},
       schema: "bool",
     },
+    Username: "string",
     Movable: "bool",
     Player: "bool",
     Health: "uint32",

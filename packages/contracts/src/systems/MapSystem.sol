@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0;
 import { System } from "@latticexyz/world/src/System.sol";
-import { MapConfig, Movable, Player, Position, Health, Range, ActionPoint, GameStartTime, GameIsLive } from "../codegen/Tables.sol";
+import { MapConfig, Movable, Player, Position, Health, Range, ActionPoint, GameStartTime, GameIsLive, Username } from "../codegen/Tables.sol";
 import { addressToEntityKey } from "../addressToEntityKey.sol";
 import { positionToEntityKey } from "../positionToEntityKey.sol";
 
 contract MapSystem is System {
 
-  function spawn(uint32 x, uint32 y) public {
+  function spawn(uint32 x, uint32 y, string memory username) public {
 
     //TODO Stop new players from spawning if match has already started
     //TODO: Allow the player to enter a name to associate with their piece - hovering over the piece in the UI will show the name
@@ -25,6 +25,7 @@ contract MapSystem is System {
 
     // when we spawn a new player we store state in separate tables (components) and associate them with the player entity rather than storing everything in a single contract
     Player.set(player, true);
+    Username.set(player, username);
     Position.set(player, x, y);
     Movable.set(player, true);
     Health.set(player, 3);
