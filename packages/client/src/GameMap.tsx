@@ -68,12 +68,14 @@ export const GameMap = ({
           );
 
           // Define the ships firing perimeter
-          let isAdjacentToPlayer = (
-            playerPosition && shipRange && (
-              (Math.abs(playerPosition.x - x) <= shipRange && Math.abs(playerPosition.y - y) <= shipRange)
-              && !(playerPosition.x === x && playerPosition.y === y)
-            )
-          );
+          let totalDistance = 0;
+          if (playerPosition && shipRange) {
+            let deltaX = Math.abs(playerPosition.x - x);
+            let deltaY = Math.abs(playerPosition.y - y);
+            totalDistance = deltaX + deltaY;
+          }
+          let isAdjacentToPlayer = playerPosition && shipRange && totalDistance <= shipRange && totalDistance !== 0;
+        
           const isHovered = hoveredTile.x === x && hoveredTile.y === y; // Check if the current tile is hovered
 
           return (
