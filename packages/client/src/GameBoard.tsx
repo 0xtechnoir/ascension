@@ -27,18 +27,36 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   const [spawnY, setSpawnY] = useState<number | null>(null);
 
   const {
-    components: { MapConfig, Player, Position, Turn, GameStartTime },
+    components: { MapConfig, Player, Position, Turn, GameStartTime, Alive },
     network: { playerEntity },
     systemCalls: { spawn, startMatch },
   } = useMUD();
 
+  let playerIsAlive: boolean;
   const mappedPlayers = players.map((entity) => {
+    // console.log("1. playerIsAlive: ", playerIsAlive);
     const position = getComponentValueStrict(Position, entity);
+    // TODO - This is trying to execute before the Alive componentis set on the entity
+    // Need to listen for an onchain event to know when the Alive component is set and also when the value of the Alive component changes
+    
+    
+    // playerIsAlive = getComponentValueStrict(Alive, entity)?.value;
+    // console.log("1. playerIsAlive: ", playerIsAlive);
+    // let emoji = "";
+    // // case statement to determine emoji is player is equal to playerEntity and whether they are alive or not
+    // if (playerIsAlive) {
+    //   emoji = entity === playerEntity ? "🚀" : "🛸";
+    // } else {
+    //   emoji = "💀";
+    // }
+    
+    const emoji = entity === playerEntity ? "🚀" : "🛸";
+
     return {
       entity,
       x: position.x,
       y: position.y,
-      emoji: entity === playerEntity ? "🚀" : "🛸",
+      emoji: emoji,
     };
   });
 
@@ -167,23 +185,19 @@ export const GameBoard: React.FC<GameBoardProps> = ({
               type="text"
               placeholder="..."
               onChange={(e) => setEnteredUsername(e.target.value)}
+              onKeyUp={(e) => {
+                if (e.keyCode === 13 && enteredUsername.trim() !== "") {
+                  handleSpawnSubmit();
+                }
+              }}
               style={{
                 paddingLeft: '10px',
               }}
             />
             <button 
               onClick={handleSpawnSubmit}
-              style={{
-                padding: '10px 15px',
-                borderRadius: '5px',
-                backgroundImage: 'linear-gradient(to right, #6A82FB, #FC5C7D)', 
-                border: 'none',
-                color: 'white',
-                cursor: 'pointer',
-                transition: '0.3s',
-                fontSize: '16px',
-                zIndex: 200,
-              }}
+              className="h-10 px-6 font-semibold rounded-md border border-slate-400 text-slate-900"
+              type="button"
               onMouseOver={(e) => e.currentTarget.style.opacity = '0.8'}
               onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
             >

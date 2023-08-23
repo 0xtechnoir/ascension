@@ -10,7 +10,7 @@ type PlayerStatsProps = {
 export const PlayerStats: React.FC<PlayerStatsProps> = ({ handleError }) => {
     
     const {
-        components: { Health, Range, ActionPoint, Username },
+        components: { Health, Range, ActionPoint, Username, Alive },
         network: { playerEntity },
         systemCalls: { 
            increaseRange,
@@ -22,6 +22,7 @@ export const PlayerStats: React.FC<PlayerStatsProps> = ({ handleError }) => {
     const playerHealth = useComponentValue(Health, playerEntity)?.value;
     const shipRange = useComponentValue(Range, playerEntity)?.value;
     const actionPoint = useComponentValue(ActionPoint, playerEntity)?.value;
+    const alive = useComponentValue(Alive, playerEntity)?.value;
 
     const boostRange = async () => {
         try {
@@ -42,10 +43,17 @@ export const PlayerStats: React.FC<PlayerStatsProps> = ({ handleError }) => {
                 <br /><br />
                 <p></p>
                 <p>Player: {playerName}</p>
+                <p>Status: {alive ? `Alive` : `Dead`}</p>
                 <p>Health: {playerHealth}</p>
                 <p>Range: {shipRange}</p>
                 <p>Action Points: {actionPoint}</p> 
-                <button onClick={boostRange} style={{backgroundColor: 'grey', color: 'white'}}>Increase Range (Requires 1 AP)</button>
+                <button 
+                  onClick={boostRange} 
+                  className="h-10 px-6 font-semibold rounded-md border border-slate-200 text-slate-300"
+                  type="button"
+                >
+                  Increase Range (Requires 1 AP)
+                </button>
             </div>
         </div>
     );

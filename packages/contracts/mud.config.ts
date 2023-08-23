@@ -25,8 +25,10 @@ export default mudConfig({
       schema: "bool",
     },
     Username: "string",
+    Champion: "bool",
     Movable: "bool",
     Player: "bool",
+    Alive: "bool",
     Health: "uint32",
     Range: "uint32",
     ActionPoint: "uint32",
@@ -42,12 +44,24 @@ export default mudConfig({
     {
       name: "KeysInTableModule",
       root: true,
-      args: [resolveTableId("Player")],
+      args: [
+        resolveTableId("Player"),
+        resolveTableId("Alive"),
+      ],
     },
     {
       name: "KeysWithValueModule",
       root: true,
-      args: [resolveTableId("Position")],
+      args: [
+        resolveTableId("Position"), 
+      ],
+    },
+    {
+      name: "KeysWithValueModule",
+      root: true,
+      args: [
+        resolveTableId("Alive"),
+      ],
     },
   ]
 });

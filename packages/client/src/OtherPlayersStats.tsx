@@ -12,7 +12,7 @@ type OtherPlayersStatsProps = {
 export const OtherPlayersStats: React.FC<OtherPlayersStatsProps> = ({ players, highlightedPlayer, setHighlightedPlayer }) => {
 
     const {
-        components: { Health, Range, ActionPoint, Username },
+        components: { Health, Range, ActionPoint, Username, Alive },
         systemCalls: { sendActionPoint, attack },
     } = useMUD();
 
@@ -22,6 +22,7 @@ export const OtherPlayersStats: React.FC<OtherPlayersStatsProps> = ({ players, h
         const health = useComponentValue(Health, player)?.value;
         const range = useComponentValue(Range, player)?.value;
         const ap = useComponentValue(ActionPoint, player)?.value;
+        const alive = useComponentValue(Alive, player)?.value;
 
         return {
           entity,
@@ -29,6 +30,7 @@ export const OtherPlayersStats: React.FC<OtherPlayersStatsProps> = ({ players, h
           health: health,
           range: range,
           actionPoints: ap,
+          alive: alive,
         };
     });
 
@@ -41,7 +43,7 @@ export const OtherPlayersStats: React.FC<OtherPlayersStatsProps> = ({ players, h
             <div
               key={mappedPlayer.entity}
               style={{
-                backgroundColor: mappedPlayer.entity === highlightedPlayer ? "lightgray" : "transparent",
+                backgroundColor: mappedPlayer.entity === highlightedPlayer ? "darkgray" : "transparent",
                 cursor: 'pointer'
               }}
               onClick={() => {
@@ -53,6 +55,7 @@ export const OtherPlayersStats: React.FC<OtherPlayersStatsProps> = ({ players, h
               }}
             >
               <p>Name: {mappedPlayer.username}</p>
+              <p>Status: {mappedPlayer.alive ? `Alive` : `Dead`}</p>
               <p>Health: {mappedPlayer.health}</p>
               <p>Range: {mappedPlayer.range}</p>
               <p>Action Points: {mappedPlayer.actionPoints}</p>

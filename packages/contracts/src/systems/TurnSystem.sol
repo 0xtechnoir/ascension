@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0;
 import { System } from "@latticexyz/world/src/System.sol";
-import { MapConfig, Movable, Player, PlayerTableId, Position, Health, Range, ActionPoint, Turn, GameStartTime, GameIsLive } from "../codegen/Tables.sol";
+import { MapConfig, Movable, Player, PlayerTableId, Position, Health, Range, ActionPoint, Turn, GameStartTime, GameIsLive, Alive, Champion } from "../codegen/Tables.sol";
 import { addressToEntityKey } from "../addressToEntityKey.sol";
 import { positionToEntityKey } from "../positionToEntityKey.sol";
 import { getKeysInTable } from "@latticexyz/world/src/modules/keysintable/getKeysInTable.sol";
 import { query, QueryFragment, QueryType } from "@latticexyz/world/src/modules/keysintable/query.sol";
-import { PlayerTableId, Position, PositionTableId } from "../codegen/Tables.sol";
+import { PlayerTableId, Position, PositionTableId, AliveTableId } from "../codegen/Tables.sol";
+import { getKeysWithValue } from "@latticexyz/world/src/modules/keyswithvalue/getKeysWithValue.sol";
 
 contract TurnSystem is System {
 
@@ -20,18 +21,20 @@ contract TurnSystem is System {
 
   function incrementTurn() public {
     require(GameIsLive.get(), "Match has not started yet.");
+    // TODO - Should have some logic in here that stops people from arbitrarily incrementing the turn
     uint32 currentTurn = Turn.get();
     Turn.set(currentTurn + 1);
-    // get all players and increment action point by 1
-    assignActionPointsToAllPlayers();
+    assignActionPointsToAllLivePlayers();
   }
 
-  function assignActionPointsToAllPlayers() private {
+  function assignActionPointsToAllLivePlayers() private {
     // get all players and increment action point by 1
     bytes32[][] memory players = getKeysInTable(PlayerTableId);
     for (uint256 i; i < players.length; i++) {
         bytes32 player = players[i][0];
-        ActionPoint.set(player, ActionPoint.get(player) + 1);
+        if (Alive.get(player)) {
+          ActionPoint.set(player, ActionPoint.get(player) + 1);
+        }
     }
   }
 
@@ -75,9 +78,24 @@ contract TurnSystem is System {
 
     ActionPoint.set(player, currentActionPoints - 1);
     Health.set(_target, Health.get(_target) - 1);
+
+    // Check if target is dead
+    if (Health.get(_target) == 0) {
+      Movable.set(_target, false);
+      Range.set(_target, 0);
+      Alive.set(_target, false);
+    }  
+    
+    bytes32[] memory remainingPlayers = getKeysWithValue(AliveTableId, Alive.encode(true));// return all records for alive players
+    if (remainingPlayers.length == 1) {
+      // Only oneplayer left alive so end game
+      GameIsLive.set(false);
+      Champion.set(remainingPlayers[0], true);
+      revert("Game over");
+    }
   }
 
-   function distance(uint32 fromX, uint32 fromY, uint32 toX, uint32 toY) internal pure returns (uint32) {
+  function distance(uint32 fromX, uint32 fromY, uint32 toX, uint32 toY) internal pure returns (uint32) {
     uint32 deltaX = fromX > toX ? fromX - toX : toX - fromX;
     uint32 deltaY = fromY > toY ? fromY - toY : toY - fromY;
     return deltaX + deltaY;

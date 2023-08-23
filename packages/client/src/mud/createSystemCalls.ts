@@ -9,7 +9,7 @@ export type SystemCalls = ReturnType<typeof createSystemCalls>;
  
 export function createSystemCalls(
   { playerEntity, worldContract, waitForTransaction }: SetupNetworkResult,
-  { MapConfig, Player, Position, GameIsLive }: ClientComponents) {
+  { MapConfig, Player, Position, GameIsLive, Health }: ClientComponents) {
 
   const wrapPosition = (x: number, y: number) => {
     const mapConfig = getComponentValue(MapConfig, singletonEntity);
@@ -56,6 +56,20 @@ export function createSystemCalls(
     }
     const tx = await worldContract.write.attackPlayer([target]);
     await waitForTransaction(tx);
+
+    // we should now check if the player is dead and remove them from the game if so
+    const targetHealth = getComponentValue(Health, target)?.value;
+    if (targetHealth && targetHealth === 0) {
+      console.log("target is dead");
+
+
+
+
+    // we should also check to see if the game is over
+    // if the game is over, we should call endGame
+
+
+    }
   }
 
   const increaseRange = async () => {
