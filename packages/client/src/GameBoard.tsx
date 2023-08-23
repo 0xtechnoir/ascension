@@ -38,8 +38,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
     const position = getComponentValueStrict(Position, entity);
     // TODO - This is trying to execute before the Alive componentis set on the entity
     // Need to listen for an onchain event to know when the Alive component is set and also when the value of the Alive component changes
-    
-    
+        
     // playerIsAlive = getComponentValueStrict(Alive, entity)?.value;
     // console.log("1. playerIsAlive: ", playerIsAlive);
     // let emoji = "";
@@ -59,6 +58,25 @@ export const GameBoard: React.FC<GameBoardProps> = ({
       emoji: emoji,
     };
   });
+
+  const closeModal = () => {
+    setShowUsernameInput(false);
+    setSpawnX(null);
+    setSpawnY(null);
+  };
+
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && showUsernameInput) {
+        closeModal();
+      }
+    };
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [showUsernameInput]);
 
   const { moveMessage, clearMoveMessage } = useKeyboardMovement();
   useEffect(() => {
@@ -90,14 +108,6 @@ export const GameBoard: React.FC<GameBoardProps> = ({
       const position = getComponentValueStrict(Position, player.entity);
       return position.x === inputX && position.y === inputY;
     });
-
-    // if (player) {
-    //   handleError(
-    //     "Donate an action point to this player.",
-    //     "Donate Action Point",
-    //     () => donateActionPoint(player.entity)
-    //   );
-    // }
 
     if (player) {
       setHighlightedPlayer(player.entity);
@@ -183,7 +193,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
             <h3>Enter Username</h3>
             <input
               type="text"
-              placeholder="..."
+              autoFocus
               onChange={(e) => setEnteredUsername(e.target.value)}
               onKeyUp={(e) => {
                 if (e.keyCode === 13 && enteredUsername.trim() !== "") {
@@ -194,6 +204,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
                 paddingLeft: '10px',
               }}
             />
+            <div onClick={closeModal} style={{position: 'absolute', right: '10px', top: '10px', cursor: 'pointer', fontWeight: 'bold'}}>X</div>
             <button 
               onClick={handleSpawnSubmit}
               className="h-10 px-6 font-semibold rounded-md border border-slate-400 text-slate-900"

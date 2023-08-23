@@ -43,11 +43,11 @@ export function createSystemCalls(
   };
 
   const sendActionPoint = async (recipient: Entity) => {
-      if (!playerEntity) {
-        throw new Error("no player");
-      }
-      const tx = await worldContract.write.sendActionPoint([recipient]);
-      await waitForTransaction(tx);
+    if (!playerEntity) {
+      throw new Error("no player");
+    }
+    const tx = await worldContract.write.sendActionPoint([recipient]);
+    await waitForTransaction(tx);
   }
 
   const attack = async (target: Entity) => {
@@ -56,20 +56,6 @@ export function createSystemCalls(
     }
     const tx = await worldContract.write.attackPlayer([target]);
     await waitForTransaction(tx);
-
-    // we should now check if the player is dead and remove them from the game if so
-    const targetHealth = getComponentValue(Health, target)?.value;
-    if (targetHealth && targetHealth === 0) {
-      console.log("target is dead");
-
-
-
-
-    // we should also check to see if the game is over
-    // if the game is over, we should call endGame
-
-
-    }
   }
 
   const increaseRange = async () => {
@@ -82,7 +68,6 @@ export function createSystemCalls(
   }
 
   const startMatch = async (playersSpawned: number, startTime: number) => {
-    console.log("startTime type: ", typeof startTime);
     const bigIntStartTime = BigInt(startTime);
     const tx = await worldContract.write.startMatch([playersSpawned, bigIntStartTime]);
     await waitForTransaction(tx);

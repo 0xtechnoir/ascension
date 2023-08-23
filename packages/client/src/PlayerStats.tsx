@@ -17,24 +17,11 @@ export const PlayerStats: React.FC<PlayerStatsProps> = ({ handleError }) => {
           },
       } = useMUD();
 
-
     const playerName = useComponentValue(Username, playerEntity)?.value;
     const playerHealth = useComponentValue(Health, playerEntity)?.value;
     const shipRange = useComponentValue(Range, playerEntity)?.value;
     const actionPoint = useComponentValue(ActionPoint, playerEntity)?.value;
     const alive = useComponentValue(Alive, playerEntity)?.value;
-
-    const boostRange = async () => {
-        try {
-          await increaseRange()
-        } catch (error){
-          console.log("error: ", error)
-          if (typeof error === 'object' && error !== null) {
-            const message = (error as ErrorWithShortMessage).shortMessage;
-            handleError(message);
-          }
-        }
-    }
     
     return (
         <div className="flex" style={{ border: '1px solid #ccc', padding: '16px', borderRadius: '8px', margin: '16px 0' }}>
@@ -48,7 +35,16 @@ export const PlayerStats: React.FC<PlayerStatsProps> = ({ handleError }) => {
                 <p>Range: {shipRange}</p>
                 <p>Action Points: {actionPoint}</p> 
                 <button 
-                  onClick={boostRange} 
+                  onClick={async () => {
+                    try {
+                      await increaseRange();
+                    } catch (error){
+                      if (typeof error === 'object' && error !== null) {
+                        const message = (error as ErrorWithShortMessage).shortMessage;
+                        handleError(message);
+                      }
+                    }
+                  }} 
                   className="h-10 px-6 font-semibold rounded-md border border-slate-200 text-slate-300"
                   type="button"
                 >

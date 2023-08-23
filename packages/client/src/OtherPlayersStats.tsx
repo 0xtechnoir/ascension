@@ -2,14 +2,16 @@ import React from "react";
 import { useMUD } from "./MUDContext";
 import { useComponentValue } from "@latticexyz/react";
 import { Entity } from "@latticexyz/recs";
+import { ErrorWithShortMessage } from "./CustomTypes";
 
 type OtherPlayersStatsProps = {
+  handleError: (message: string, actionButtonText?: string, onActionButtonClick?: () => void) => void;
   players: Entity[];
   highlightedPlayer: Entity | null;
   setHighlightedPlayer: (player: Entity | null) => void;
 };
 
-export const OtherPlayersStats: React.FC<OtherPlayersStatsProps> = ({ players, highlightedPlayer, setHighlightedPlayer }) => {
+export const OtherPlayersStats: React.FC<OtherPlayersStatsProps> = ({ handleError, players, highlightedPlayer, setHighlightedPlayer }) => {
 
     const {
         components: { Health, Range, ActionPoint, Username, Alive },
@@ -63,9 +65,16 @@ export const OtherPlayersStats: React.FC<OtherPlayersStatsProps> = ({ players, h
                 <button 
                   className="h-10 px-6 font-semibold rounded-md border border-slate-200 text-slate-300"
                   type="button"
-                  onClick={() => {
+                  onClick={async () => {
                     if (highlightedPlayer) {
-                      sendActionPoint(highlightedPlayer)
+                      try {
+                        await sendActionPoint(highlightedPlayer)
+                      } catch (error){
+                        if (typeof error === 'object' && error !== null) {
+                          const message = (error as ErrorWithShortMessage).shortMessage;
+                          handleError(message);
+                        }
+                      }
                     }
                   }} 
                 >
@@ -75,9 +84,20 @@ export const OtherPlayersStats: React.FC<OtherPlayersStatsProps> = ({ players, h
                 <button 
                   className="h-10 px-6 font-semibold rounded-md border border-slate-200 text-slate-300"
                   type="button"
-                  onClick={() => {
+                  onClick={async () => {
                     if (highlightedPlayer) {
-                      attack(highlightedPlayer)
+                      try {
+                        console.log("trying to attack");
+                        await attack(highlightedPlayer);
+                        console.log("Attack successful!");
+                      } catch (error){
+                        console.log("typeof error: ", typeof error);
+                        console.log("error: ", error)
+                        if (typeof error === 'object' && error !== null) {
+                          const message = (error as ErrorWithShortMessage).shortMessage;
+                          handleError(message);
+                        }
+                      }
                     }
                   }} 
                 >
