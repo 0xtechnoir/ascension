@@ -1,8 +1,13 @@
 import { ReactNode, useEffect, useState } from "react";
 import { useComponentValue } from "@latticexyz/react";
-import { Entity } from "@latticexyz/recs";
+import { Entity, getComponentValueStrict } from "@latticexyz/recs";
 import { twMerge } from "tailwind-merge";
 import { useMUD } from "./MUDContext";
+
+type Position = {
+  x: number;
+  y: number;
+};
 
 type Props = {
   width: number;
@@ -17,9 +22,9 @@ type Props = {
     x: number;
     y: number;
     emoji: string;
-    entity: Entity;
+    entity: Entity | null;
   }[];
-  encounter?: ReactNode;
+  highlightedPlayer: Entity | null;
 };
 
 export const GameMap = ({
@@ -28,26 +33,27 @@ export const GameMap = ({
   onTileClick,
   terrain,
   players,
-  encounter,
+  highlightedPlayer,
 }: Props) => {
   const {
     network: { playerEntity },
-    components: { Range },
+    components: { Range, Position },
   } = useMUD();
 
+  console.log("highlightedPlayer: ", highlightedPlayer);
+
+  let highlightedPlayerPosition: Position | null = null;
+  if(highlightedPlayer) {
+    highlightedPlayerPosition = getComponentValueStrict(Position, highlightedPlayer);
+  }
+
+  console.log("highlightedPlayerPosition: ", highlightedPlayerPosition);
+  
   const [hoveredTile, setHoveredTile] = useState({ x: -1, y: -1 });
   const rows = new Array(width).fill(0).map((_, i) => i);
   const columns = new Array(height).fill(0).map((_, i) => i);
   const shipRange = useComponentValue(Range, playerEntity)?.value;
   let playerPosition = players?.find((p) => p.entity === playerEntity);
-  const [showEncounter, setShowEncounter] = useState(false);
-  
-  // Reset show encounter when we leave encounter
-  useEffect(() => {
-    if (!encounter) {
-      setShowEncounter(false);
-    }
-  }, [encounter]);
 
   return (
     <div className="inline-grid p-2 bg-slate-900 relative overflow-hidden">
@@ -56,7 +62,10 @@ export const GameMap = ({
           const terrainEmoji = terrain?.find(
             (t) => t.x === x && t.y === y
           )?.emoji;
-
+          let isHighlighted: boolean | null = false;
+          if (highlightedPlayerPosition) {
+            isHighlighted = highlightedPlayer && x === highlightedPlayerPosition.x && y === highlightedPlayerPosition.y;
+          }
           const playersHere = players?.filter((p) => p.x === x && p.y === y);
           const mainPlayerHere = playersHere?.find(
             (p) => p.entity === playerEntity
@@ -83,6 +92,7 @@ export const GameMap = ({
               style={{
                 gridColumn: x + 1,
                 gridRow: y + 1,
+                backgroundColor: isHighlighted ? "lightgray" : "transparent",
               }}
               onClick={() => {
                 onTileClick?.(x, y);
@@ -90,17 +100,6 @@ export const GameMap = ({
               onMouseEnter={() => setHoveredTile({ x, y })} // Set the hovered tile when mouse enters
               onMouseLeave={() => setHoveredTile({ x: -1, y: -1 })} // Reset the hovered tile when mouse leave
             >
-              {encounter && mainPlayerHere ? (
-                <div
-                  className="absolute z-10 animate-battle"
-                  style={{
-                    boxShadow: "0 0 0 100vmax black",
-                  }}
-                  onAnimationEnd={() => {
-                    setShowEncounter(true);
-                  }}
-                ></div>
-              ) : null}
               <div className="flex flex-wrap gap-1 items-center justify-center relative">
                 {terrainEmoji ? (
                   <div className="absolute inset-0 flex items-center justify-center text-3xl pointer-events-none">
@@ -117,20 +116,6 @@ export const GameMap = ({
           );
         })
       )}
-
-      {encounter && showEncounter ? (
-        <div
-          className="relative z-10 -m-2 bg-black text-white flex items-center justify-center"
-          style={{
-            gridColumnStart: 1,
-            gridColumnEnd: width + 1,
-            gridRowStart: 1,
-            gridRowEnd: height + 1,
-          }}
-        >
-          {encounter}
-        </div>
-      ) : null}
     </div>
   );
 };

@@ -8,18 +8,19 @@ import { singletonEntity } from "@latticexyz/store-sync/recs";
 import { ErrorWithShortMessage } from "./CustomTypes";
 
 interface GameBoardProps {
-  handleError: (
-    message: string,
-    actionButtonText?: string,
-    onActionButtonClick?: () => void
-  ) => void;
+  handleError: (message: string, actionButtonText?: string, onActionButtonClick?: () => void) => void;
   players: Entity[];
+  highlightedPlayer: Entity | undefined;
+  setHighlightedPlayer: (player: Entity | undefined) => void;
 }
 
 export const GameBoard: React.FC<GameBoardProps> = ({
   handleError,
   players,
+  highlightedPlayer,
+  setHighlightedPlayer,
 }) => {
+
   const [showUsernameInput, setShowUsernameInput] = useState(false);
   const [enteredUsername, setEnteredUsername] = useState("");
   const [spawnX, setSpawnX] = useState<number | null>(null);
@@ -78,12 +79,16 @@ export const GameBoard: React.FC<GameBoardProps> = ({
       return position.x === inputX && position.y === inputY;
     });
 
+    // if (player) {
+    //   handleError(
+    //     "Donate an action point to this player.",
+    //     "Donate Action Point",
+    //     () => donateActionPoint(player.entity)
+    //   );
+    // }
+
     if (player) {
-      handleError(
-        "Donate an action point to this player.",
-        "Donate Action Point",
-        () => donateActionPoint(player.entity)
-      );
+      setHighlightedPlayer(player.entity);
     }
   };
 
@@ -135,6 +140,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   const { width, height } = mapConfig;
 
   return (
+    
     <div>
       <div>Turn: {turn}</div>
       {showUsernameInput && (
@@ -197,6 +203,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
         height={height}
         onTileClick={canSpawn ? spawnPlayerWithName : selectPlayer}
         players={mappedPlayers}
+        highlightedPlayer={highlightedPlayer}
       />
       <button
         onClick={start}

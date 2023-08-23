@@ -5,7 +5,7 @@ import { useMUD } from "./MUDContext";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
 import { GameBoard } from "./GameBoard";
 import { PlayerStats } from "./PlayerStats";
-import { OtherPlayersStats } from "./OtherPlayerStats";
+import { OtherPlayersStats } from "./OtherPlayersStats";
 
 export const App = () => {
   const {
@@ -13,15 +13,16 @@ export const App = () => {
     network: { playerEntity },
   } = useMUD();
 
-  // State for error modal
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [actionButtonText, setActionButtonText] = useState<string | undefined>(undefined);
-  const [actionButtonCallback, setActionButtonCallback] = useState<(() => void) | undefined>(undefined);
-
+  const [actionButtonCallback, setActionButtonCallback] = useState<(() => void) | undefined>(undefined);  
   const playerHealth = useComponentValue(Health, playerEntity)?.value;
   const shipRange = useComponentValue(Range, playerEntity)?.value;
   const actionPoint = useComponentValue(ActionPoint, playerEntity)?.value;
+
+  // highlight player state is managed here and passed between OtherPlayersStats and GameBoard
+  const [highlightedPlayer, setHighlightedPlayer] = useState<Entity | null >(null);
 
   const players = useEntityQuery([
     Has(Player), 
@@ -147,9 +148,9 @@ export const App = () => {
         <div className="flex">
           <div className="flex-col mr-4">
             <PlayerStats handleError={handleError} />
-            <OtherPlayersStats players={otherPlayers} />
+            <OtherPlayersStats players={otherPlayers} highlightedPlayer={highlightedPlayer} setHighlightedPlayer={setHighlightedPlayer} />
           </div>
-            <GameBoard handleError={handleError} players={players}/>
+            <GameBoard handleError={handleError} players={players} highlightedPlayer={highlightedPlayer} setHighlightedPlayer={setHighlightedPlayer}/>
         </div>    
       )}
     </div>
