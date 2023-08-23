@@ -13,6 +13,7 @@ export const OtherPlayersStats: React.FC<OtherPlayersStatsProps> = ({ players, h
 
     const {
         components: { Health, Range, ActionPoint, Username },
+        systemCalls: { sendActionPoint, attack },
     } = useMUD();
 
     const mappedPlayers = players.map((player) => {
@@ -31,13 +32,11 @@ export const OtherPlayersStats: React.FC<OtherPlayersStatsProps> = ({ players, h
         };
     });
 
-    console.log("mappedPlayers: ", mappedPlayers);
-
     return (
-      <div className="flex flex-col items-start">
+      <div className="flex flex-col items-start" style={{ border: '1px solid #ccc', padding: '16px', borderRadius: '8px', margin: '16px 0' }}>
         <h2>Other Players:</h2>
+        <br />
         {mappedPlayers.map((mappedPlayer) => {
-            console.log("mappedPlayer: ", mappedPlayer);
           return (
             <div
               key={mappedPlayer.entity}
@@ -57,6 +56,31 @@ export const OtherPlayersStats: React.FC<OtherPlayersStatsProps> = ({ players, h
               <p>Health: {mappedPlayer.health}</p>
               <p>Range: {mappedPlayer.range}</p>
               <p>Action Points: {mappedPlayer.actionPoints}</p>
+              <div>
+                <button 
+                  className="h-10 px-6 font-semibold rounded-md border border-slate-200 text-slate-300"
+                  type="button"
+                  onClick={() => {
+                    if (highlightedPlayer) {
+                      sendActionPoint(highlightedPlayer)
+                    }
+                  }} 
+                >
+                  Donate Action Point
+                </button>
+                <br />
+                <button 
+                  className="h-10 px-6 font-semibold rounded-md border border-slate-200 text-slate-300"
+                  type="button"
+                  onClick={() => {
+                    if (highlightedPlayer) {
+                      attack(highlightedPlayer)
+                    }
+                  }} 
+                >
+                  Attack Player
+                </button>
+              </div>
             </div>
           );
         })}

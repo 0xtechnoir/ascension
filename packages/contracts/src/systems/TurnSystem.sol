@@ -12,13 +12,14 @@ contract TurnSystem is System {
 
   function startMatch(uint32 playersSpawned, uint256 startTime) public {
     require(playersSpawned > 1, "Not enough players to start match");
-    //TODO: check if match has already started and if so, return
+    require(!GameIsLive.get(), "Match has already started");
     GameIsLive.set(true);
     Turn.set(1);
     GameStartTime.set(startTime);
   }
 
   function incrementTurn() public {
+    require(GameIsLive.get(), "Match has not started yet.");
     uint32 currentTurn = Turn.get();
     Turn.set(currentTurn + 1);
     // get all players and increment action point by 1
@@ -35,25 +36,50 @@ contract TurnSystem is System {
   }
 
   function increaseRange() public {
-    // allow players to spend action points to increase their range
     bytes32 player = addressToEntityKey(_msgSender());
+    require(GameIsLive.get(), "Match has not started yet.");
     uint32 currentRange = Range.get(player);
     uint32 currentActionPoints = ActionPoint.get(player);
-    require(GameIsLive.get(), "Match has not started yet.");
     require(currentActionPoints > 0, "You need an action point in order to increase your range");
     Range.set(player, currentRange + 1);
     ActionPoint.set(player, currentActionPoints - 1);
   }
 
-  // function transferActionPoint(uint32 recipient) public {
-  //   // allow players to transfer action points to other players
-  //   bytes32 player = addressToEntityKey(_msgSender());
-  //   uint32 currentActionPoints = ActionPoint.get(player);
-  //   require(currentActionPoints > 0, "You need an action point in order to transfer an action point");
-  //   ActionPoint.set(player, currentActionPoints - 1);
-  //   ActionPoint.set(recipient, ActionPoint.get(recipient) + 1);
-  // }
-  
+  function sendActionPoint(bytes32 _recipient) public {
+    require(GameIsLive.get(), "Match has not started yet.");
+    bytes32 player = addressToEntityKey(_msgSender());
+    uint32 currentActionPoints = ActionPoint.get(player);
+    require(currentActionPoints > 0, "You need an action point in order to transfer an action point");
+    
+    // TODO - check if recipient is within range
+    (uint32 target_x, uint32 target_y) = Position.get(_recipient);
+    (uint32 player_x, uint32 player_y) = Position.get(player);
+    uint32 playerRange = Range.get(player);
+    require(distance(player_x, player_y, target_x, target_y) <= playerRange, "Target is out of range");
 
+    ActionPoint.set(player, currentActionPoints - 1);
+    ActionPoint.set(_recipient, ActionPoint.get(_recipient) + 1);
+  }
 
+  function attackPlayer(bytes32 _target) public {
+    require(GameIsLive.get(), "Match has not started yet.");
+    bytes32 player = addressToEntityKey(_msgSender());
+    uint32 currentActionPoints = ActionPoint.get(player);
+    require(currentActionPoints > 0, "You need an action point in order to attack");
+    
+    // Check if target is within range
+    (uint32 target_x, uint32 target_y) = Position.get(_target);
+    (uint32 player_x, uint32 player_y) = Position.get(player);
+    uint32 playerRange = Range.get(player);
+    require(distance(player_x, player_y, target_x, target_y) <= playerRange, "Target is out of range");
+
+    ActionPoint.set(player, currentActionPoints - 1);
+    Health.set(_target, Health.get(_target) - 1);
+  }
+
+   function distance(uint32 fromX, uint32 fromY, uint32 toX, uint32 toY) internal pure returns (uint32) {
+    uint32 deltaX = fromX > toX ? fromX - toX : toX - fromX;
+    uint32 deltaY = fromY > toY ? fromY - toY : toY - fromY;
+    return deltaX + deltaY;
+  }
 }

@@ -1,4 +1,4 @@
-import { getComponentValue, Has, HasValue } from "@latticexyz/recs";
+import { getComponentValue, Entity, Has, HasValue } from "@latticexyz/recs";
 import { uuid } from "@latticexyz/utils";
 import { ClientComponents } from "./createClientComponents";
 import { SetupNetworkResult } from "./setupNetwork";
@@ -24,9 +24,7 @@ export function createSystemCalls(
     if (!playerEntity) {
       throw new Error("no player");
     }
-
     const [x, y] = wrapPosition(inputX, inputY);
-
     const positionId = uuid();
     Position.addOverride(positionId, {
       entity: playerEntity,
@@ -43,6 +41,22 @@ export function createSystemCalls(
       Position.removeOverride(positionId);
     }
   };
+
+  const sendActionPoint = async (recipient: Entity) => {
+      if (!playerEntity) {
+        throw new Error("no player");
+      }
+      const tx = await worldContract.write.sendActionPoint([recipient]);
+      await waitForTransaction(tx);
+  }
+
+  const attack = async (target: Entity) => {
+    if (!playerEntity) {
+      throw new Error("no player");
+    }
+    const tx = await worldContract.write.attackPlayer([target]);
+    await waitForTransaction(tx);
+  }
 
   const increaseRange = async () => {
     console.log("increaseRange called")
@@ -61,13 +75,10 @@ export function createSystemCalls(
 
     setInterval(() => {
       incrementTurn();
-    }, 10000);
+    }, 30000); // 30 seconds turn length
   }
 
   const incrementTurn = async () => {
-    console.log("incrementTurn called")
-    // const tx = await worldSend("incrementTurn", []);
-    // await awaitStreamValue(txReduced$, (txHash) => txHash === tx.hash);
     const tx = await worldContract.write.incrementTurn();
     await waitForTransaction(tx);
   }
@@ -83,41 +94,18 @@ export function createSystemCalls(
       console.warn("cannot moveBy without a player position, not yet spawned?");
       return;
     }
- 
     await moveTo(playerPosition.x + deltaX, playerPosition.y + deltaY);
   };
 
-  
-  // simple function to display another platers playerId when their current tile is clicked on
-  // const displayPlayerId = async (inputX: number, inputY: number) => {
-  //   console.log("displayPlayerId called with coordinates: ", inputX, " ,", inputY);
-  //   // check if there is a player at the clicked on tile
-  //   try {
-  //     const tx = await worldContract.write.getPlayerAtPosition([inputX, inputY]);
-  //     await waitForTransaction(tx);
-  //     console.log("tx: ", tx);
-  //   } catch (error) {
-  //     console.log("caught error in createSystemCalls.ts: ", error);
-  //   }
-  // }
-
-
   const spawn = async (inputX: number, inputY: number, username: string) => {
-
-    console.log("spawn called with name: ", username);
     if (!playerEntity) {
       throw new Error("no player");
     }
-
-    console.log("playerEntity: ", playerEntity);
- 
     const canSpawn = getComponentValue(Player, playerEntity)?.value !== true;
     if (!canSpawn) {
       throw new Error("already spawned");
     }
- 
     const [x, y] = wrapPosition(inputX, inputY);
- 
     const positionId = uuid();
     Position.addOverride(positionId, {
       entity: playerEntity,
@@ -145,5 +133,7 @@ export function createSystemCalls(
     spawn,
     startMatch,
     increaseRange,
+    sendActionPoint,
+    attack,
    };
 }

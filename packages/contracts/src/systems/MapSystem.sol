@@ -42,6 +42,9 @@ contract MapSystem is System {
     // match moust hve started
     require(GameIsLive.get(), "Match hasn't started yet. Stay put!");
 
+    uint32 currentActionPoints = ActionPoint.get(player);
+    require(currentActionPoints > 0, "You need an action point in order to attack");
+
     // retrieve the players current position
     (uint32 fromX, uint32 fromY) = Position.get(player);
     // if a players range is dynamic, could retrieve a value from a range component here instead of the hardcoded '1'
@@ -56,6 +59,7 @@ contract MapSystem is System {
     y = (y + height) % height;
 
     Position.set(player, x, y);
+    ActionPoint.set(player, currentActionPoints - 1);
   }
 
   function distance(uint32 fromX, uint32 fromY, uint32 toX, uint32 toY) internal pure returns (uint32) {

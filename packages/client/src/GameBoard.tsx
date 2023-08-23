@@ -10,8 +10,8 @@ import { ErrorWithShortMessage } from "./CustomTypes";
 interface GameBoardProps {
   handleError: (message: string, actionButtonText?: string, onActionButtonClick?: () => void) => void;
   players: Entity[];
-  highlightedPlayer: Entity | undefined;
-  setHighlightedPlayer: (player: Entity | undefined) => void;
+  highlightedPlayer: Entity | null;
+  setHighlightedPlayer: (player: Entity | null) => void;
 }
 
 export const GameBoard: React.FC<GameBoardProps> = ({
@@ -44,9 +44,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
 
   const { moveMessage, clearMoveMessage } = useKeyboardMovement();
   useEffect(() => {
-    console.log("moveMessage: ", moveMessage);
     if (moveMessage) {
-      console.log("moveMessage: ", moveMessage);
       // When setting the error message, add the new message to the existing array instead of replacing it.
       handleError(moveMessage);
       clearMoveMessage();
@@ -67,10 +65,6 @@ export const GameBoard: React.FC<GameBoardProps> = ({
     startDate = dateObj.toLocaleDateString();
     startTime = dateObj.toLocaleTimeString();
   }
-
-  const donateActionPoint = async (player: Entity) => {
-    console.log("donateActionPoint called with player: ", player);
-  };
 
   // Function to handle the button click
   const selectPlayer = (inputX: number, inputY: number) => {
@@ -93,7 +87,6 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   };
 
   const start = async () => {
-    console.log("players: ", mappedPlayers);
     const playersSpawned = mappedPlayers.length;
     const startTime = Date.now();
     try {
@@ -112,6 +105,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
     setSpawnY(inputY);
     // Display the modal for user input
     setShowUsernameInput(true);
+    // TODO - Need to santize the username input
   };
 
   const handleSpawnSubmit = () => {

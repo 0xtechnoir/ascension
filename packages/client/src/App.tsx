@@ -30,11 +30,6 @@ export const App = () => {
   ])
   const otherPlayers = players.filter((entity) => entity !== playerEntity);
 
-  
-  // console.log("players: ", players);
-  // console.log("otherPlayers: ", otherPlayers);
-
-  // SyncStep enum
   enum SyncStep {  
     INITIALIZE = "initialize",
     SNAPSHOT = "snapshot",
@@ -64,8 +59,6 @@ export const App = () => {
     setShowErrorModal(true);
     setActionButtonText(actionButtonText);
     setActionButtonCallback(onActionButtonClick);
-    // console.log("onActionButtonClick type:", typeof onActionButtonClick);  // In App.tsx
-    // console.log("actionButtonCallback type:", typeof actionButtonCallback);  // In App.tsx
   };
 
   const closeErrorModal = () => {

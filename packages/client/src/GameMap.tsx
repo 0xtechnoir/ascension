@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useState } from "react";
 import { useComponentValue } from "@latticexyz/react";
 import { Entity, getComponentValueStrict } from "@latticexyz/recs";
 import { twMerge } from "tailwind-merge";
@@ -40,14 +40,10 @@ export const GameMap = ({
     components: { Range, Position },
   } = useMUD();
 
-  console.log("highlightedPlayer: ", highlightedPlayer);
-
   let highlightedPlayerPosition: Position | null = null;
   if(highlightedPlayer) {
     highlightedPlayerPosition = getComponentValueStrict(Position, highlightedPlayer);
   }
-
-  console.log("highlightedPlayerPosition: ", highlightedPlayerPosition);
   
   const [hoveredTile, setHoveredTile] = useState({ x: -1, y: -1 });
   const rows = new Array(width).fill(0).map((_, i) => i);
@@ -87,12 +83,12 @@ export const GameMap = ({
                 "w-8 h-8 flex items-center justify-center border border-gray-500",
                 onTileClick ? "cursor-pointer hover:ring" : null,
                 isAdjacentToPlayer ? "bg-slate-600" : null,
-                isHovered ? "bg-blue-500" : null // Add styling for hovered tile
+                isHovered ? "bg-blue-500" : null, // Add styling for hovered tile
+                isHighlighted ? "bg-gray-300" : null,
               )}
               style={{
                 gridColumn: x + 1,
                 gridRow: y + 1,
-                backgroundColor: isHighlighted ? "lightgray" : "transparent",
               }}
               onClick={() => {
                 onTileClick?.(x, y);
