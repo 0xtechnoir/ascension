@@ -24,9 +24,9 @@ export const PlayerStats: React.FC<PlayerStatsProps> = ({ handleError }) => {
     const alive = useComponentValue(Alive, playerEntity)?.value;
     
     return (
-        <div className="flex" style={{ border: '1px solid #ccc', padding: '16px', borderRadius: '8px', margin: '16px 0' }}>
+      <div className="flex flex-col items-start border border-gray-300 p-4 rounded-md my-1">
             <div className="flex-col mr-4">
-                <strong>Ship Control:</strong>
+                <strong>You: 🚀</strong>
                 <br /><br />
                 <p></p>
                 <p>Player: {playerName}</p>

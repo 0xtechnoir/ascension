@@ -62,7 +62,7 @@ export const App = () => {
   });
 
   return (
-    <div className="items-center justify-center max-h-40vh">
+    <div className="items-center justify-center">
       {showErrorModal && (
         <ErrorModal
           message={errorMessage}
@@ -75,16 +75,18 @@ export const App = () => {
           {syncProgress.message} ({Math.floor(syncProgress.percentage)}%)
         </div>
       ) : (
-        <div className="grid grid-cols-4 gap-4 max-h-500px overflow-y-auto">
-          <div className="col-span-1">
+        <div className="flex">
+          
           {gameStarted &&
-            <div className="flex flex-col h-full col-span-1">
+            <div className="flex flex-col w-1/4">
               <PlayerStats handleError={handleError} />
-              <OtherPlayersStats handleError={handleError} players={otherPlayers} highlightedPlayer={highlightedPlayer} setHighlightedPlayer={setHighlightedPlayer} />
+              <div className="h-10 flex-grow felx-col overflow-scroll">
+                <OtherPlayersStats handleError={handleError} players={otherPlayers} highlightedPlayer={highlightedPlayer} setHighlightedPlayer={setHighlightedPlayer} />
+              </div>
             </div>
           }
-          </div>
-          <div className="col-span-3">
+        
+          <div className="w-3/4">
             <GameBoard handleError={handleError} players={allPlayers} highlightedPlayer={highlightedPlayer} setHighlightedPlayer={setHighlightedPlayer} setGameStarted={setGameStarted}/>
           </div> 
         </div>    

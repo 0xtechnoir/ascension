@@ -24,8 +24,10 @@ export const OtherPlayersStats: React.FC<OtherPlayersStatsProps> = ({ handleErro
     const mergedPlayers = [...players, ...preAllocatedPlayers].slice(0, MAX_PLAYERS);
 
     return (
-      <div className="flex flex-col items-start" style={{ border: '1px solid #ccc', padding: '16px', borderRadius: '8px', margin: '16px 0' }}>
-        <h2>Other Players:</h2>
+      <div className="flex flex-col items-start border border-gray-300 p-3 rounded-md my-1">
+        <h1>Other Players: 🛸</h1>
+        <p>Click to highlight on map</p>
+        <p>-----------------------------------</p>
         <br />
         {mergedPlayers.map((player) => {
           if (player === placeholderPlayer) {
@@ -41,10 +43,7 @@ export const OtherPlayersStats: React.FC<OtherPlayersStatsProps> = ({ handleErro
           return (
             <div
               key={entity}
-              style={{
-                backgroundColor: entity === highlightedPlayer ? "darkgray" : "transparent",
-                cursor: 'pointer'
-              }}
+              className={`cursor-pointer ${entity === highlightedPlayer ? 'bg-gray-600' : ''}`}
               onClick={() => {
                 if (highlightedPlayer === entity) {
                   setHighlightedPlayer(null);
@@ -58,9 +57,9 @@ export const OtherPlayersStats: React.FC<OtherPlayersStatsProps> = ({ handleErro
               <p>Health: {health}</p>
               <p>Range: {range}</p>
               <p>Action Points: {ap}</p>
-              <div>
+              <div className="flex">
                 <button 
-                  className="h-10 px-6 font-semibold rounded-md border border-slate-200 text-slate-300"
+                  className="h-10 px-2 font-semibold rounded-md border border-slate-200 text-slate-300 mr-2"
                   type="button"
                   onClick={async () => {
                     if (highlightedPlayer) {
@@ -100,7 +99,8 @@ export const OtherPlayersStats: React.FC<OtherPlayersStatsProps> = ({ handleErro
                 >
                   Attack Player
                 </button>
-              </div>
+              </div> 
+              <p>-----------------------------------</p>
             </div>
           );
         })}

@@ -63,9 +63,9 @@ export const GameMap = ({
             isHighlighted = highlightedPlayer && x === highlightedPlayerPosition.x && y === highlightedPlayerPosition.y;
           }
           const playersHere = players?.filter((p) => p.x === x && p.y === y);
-          const mainPlayerHere = playersHere?.find(
-            (p) => p.entity === playerEntity
-          );
+          // const mainPlayerHere = playersHere?.find(
+          //   (p) => p.entity === playerEntity
+          // );
 
           // Define the ships firing perimeter
           let totalDistance = 0;

@@ -12,6 +12,7 @@ interface GameBoardProps {
   players: Entity[];
   highlightedPlayer: Entity | null;
   setHighlightedPlayer: (player: Entity | null) => void;
+  setGameStarted: (gameStarted: boolean) => void;
 }
 
 export const GameBoard: React.FC<GameBoardProps> = ({
@@ -19,6 +20,8 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   players,
   highlightedPlayer,
   setHighlightedPlayer,
+  setGameStarted,
+
 }) => {
 
   const [showUsernameInput, setShowUsernameInput] = useState(false);
@@ -32,9 +35,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
     systemCalls: { spawn, startMatch },
   } = useMUD();
 
-  let playerIsAlive: boolean;
   const mappedPlayers = players.map((entity) => {
-    // console.log("1. playerIsAlive: ", playerIsAlive);
     const position = getComponentValueStrict(Position, entity);
     // TODO - This is trying to execute before the Alive componentis set on the entity
     // Need to listen for an onchain event to know when the Alive component is set and also when the value of the Alive component changes
