@@ -22,7 +22,7 @@ export const OtherPlayersStats: React.FC<OtherPlayersStatsProps> = ({ handleErro
     const placeholderPlayer = {};
     const preAllocatedPlayers = new Array(MAX_PLAYERS).fill(placeholderPlayer);
     const mergedPlayers = [...players, ...preAllocatedPlayers].slice(0, MAX_PLAYERS);
-
+    
     return (
       <div className="flex flex-col items-start border border-gray-300 p-3 rounded-md my-1">
         <h1>Other Players: 🛸</h1>
@@ -39,18 +39,13 @@ export const OtherPlayersStats: React.FC<OtherPlayersStatsProps> = ({ handleErro
           const range = useComponentValue(Range, player)?.value;
           const ap = useComponentValue(ActionPoint, player)?.value;
           const alive = useComponentValue(Alive, player)?.value;
-
+          
+          
           return (
             <div
               key={entity}
-              className={`cursor-pointer ${entity === highlightedPlayer ? 'bg-gray-600' : ''}`}
-              onClick={() => {
-                if (highlightedPlayer === entity) {
-                  setHighlightedPlayer(null);
-                } else {
-                  setHighlightedPlayer(entity);
-                }
-              }}
+              className={`cursor-pointer ${!alive ? 'bg-red-500' : (entity === highlightedPlayer ? 'bg-gray-600' : '')}`}
+              onClick={() => setHighlightedPlayer(entity)}
             >
               <p>Name: {username}</p>
               <p>Status: {alive ? `Alive` : `Dead`}</p>
