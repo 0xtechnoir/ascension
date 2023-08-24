@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useComponentValue, useEntityQuery } from "@latticexyz/react";
 import { Entity, Has } from "@latticexyz/recs";
 import { useMUD } from "./MUDContext";
@@ -20,7 +20,7 @@ export const App = () => {
 
   // MUD Context
   const {
-    components: { SyncProgress, Player, Position },
+    components: { SyncProgress, Player, Position, GameIsLive },
     network: { playerEntity },
   } = useMUD();
 
@@ -28,6 +28,15 @@ export const App = () => {
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [highlightedPlayer, setHighlightedPlayer] = useState<Entity | null >(null);
+  const [gameStarted, setGameStarted] = useState(false);
+
+  // useEffect hook to check if the game has started
+  const gameIsLive = useComponentValue(GameIsLive, singletonEntity)?.value;
+  useEffect(() => {
+    if (gameIsLive) {
+      setGameStarted(true);
+    }
+  }, [gameIsLive]);
 
   // Query for all player entities
   const allPlayers = useEntityQuery([Has(Player), Has(Position)])
@@ -53,7 +62,7 @@ export const App = () => {
   });
 
   return (
-    <div className="w-screen h-screen flex items-center justify-center">
+    <div className="items-center justify-center max-h-40vh">
       {showErrorModal && (
         <ErrorModal
           message={errorMessage}
@@ -66,12 +75,18 @@ export const App = () => {
           {syncProgress.message} ({Math.floor(syncProgress.percentage)}%)
         </div>
       ) : (
-        <div className="flex">
-          <div className="flex-col mr-4">
-            <PlayerStats handleError={handleError} />
-            <OtherPlayersStats handleError={handleError} players={otherPlayers} highlightedPlayer={highlightedPlayer} setHighlightedPlayer={setHighlightedPlayer} />
+        <div className="grid grid-cols-4 gap-4 max-h-500px overflow-y-auto">
+          <div className="col-span-1">
+          {gameStarted &&
+            <div className="flex flex-col h-full col-span-1">
+              <PlayerStats handleError={handleError} />
+              <OtherPlayersStats handleError={handleError} players={otherPlayers} highlightedPlayer={highlightedPlayer} setHighlightedPlayer={setHighlightedPlayer} />
+            </div>
+          }
           </div>
-            <GameBoard handleError={handleError} players={allPlayers} highlightedPlayer={highlightedPlayer} setHighlightedPlayer={setHighlightedPlayer}/>
+          <div className="col-span-3">
+            <GameBoard handleError={handleError} players={allPlayers} highlightedPlayer={highlightedPlayer} setHighlightedPlayer={setHighlightedPlayer} setGameStarted={setGameStarted}/>
+          </div> 
         </div>    
       )}
     </div>
