@@ -2,7 +2,7 @@
 
 ## Deploying 
 ### 1. Pick your network
-In .env, set VITE_CHAIN_ID to one of the following:
+In .env in the client, set VITE_CHAIN_ID to one of the following:
 - 31337 (local anvil devnet) 
 - 4242 (Lattice public testnet)
 

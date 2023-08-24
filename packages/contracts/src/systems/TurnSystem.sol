@@ -40,7 +40,8 @@ contract TurnSystem is System {
 
   function increaseRange() public {
     bytes32 player = addressToEntityKey(_msgSender());
-    require(GameIsLive.get(), "Match has not started yet.");
+    require(GameIsLive.get(), "Match is not live.");
+    require(Alive.get(player), "Not possible when dead");
     uint32 currentRange = Range.get(player);
     uint32 currentActionPoints = ActionPoint.get(player);
     require(currentActionPoints > 0, "You need an action point in order to increase your range");
@@ -49,8 +50,10 @@ contract TurnSystem is System {
   }
 
   function sendActionPoint(bytes32 _recipient) public {
-    require(GameIsLive.get(), "Match has not started yet.");
     bytes32 player = addressToEntityKey(_msgSender());
+    require(GameIsLive.get(), "Match is not live.");
+    require(Alive.get(player), "Not possible when dead");
+    require(Alive.get(_recipient), "Cannot send AP to a dead player");
     uint32 currentActionPoints = ActionPoint.get(player);
     require(currentActionPoints > 0, "You need an action point in order to transfer an action point");
     
@@ -65,8 +68,10 @@ contract TurnSystem is System {
   }
 
   function attackPlayer(bytes32 _target) public {
-    require(GameIsLive.get(), "Match has not started yet.");
     bytes32 player = addressToEntityKey(_msgSender());
+    require(GameIsLive.get(), "Match is not live.");
+    require(Alive.get(player), "Not possible when dead");
+    require(Alive.get(_target), "Cannot attack a dead player");
     uint32 currentActionPoints = ActionPoint.get(player);
     require(currentActionPoints > 0, "You need an action point in order to attack");
     
@@ -76,8 +81,8 @@ contract TurnSystem is System {
     uint32 playerRange = Range.get(player);
     require(distance(player_x, player_y, target_x, target_y) <= playerRange, "Target is out of range");
 
-    ActionPoint.set(player, currentActionPoints - 1);
     Health.set(_target, Health.get(_target) - 1);
+    ActionPoint.set(player, currentActionPoints - 1);
 
     // Check if target is dead
     if (Health.get(_target) == 0) {
@@ -91,7 +96,6 @@ contract TurnSystem is System {
       // Only oneplayer left alive so end game
       GameIsLive.set(false);
       Champion.set(remainingPlayers[0], true);
-      revert("Game over");
     }
   }
 

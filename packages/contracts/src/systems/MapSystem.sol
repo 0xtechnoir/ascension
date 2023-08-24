@@ -39,9 +39,9 @@ contract MapSystem is System {
 
     bytes32 player = addressToEntityKey(_msgSender());
     
-    require(GameIsLive.get(), "Match hasn't started yet. Stay put!");
-    require(Movable.get(player), "You need to be a player to move");
-    require(Alive.get(player), "Cannot move, you are dead");
+    require(GameIsLive.get(), "Match is not live");
+    require(Movable.get(player), "Moving disabled");
+    require(Alive.get(player), "You are dead");
     uint32 currentActionPoints = ActionPoint.get(player);
     require(currentActionPoints > 0, "An Action point is required to move");
 

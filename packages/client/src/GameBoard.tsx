@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
-import { useComponentValue } from "@latticexyz/react";
+import { useComponentValue, useEntityQuery } from "@latticexyz/react";
 import { GameMap } from "./GameMap";
 import { useMUD } from "./MUDContext";
 import { useKeyboardMovement } from "./useKeyboardMovement";
-import { Entity, getComponentValueStrict } from "@latticexyz/recs";
+import { Entity, getComponentValueStrict, Has, HasValue } from "@latticexyz/recs";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
 import { ErrorWithShortMessage } from "./CustomTypes";
 
 interface GameBoardProps {
   handleError: (message: string, actionButtonText?: string, onActionButtonClick?: () => void) => void;
-  players: Entity[];
+  players: Entity[];  
   highlightedPlayer: Entity | null;
   setHighlightedPlayer: (player: Entity | null) => void;
   setGameStarted: (gameStarted: boolean) => void;
@@ -30,28 +30,21 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   const [spawnY, setSpawnY] = useState<number | null>(null);
 
   const {
-    components: { MapConfig, Player, Position, Turn, GameStartTime, Alive },
+    components: { MapConfig, Player, Position, Turn, GameStartTime, Alive, GameIsLive },
     network: { playerEntity },
     systemCalls: { spawn, startMatch },
   } = useMUD();
 
+  const deadPlayers = useEntityQuery([Has(Player), HasValue(Alive, { value: false })]);
   const mappedPlayers = players.map((entity) => {
     const position = getComponentValueStrict(Position, entity);
-    // TODO - This is trying to execute before the Alive componentis set on the entity
-    // Need to listen for an onchain event to know when the Alive component is set and also when the value of the Alive component changes
-        
-    // playerIsAlive = getComponentValueStrict(Alive, entity)?.value;
-    // console.log("1. playerIsAlive: ", playerIsAlive);
-    // let emoji = "";
-    // // case statement to determine emoji is player is equal to playerEntity and whether they are alive or not
-    // if (playerIsAlive) {
-    //   emoji = entity === playerEntity ? "🚀" : "🛸";
-    // } else {
-    //   emoji = "💀";
-    // }
-    
-    const emoji = entity === playerEntity ? "🚀" : "🛸";
-
+    let emoji = '';
+    // if entity is not in the deadPlayers array give it the rocket emoji, otherwise give it the skull emoji
+    if(!deadPlayers.includes(entity)) {
+      emoji = entity === playerEntity ? "🚀" : "🛸";
+    } else {
+      emoji = "💀";
+    }
     return {
       entity,
       x: position.x,
