@@ -10,6 +10,8 @@ import { PlayerTableId, Position, PositionTableId, AliveTableId } from "../codeg
 import { getKeysWithValue } from "@latticexyz/world/src/modules/keyswithvalue/getKeysWithValue.sol";
 import { GameStarted, GameStartedTableId } from "../codegen/Tables.sol";
 import { AttackExecuted, AttackExecutedData } from "../codegen/Tables.sol";
+import { SendActionPointExecuted, SendActionPointExecutedData } from "../codegen/Tables.sol";
+import { RangeIncreaseExecuted, RangeIncreaseExecutedData } from "../codegen/Tables.sol";
 
 contract TurnSystem is System {
 
@@ -41,7 +43,7 @@ contract TurnSystem is System {
     }
   }
 
-  function increaseRange() public {
+  function increaseRange(uint256 timestamp) public {
     bytes32 player = addressToEntityKey(_msgSender());
     require(GameIsLive.get(), "Match is not live.");
     require(Alive.get(player), "Not possible when dead");
@@ -50,9 +52,15 @@ contract TurnSystem is System {
     require(currentActionPoints > 0, "You need an action point in order to increase your range");
     Range.set(player, currentRange + 1);
     ActionPoint.set(player, currentActionPoints - 1);
+
+    string memory sender = Username.get(player);
+    RangeIncreaseExecuted.emitEphemeral(timestamp, RangeIncreaseExecutedData({
+      timestamp: timestamp,
+      player: sender
+    })); 
   }
 
-  function sendActionPoint(bytes32 _recipient) public {
+  function sendActionPoint(uint256 timestamp, bytes32 _recipient) public {
     bytes32 player = addressToEntityKey(_msgSender());
     require(GameIsLive.get(), "Match is not live.");
     require(Alive.get(player), "Not possible when dead");
@@ -68,6 +76,14 @@ contract TurnSystem is System {
 
     ActionPoint.set(player, currentActionPoints - 1);
     ActionPoint.set(_recipient, ActionPoint.get(_recipient) + 1);
+
+    string memory sender = Username.get(player);
+    string memory reciever = Username.get(_recipient);
+    SendActionPointExecuted.emitEphemeral(timestamp, SendActionPointExecutedData({
+      timestamp: timestamp,
+      sender: sender,
+      reciever: reciever
+    })); 
   }
 
   function attackPlayer(uint256 timestamp, bytes32 _target) public {

@@ -19,5 +19,7 @@ import { Position, PositionTableId } from "./tables/Position.sol";
 import { ActivityLog, ActivityLogTableId } from "./tables/ActivityLog.sol";
 import { MoveExecuted, MoveExecutedData, MoveExecutedTableId } from "./tables/MoveExecuted.sol";
 import { AttackExecuted, AttackExecutedData, AttackExecutedTableId } from "./tables/AttackExecuted.sol";
+import { SendActionPointExecuted, SendActionPointExecutedData, SendActionPointExecutedTableId } from "./tables/SendActionPointExecuted.sol";
+import { RangeIncreaseExecuted, RangeIncreaseExecutedData, RangeIncreaseExecutedTableId } from "./tables/RangeIncreaseExecuted.sol";
 import { GameStarted, GameStartedTableId } from "./tables/GameStarted.sol";
 import { GameEnded, GameEndedTableId } from "./tables/GameEnded.sol";

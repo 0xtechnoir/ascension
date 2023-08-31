@@ -26,7 +26,8 @@ export function createSystemCalls(
     if (!playerEntity) {
       throw new Error("no player");
     }
-    const tx = await worldContract.write.sendActionPoint([recipient]);
+    const bigIntTimestamp = BigInt(Date.now());
+    const tx = await worldContract.write.sendActionPoint([bigIntTimestamp, recipient]);
     await waitForTransaction(tx);
   };
   
@@ -44,7 +45,8 @@ export function createSystemCalls(
     if (!playerEntity) {
       throw new Error("no player");
     }
-    const tx = await worldContract.write.increaseRange();
+    const bigIntTimestamp = BigInt(Date.now());
+    const tx = await worldContract.write.increaseRange([bigIntTimestamp]);
     await waitForTransaction(tx);
   };
   

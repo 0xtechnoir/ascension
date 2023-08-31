@@ -1,77 +1,116 @@
 import React from "react";
-import { Component, getComponentValue, Has } from "@latticexyz/recs";
+import { getComponentValue, Has } from "@latticexyz/recs";
 import { useEntityQuery } from "@latticexyz/react";
 import { useMUD } from "./MUDContext";
-import  { LogMessage } from './CustomTypes';
+import { LogMessage } from "./CustomTypes";
 import { formatDate } from "./utils";
-import { Entity } from "@latticexyz/recs";
 
 const ActivityLogComponent: React.FC = () => {
+  const {
+    components: {
+      MoveExecuted,
+      AttackExecuted,
+      SendActionPointExecuted,
+      RangeIncreaseExecuted,
+    },
+  } = useMUD();
 
-    const {
-        components: { MoveExecuted, AttackExecuted },
-    } = useMUD();
+  const allMoveLogs = useEntityQuery([Has(MoveExecuted)]);
+  const allAttackLogs = useEntityQuery([Has(AttackExecuted)]);
+  const allSendActionPointLogs = useEntityQuery([Has(SendActionPointExecuted)]);
+  const allRangeIncreaseLogs = useEntityQuery([Has(RangeIncreaseExecuted)]);
+  let mappedLogs: LogMessage[] = [];
 
-    let mappedLogs: LogMessage[] = [];
-    let mappedMoveLogs: LogMessage[] = [];
-    let mappedAttackLogs: LogMessage[] = [];
-    let allMoveLogs = useEntityQuery([Has(MoveExecuted)]);
-    let allAttackLogs = useEntityQuery([Has(AttackExecuted)]);
+  const mapMoveLogs = () => {
+    return allMoveLogs.map((entity) => {
+      const rec = getComponentValue(MoveExecuted, entity);
+      const ts = rec?.timestamp;
+      const numTs = Number(ts);
+      const player = rec?.player;
+      const fromX = rec?.fromX;
+      const fromY = rec?.fromY;
+      const toX = rec?.toX;
+      const toY = rec?.toY;
+      const mappedLog: LogMessage = {
+        timestamp: numTs,
+        message: `${player} moved from (${fromX}, ${fromY}) to (${toX}, ${toY})`,
+      };
+      return mappedLog;
+    });
+  };
 
-    mappedMoveLogs = mapMoveLogs(mappedMoveLogs, allMoveLogs, MoveExecuted);
-    mappedAttackLogs = mapAttackLogs(mappedAttackLogs, allAttackLogs, AttackExecuted);
-    mappedLogs = mappedLogs.concat(mappedMoveLogs, mappedAttackLogs);
+  const mapAttackLogs = () => {
+    return allAttackLogs.map((entity) => {
+      const rec = getComponentValue(AttackExecuted, entity);
+      const ts = rec?.timestamp;
+      const numTs = Number(ts);
+      const attacker = rec?.attacker;
+      const target = rec?.target;
+      const mappedLog: LogMessage = {
+        timestamp: numTs,
+        message: `${attacker} attacked ${target}`,
+      };
+      return mappedLog;
+    });
+  };
 
-    return (
-        <div className="activity-log" style={{ maxHeight: "200px", overflowY: "auto" }}>
-        <h3>Activity Log</h3>
-        <ul>
-        {
-            mappedLogs.sort((a, b) => b.timestamp - a.timestamp)
-            .map((logObj, index) => (
+  const mapSendActionPointLogs = () => {
+    return allSendActionPointLogs.map((entity) => {
+      const rec = getComponentValue(SendActionPointExecuted, entity);
+      const ts = rec?.timestamp;
+      const numTs = Number(ts);
+      const sender = rec?.sender;
+      const reciever = rec?.reciever;
+      const mappedLog: LogMessage = {
+        timestamp: numTs,
+        message: `${sender} sent 1 Action Point to ${reciever}`,
+      };
+      return mappedLog;
+    });
+  };
+
+  const mapRangeIncreaseLogs = () => {
+    return allRangeIncreaseLogs.map((entity) => {
+      const rec = getComponentValue(RangeIncreaseExecuted, entity);
+      const ts = rec?.timestamp;
+      const numTs = Number(ts);
+      const player = rec?.player;
+      const mappedLog: LogMessage = {
+        timestamp: numTs,
+        message: `${player} increased their range by 1`,
+      };
+      return mappedLog;
+    });
+  };
+
+  const mappedMoveLogs = mapMoveLogs();
+  const mappedAttackLogs = mapAttackLogs();
+  const mappedSendActionPointLogs = mapSendActionPointLogs();
+  const mappedRangeIncreaseLogs = mapRangeIncreaseLogs();
+  mappedLogs = mappedLogs.concat(
+    mappedMoveLogs,
+    mappedAttackLogs,
+    mappedSendActionPointLogs,
+    mappedRangeIncreaseLogs
+  );
+
+  return (
+    <div
+      className="activity-log"
+      style={{ maxHeight: "200px", overflowY: "auto" }}
+    >
+      <h3>Ships Log:</h3>
+      <ul>
+        {mappedLogs
+          .sort((a, b) => b.timestamp - a.timestamp)
+          .map((logObj, index) => (
             <li key={index}>
-                {`${formatDate(logObj.timestamp)} : ${logObj.message}`}
+              {`${formatDate(logObj.timestamp)} : ${logObj.message}`}
             </li>
-        ))}
-        </ul>
+          ))}
+      </ul>
     </div>
-    );
+  );
 };
 
 export default ActivityLogComponent;
-
-function mapMoveLogs(mappedLogs: any[], allMoveLogs: Entity[], MoveExecuted: Component) {
-    mappedLogs = allMoveLogs.map((entity) => {
-        const rec = getComponentValue(MoveExecuted, entity); 
-        const ts = rec?.timestamp;
-        const numTs = Number(ts);
-        const player = rec?.player;
-        const fromX = rec?.fromX;
-        const fromY = rec?.fromY;
-        const toX = rec?.toX;
-        const toY = rec?.toY;
-        const mappedLog: LogMessage = {
-            timestamp: numTs,
-            message: `${player} moved from (${fromX}, ${fromY}) to (${toX}, ${toY})`
-        };
-        return mappedLog;
-    });
-    return mappedLogs;
-}
-
-function mapAttackLogs(mappedLogs: any[], allAttackLogs: Entity[], AttackExecuted: Component) {
-    mappedLogs = allAttackLogs.map((entity) => {
-        const rec = getComponentValue(AttackExecuted, entity); 
-        const ts = rec?.timestamp;
-        const numTs = Number(ts);
-        const attacker = rec?.attacker;
-        const target = rec?.target;
-        const mappedLog: LogMessage = {
-            timestamp: numTs,
-            message: `${attacker} attacked ${target}`
-        };
-        return mappedLog;
-    });
-    return mappedLogs;
-}
-

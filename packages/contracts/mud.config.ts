@@ -69,6 +69,27 @@ export default mudConfig({
       }, 
       ephemeral: true,
     },
+    SendActionPointExecuted : {
+      keySchema: {
+        id: "uint256",
+      },
+      schema: {
+        timestamp: "uint256",
+        sender: "string",
+        reciever: "string",
+      }, 
+      ephemeral: true,
+    },
+    RangeIncreaseExecuted : {
+      keySchema: {
+        id: "uint256",
+      },
+      schema: {
+        timestamp: "uint256",
+        player: "string",
+      }, 
+      ephemeral: true,
+    },
     GameStarted: {
       keySchema: {},
       schema: "bool",

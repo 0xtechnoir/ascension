@@ -8,9 +8,9 @@ interface ITurnSystem {
 
   function incrementTurn() external;
 
-  function increaseRange() external;
+  function increaseRange(uint256 timestamp) external;
 
-  function sendActionPoint(bytes32 _recipient) external;
+  function sendActionPoint(uint256 timestamp, bytes32 _recipient) external;
 
   function attackPlayer(uint256 timestamp, bytes32 _target) external;
 }
