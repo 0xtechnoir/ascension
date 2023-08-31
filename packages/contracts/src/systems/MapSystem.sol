@@ -7,35 +7,56 @@ import { positionToEntityKey } from "../positionToEntityKey.sol";
 import { query, QueryFragment, QueryType } from "@latticexyz/world/src/modules/keysintable/query.sol";
 import { getKeysInTable } from "@latticexyz/world/src/modules/keysintable/getKeysInTable.sol";
 import { getKeysWithValue } from "@latticexyz/world/src/modules/keyswithvalue/getKeysWithValue.sol";
+import { console } from "forge-std/console.sol";
+import { MoveExecuted, MoveExecutedData } from "../codegen/Tables.sol";
 
 contract MapSystem is System {
+
+  struct Point {
+      uint32 x;
+      uint32 y;
+  }
   
-  function spawn(uint32 x, uint32 y, string memory username) public {
+  function spawn(string memory username) public {
+
+    // not a nice way to achieve this but it works for now - TODO - find a better way to do this
+    Point[] memory points = new Point[](8);
+    points[0] = Point(0, 0);
+    points[1] = Point(0, 5);
+    points[2] = Point(0, 10);
+    points[3] = Point(5, 0);
+    points[4] = Point(5, 10);
+    points[5] = Point(10, 0);
+    points[6] = Point(10, 5);
+    points[7] = Point(10, 10);
+      
+    console.log("Spawn function called");
+    console.log("points: %s", points.length);
     require(!GameIsLive.get(), "Cannot spawn players after match has started");
-    
     // create a player entity using the message senders address as the key
     bytes32 player = addressToEntityKey(address(_msgSender()));
-    
     // we could limit the number of players here as well
     require(!Player.get(player), "already spawned");
 
-    // Constrain position to map size, wrapping around if necessary
-    (uint32 width, uint32 height ) = MapConfig.get();
-    x = (x + width) % width;
-    y = (y + height) % height;
-
-    // when we spawn a new player we store state in separate tables (components) and associate them with the player entity rather than storing everything in a single contract
+    // loop through the points array and find a point that is not already occupied
+    for (uint i = 0; i < points.length; i++) {
+        // check if there is already a player at the given position, if not then spawn the player at that position
+        bytes32[] memory keysWithValue = getKeysWithValue(PositionTableId, Position.encode(points[i].x, points[i].y));
+        if (keysWithValue.length == 0) {
+            Position.set(player, points[i].x, points[i].y);
+            break;
+        }
+    }
+    // set the players attributes
     Alive.set(player, true);
     Player.set(player, true);
     Username.set(player, username);
-    Position.set(player, x, y);
     Movable.set(player, true);
     Health.set(player, 3);
     Range.set(player, 2);
     ActionPoint.set(player, 1);   
   }
-
-  function move(uint32 x, uint32 y) public {
+  function move(uint256 timestamp, uint32 x, uint32 y) public {
 
     bytes32 player = addressToEntityKey(_msgSender());
     
@@ -59,6 +80,14 @@ contract MapSystem is System {
     require(keysWithValue.length == 0, "There is already a player at the given position");
 
     Position.set(player, x, y);
+    MoveExecuted.emitEphemeral(player, MoveExecutedData({
+      timestamp: timestamp,
+      fromX: fromX,
+      fromY: fromY,
+      toX: x,
+      toY: y
+    }));
+
     ActionPoint.set(player, currentActionPoints - 1);
   }
 

@@ -28,10 +28,9 @@ export const useKeyboardMovement = () => {
         if (e.key === "ArrowRight") {
           await moveBy(1, 0);
         }
-      } 
-      catch (error) {
+      } catch (error) {
         console.log("catch block triggerd. Error: ", error);
-        if (typeof error === 'object' && error !== null) {
+        if (typeof error === "object" && error !== null) {
           const message = (error as ErrorWithShortMessage).shortMessage;
           setMoveMessage(message);
         } else {
@@ -45,5 +44,4 @@ export const useKeyboardMovement = () => {
   }, [moveBy]);
 
   return { moveMessage, clearMoveMessage };
-
 };

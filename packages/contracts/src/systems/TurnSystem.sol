@@ -8,6 +8,8 @@ import { getKeysInTable } from "@latticexyz/world/src/modules/keysintable/getKey
 import { query, QueryFragment, QueryType } from "@latticexyz/world/src/modules/keysintable/query.sol";
 import { PlayerTableId, Position, PositionTableId, AliveTableId } from "../codegen/Tables.sol";
 import { getKeysWithValue } from "@latticexyz/world/src/modules/keyswithvalue/getKeysWithValue.sol";
+import { GameStarted, GameStartedTableId } from "../codegen/Tables.sol";
+
 
 contract TurnSystem is System {
 
@@ -17,6 +19,7 @@ contract TurnSystem is System {
     GameIsLive.set(true);
     Turn.set(1);
     GameStartTime.set(startTime);
+    GameStarted.emitEphemeral(true);
   }
 
   function incrementTurn() public {

@@ -10,7 +10,7 @@ export default mudConfig({
       schema: {
         width: "uint32",
         height: "uint32",
-      },
+      }
     },
     Turn: {
       keySchema: {},
@@ -38,7 +38,33 @@ export default mudConfig({
         x: "uint32",
         y: "uint32",
       }
-    }
+    },
+    ActivityLog: {
+      schema: {
+        message: "string",
+      },
+    },
+    MoveExecuted : {
+      schema: {
+        timestamp: "uint256",
+        fromX: "uint32",
+        fromY: "uint32",
+        toX: "uint32",
+        toY: "uint32", 
+      }, 
+      ephemeral: true,
+    },
+    GameStarted: {
+      keySchema: {},
+      schema: "bool",
+      ephemeral: true,
+    },
+    GameEnded: {
+      schema: {
+        timestamp: "uint256",
+      },
+      ephemeral: true,
+    },
   },
   modules: [
     {
@@ -46,7 +72,6 @@ export default mudConfig({
       root: true,
       args: [
         resolveTableId("Player"),
-        resolveTableId("Alive"),
       ],
     },
     {
@@ -63,5 +88,12 @@ export default mudConfig({
         resolveTableId("Alive"),
       ],
     },
-  ]
+    {
+      name: "KeysWithValueModule",
+      root: true,
+      args: [
+        resolveTableId("Username"),
+      ],
+    },
+  ],
 });

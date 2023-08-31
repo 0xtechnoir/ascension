@@ -16,8 +16,8 @@ contract PostDeploy is Script {
 
     // Start broadcasting transactions from the deployer account
     vm.startBroadcast(deployerPrivateKey);
-    uint32 height = 20;
-    uint32 width = 20;    
+    uint32 height = 11;
+    uint32 width = 11;
     MapConfig.set(world, width, height);
     vm.stopBroadcast();
   }

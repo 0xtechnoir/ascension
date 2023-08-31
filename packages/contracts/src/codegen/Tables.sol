@@ -16,3 +16,7 @@ import { Health, HealthTableId } from "./tables/Health.sol";
 import { Range, RangeTableId } from "./tables/Range.sol";
 import { ActionPoint, ActionPointTableId } from "./tables/ActionPoint.sol";
 import { Position, PositionTableId } from "./tables/Position.sol";
+import { ActivityLog, ActivityLogTableId } from "./tables/ActivityLog.sol";
+import { MoveExecuted, MoveExecutedData, MoveExecutedTableId } from "./tables/MoveExecuted.sol";
+import { GameStarted, GameStartedTableId } from "./tables/GameStarted.sol";
+import { GameEnded, GameEndedTableId } from "./tables/GameEnded.sol";

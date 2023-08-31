@@ -1,4 +1,4 @@
-import { ReactNode, useState } from "react";
+import { useState } from "react";
 import { useComponentValue } from "@latticexyz/react";
 import { Entity, getComponentValueStrict } from "@latticexyz/recs";
 import { twMerge } from "tailwind-merge";
@@ -31,7 +31,6 @@ export const GameMap = ({
   width,
   height,
   onTileClick,
-  terrain,
   players,
   highlightedPlayer,
 }: Props) => {
@@ -41,10 +40,13 @@ export const GameMap = ({
   } = useMUD();
 
   let highlightedPlayerPosition: Position | null = null;
-  if(highlightedPlayer) {
-    highlightedPlayerPosition = getComponentValueStrict(Position, highlightedPlayer);
+  if (highlightedPlayer) {
+    highlightedPlayerPosition = getComponentValueStrict(
+      Position,
+      highlightedPlayer
+    );
   }
-  
+
   const [hoveredTile, setHoveredTile] = useState({ x: -1, y: -1 });
   const rows = new Array(width).fill(0).map((_, i) => i);
   const columns = new Array(height).fill(0).map((_, i) => i);
@@ -55,17 +57,14 @@ export const GameMap = ({
     <div className="inline-grid p-2 bg-slate-900 relative overflow-hidden">
       {rows.map((y) =>
         columns.map((x) => {
-          const terrainEmoji = terrain?.find(
-            (t) => t.x === x && t.y === y
-          )?.emoji;
           let isHighlighted: boolean | null = false;
           if (highlightedPlayerPosition) {
-            isHighlighted = highlightedPlayer && x === highlightedPlayerPosition.x && y === highlightedPlayerPosition.y;
+            isHighlighted =
+              highlightedPlayer &&
+              x === highlightedPlayerPosition.x &&
+              y === highlightedPlayerPosition.y;
           }
           const playersHere = players?.filter((p) => p.x === x && p.y === y);
-          // const mainPlayerHere = playersHere?.find(
-          //   (p) => p.entity === playerEntity
-          // );
 
           // Define the ships firing perimeter
           let totalDistance = 0;
@@ -74,8 +73,12 @@ export const GameMap = ({
             let deltaY = Math.abs(playerPosition.y - y);
             totalDistance = deltaX + deltaY;
           }
-          let isAdjacentToPlayer = playerPosition && shipRange && totalDistance <= shipRange && totalDistance !== 0;
-        
+          let isAdjacentToPlayer =
+            playerPosition &&
+            shipRange &&
+            totalDistance <= shipRange &&
+            totalDistance !== 0;
+
           const isHovered = hoveredTile.x === x && hoveredTile.y === y; // Check if the current tile is hovered
 
           return (
@@ -86,7 +89,7 @@ export const GameMap = ({
                 onTileClick ? "cursor-pointer hover:ring" : null,
                 isAdjacentToPlayer ? "bg-slate-600" : null,
                 isHovered ? "bg-blue-500" : null, // Add styling for hovered tile
-                isHighlighted ? "bg-gray-300" : null,
+                isHighlighted ? "bg-gray-300" : null
               )}
               style={{
                 gridColumn: x + 1,
@@ -99,11 +102,6 @@ export const GameMap = ({
               onMouseLeave={() => setHoveredTile({ x: -1, y: -1 })} // Reset the hovered tile when mouse leave
             >
               <div className="flex flex-wrap gap-1 items-center justify-center relative">
-                {terrainEmoji ? (
-                  <div className="absolute inset-0 flex items-center justify-center text-3xl pointer-events-none">
-                    {terrainEmoji}
-                  </div>
-                ) : null}
                 <div className="relative">
                   {playersHere?.map((p) => (
                     <span key={p.entity}>{p.emoji}</span>
