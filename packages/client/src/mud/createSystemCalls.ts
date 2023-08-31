@@ -64,9 +64,7 @@ export function createSystemCalls(
     await waitForTransaction(tx);
   };
 
-
   const moveTo = async (inputX: number, inputY: number) => {
-    console.log("moveTo called");
     if (!playerEntity) {
       throw new Error("no player");
     }
@@ -90,7 +88,6 @@ export function createSystemCalls(
   };
 
   const moveBy = async (deltaX: number, deltaY: number) => {
-    console.log("moveBy called");
     if (!playerEntity) {
       throw new Error("no player");
     }

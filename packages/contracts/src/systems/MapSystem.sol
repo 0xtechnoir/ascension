@@ -78,13 +78,16 @@ contract MapSystem is System {
     // check if there is already a player at the given position
     bytes32[] memory keysWithValue = getKeysWithValue(PositionTableId, Position.encode(x, y));
     require(keysWithValue.length == 0, "There is already a player at the given position");
+    string memory username = Username.get(player);
 
     Position.set(player, x, y);
-    MoveExecuted.emitEphemeral(player, MoveExecutedData({
+    
+    MoveExecuted.emitEphemeral(timestamp, MoveExecutedData({
       timestamp: timestamp,
-      fromX: fromX,
-      fromY: fromY,
-      toX: x,
+      player: username,
+      fromX: fromX, 
+      fromY: fromY, 
+      toX: x, 
       toY: y
     }));
 

@@ -26,36 +26,39 @@ struct MoveExecutedData {
   uint32 fromY;
   uint32 toX;
   uint32 toY;
+  string player;
 }
 
 library MoveExecuted {
   /** Get the table's schema */
   function getSchema() internal pure returns (Schema) {
-    SchemaType[] memory _schema = new SchemaType[](5);
+    SchemaType[] memory _schema = new SchemaType[](6);
     _schema[0] = SchemaType.UINT256;
     _schema[1] = SchemaType.UINT32;
     _schema[2] = SchemaType.UINT32;
     _schema[3] = SchemaType.UINT32;
     _schema[4] = SchemaType.UINT32;
+    _schema[5] = SchemaType.STRING;
 
     return SchemaLib.encode(_schema);
   }
 
   function getKeySchema() internal pure returns (Schema) {
     SchemaType[] memory _schema = new SchemaType[](1);
-    _schema[0] = SchemaType.BYTES32;
+    _schema[0] = SchemaType.UINT256;
 
     return SchemaLib.encode(_schema);
   }
 
   /** Get the table's metadata */
   function getMetadata() internal pure returns (string memory, string[] memory) {
-    string[] memory _fieldNames = new string[](5);
+    string[] memory _fieldNames = new string[](6);
     _fieldNames[0] = "timestamp";
     _fieldNames[1] = "fromX";
     _fieldNames[2] = "fromY";
     _fieldNames[3] = "toX";
     _fieldNames[4] = "toY";
+    _fieldNames[5] = "player";
     return ("MoveExecuted", _fieldNames);
   }
 
@@ -82,11 +85,19 @@ library MoveExecuted {
   }
 
   /** Emit the ephemeral event using individual values */
-  function emitEphemeral(bytes32 key, uint256 timestamp, uint32 fromX, uint32 fromY, uint32 toX, uint32 toY) internal {
-    bytes memory _data = encode(timestamp, fromX, fromY, toX, toY);
+  function emitEphemeral(
+    uint256 id,
+    uint256 timestamp,
+    uint32 fromX,
+    uint32 fromY,
+    uint32 toX,
+    uint32 toY,
+    string memory player
+  ) internal {
+    bytes memory _data = encode(timestamp, fromX, fromY, toX, toY, player);
 
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = key;
+    _keyTuple[0] = bytes32(uint256(id));
 
     StoreSwitch.emitEphemeralRecord(_tableId, _keyTuple, _data);
   }
@@ -94,29 +105,30 @@ library MoveExecuted {
   /** Emit the ephemeral event using individual values (using the specified store) */
   function emitEphemeral(
     IStore _store,
-    bytes32 key,
+    uint256 id,
     uint256 timestamp,
     uint32 fromX,
     uint32 fromY,
     uint32 toX,
-    uint32 toY
+    uint32 toY,
+    string memory player
   ) internal {
-    bytes memory _data = encode(timestamp, fromX, fromY, toX, toY);
+    bytes memory _data = encode(timestamp, fromX, fromY, toX, toY, player);
 
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = key;
+    _keyTuple[0] = bytes32(uint256(id));
 
     _store.emitEphemeralRecord(_tableId, _keyTuple, _data);
   }
 
   /** Emit the ephemeral event using the data struct */
-  function emitEphemeral(bytes32 key, MoveExecutedData memory _table) internal {
-    emitEphemeral(key, _table.timestamp, _table.fromX, _table.fromY, _table.toX, _table.toY);
+  function emitEphemeral(uint256 id, MoveExecutedData memory _table) internal {
+    emitEphemeral(id, _table.timestamp, _table.fromX, _table.fromY, _table.toX, _table.toY, _table.player);
   }
 
   /** Emit the ephemeral event using the data struct (using the specified store) */
-  function emitEphemeral(IStore _store, bytes32 key, MoveExecutedData memory _table) internal {
-    emitEphemeral(_store, key, _table.timestamp, _table.fromX, _table.fromY, _table.toX, _table.toY);
+  function emitEphemeral(IStore _store, uint256 id, MoveExecutedData memory _table) internal {
+    emitEphemeral(_store, id, _table.timestamp, _table.fromX, _table.fromY, _table.toX, _table.toY, _table.player);
   }
 
   /** Tightly pack full data using this table's schema */
@@ -125,14 +137,19 @@ library MoveExecuted {
     uint32 fromX,
     uint32 fromY,
     uint32 toX,
-    uint32 toY
+    uint32 toY,
+    string memory player
   ) internal pure returns (bytes memory) {
-    return abi.encodePacked(timestamp, fromX, fromY, toX, toY);
+    uint40[] memory _counters = new uint40[](1);
+    _counters[0] = uint40(bytes(player).length);
+    PackedCounter _encodedLengths = PackedCounterLib.pack(_counters);
+
+    return abi.encodePacked(timestamp, fromX, fromY, toX, toY, _encodedLengths.unwrap(), bytes((player)));
   }
 
   /** Encode keys as a bytes32 array using this table's schema */
-  function encodeKeyTuple(bytes32 key) internal pure returns (bytes32[] memory _keyTuple) {
+  function encodeKeyTuple(uint256 id) internal pure returns (bytes32[] memory _keyTuple) {
     _keyTuple = new bytes32[](1);
-    _keyTuple[0] = key;
+    _keyTuple[0] = bytes32(uint256(id));
   }
 }

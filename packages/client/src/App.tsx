@@ -10,9 +10,9 @@ import { OtherPlayersStats } from "./OtherPlayersStats";
 import { ErrorModal } from "./ErrorModal";
 import { ErrorWithShortMessage } from "./CustomTypes";
 import ActivityLogComponent from "./ActivityLogComponent";
-import { persistor } from "./reduxStore";
 
 export const App = () => {
+  
   // Custom Types
   enum SyncStep {
     INITIALIZE = "initialize",
@@ -27,8 +27,20 @@ export const App = () => {
     network: { playerEntity },
     systemCalls: { spawn },
   } = useMUD();
+  
+  // Constants 
+  const gameIsLive = useComponentValue(GameIsLive, singletonEntity)?.value;
+  const allPlayers = useEntityQuery([Has(Player), Has(Position)]);
+  const otherPlayers = allPlayers.filter((entity) => entity !== playerEntity);
+  const syncProgress = useComponentValue(SyncProgress, singletonEntity, {
+    step: SyncStep.INITIALIZE,
+    message: "Connecting",
+    percentage: 0,
+    latestBlockNumber: 0n,
+    lastBlockNumberProcessed: 0n,
+  });
 
-  // State Hooks
+  // Hooks
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [highlightedPlayer, setHighlightedPlayer] = useState<Entity | null>(null);
@@ -37,14 +49,16 @@ export const App = () => {
   const [showModal, setShowModal] = useState(false);
   const [enteredUsername, setEnteredUsername] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [persistorPergeComplete, setPersistorPurgeComplete] = useState(false);
+  
+  useEffect(() => {
+    if (gameIsLive) {
+      setGameStarted(true);
+    }
+  }, [gameIsLive]);
 
   const handleSpawnClick = () => {
     setShowModal(true);
   };
-
-  const allPlayers = useEntityQuery([Has(Player), Has(Position)]);
-  const otherPlayers = allPlayers.filter((entity) => entity !== playerEntity);
 
   const handleModalSubmit = async () => {
     setIsLoading(true);
@@ -68,17 +82,7 @@ export const App = () => {
   const handleCloseModal = () => {
     setShowModal(false);
   };
-
   
-  // useEffect hook to check if the game has started
-  const gameIsLive = useComponentValue(GameIsLive, singletonEntity)?.value;
-  
-  useEffect(() => {
-    if (gameIsLive) {
-      setGameStarted(true);
-    }
-  }, [gameIsLive]);
-
   const handleError = (message: string) => {
     setErrorMessage(message);
     setShowErrorModal(true);
@@ -88,14 +92,6 @@ export const App = () => {
     setErrorMessage("");
     setShowErrorModal(false);
   };
-
-  const syncProgress = useComponentValue(SyncProgress, singletonEntity, {
-    step: SyncStep.INITIALIZE,
-    message: "Connecting",
-    percentage: 0,
-    latestBlockNumber: 0n,
-    lastBlockNumberProcessed: 0n,
-  });
 
   return (
     <div className="items-center justify-center">

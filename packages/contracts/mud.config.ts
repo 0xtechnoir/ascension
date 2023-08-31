@@ -45,12 +45,16 @@ export default mudConfig({
       },
     },
     MoveExecuted : {
+      keySchema: {
+        id: "uint256",
+      },
       schema: {
         timestamp: "uint256",
         fromX: "uint32",
         fromY: "uint32",
         toX: "uint32",
         toY: "uint32", 
+        player: "string",
       }, 
       ephemeral: true,
     },
