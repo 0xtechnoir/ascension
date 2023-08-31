@@ -9,13 +9,18 @@ import { Entity } from "@latticexyz/recs";
 const ActivityLogComponent: React.FC = () => {
 
     const {
-        components: { MoveExecuted },
+        components: { MoveExecuted, AttackExecuted },
     } = useMUD();
 
-    let mappedLogs: any[] = [];
+    let mappedLogs: LogMessage[] = [];
+    let mappedMoveLogs: LogMessage[] = [];
+    let mappedAttackLogs: LogMessage[] = [];
     let allMoveLogs = useEntityQuery([Has(MoveExecuted)]);
+    let allAttackLogs = useEntityQuery([Has(AttackExecuted)]);
 
-    mappedLogs = mapMoveLogs(mappedLogs, allMoveLogs, MoveExecuted);
+    mappedMoveLogs = mapMoveLogs(mappedMoveLogs, allMoveLogs, MoveExecuted);
+    mappedAttackLogs = mapAttackLogs(mappedAttackLogs, allAttackLogs, AttackExecuted);
+    mappedLogs = mappedLogs.concat(mappedMoveLogs, mappedAttackLogs);
 
     return (
         <div className="activity-log" style={{ maxHeight: "200px", overflowY: "auto" }}>
@@ -48,6 +53,22 @@ function mapMoveLogs(mappedLogs: any[], allMoveLogs: Entity[], MoveExecuted: Com
         const mappedLog: LogMessage = {
             timestamp: numTs,
             message: `${player} moved from (${fromX}, ${fromY}) to (${toX}, ${toY})`
+        };
+        return mappedLog;
+    });
+    return mappedLogs;
+}
+
+function mapAttackLogs(mappedLogs: any[], allAttackLogs: Entity[], AttackExecuted: Component) {
+    mappedLogs = allAttackLogs.map((entity) => {
+        const rec = getComponentValue(AttackExecuted, entity); 
+        const ts = rec?.timestamp;
+        const numTs = Number(ts);
+        const attacker = rec?.attacker;
+        const target = rec?.target;
+        const mappedLog: LogMessage = {
+            timestamp: numTs,
+            message: `${attacker} attacked ${target}`
         };
         return mappedLog;
     });

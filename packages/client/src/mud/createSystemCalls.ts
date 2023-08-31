@@ -34,7 +34,8 @@ export function createSystemCalls(
     if (!playerEntity) {
       throw new Error("no player");
     }
-    const tx = await worldContract.write.attackPlayer([target]);
+    const bigIntTimestamp = BigInt(Date.now());
+    const tx = await worldContract.write.attackPlayer([bigIntTimestamp, target]);
     await waitForTransaction(tx);
   };
   

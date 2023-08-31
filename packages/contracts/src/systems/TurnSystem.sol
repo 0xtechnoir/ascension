@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0;
 import { System } from "@latticexyz/world/src/System.sol";
-import { MapConfig, Movable, Player, PlayerTableId, Position, Health, Range, ActionPoint, Turn, GameStartTime, GameIsLive, Alive, Champion } from "../codegen/Tables.sol";
+import { MapConfig, Movable, Player, PlayerTableId, Position, Health, Range, ActionPoint, Turn, GameStartTime, GameIsLive, Alive, Champion, Username } from "../codegen/Tables.sol";
 import { addressToEntityKey } from "../addressToEntityKey.sol";
 import { positionToEntityKey } from "../positionToEntityKey.sol";
 import { getKeysInTable } from "@latticexyz/world/src/modules/keysintable/getKeysInTable.sol";
@@ -9,7 +9,7 @@ import { query, QueryFragment, QueryType } from "@latticexyz/world/src/modules/k
 import { PlayerTableId, Position, PositionTableId, AliveTableId } from "../codegen/Tables.sol";
 import { getKeysWithValue } from "@latticexyz/world/src/modules/keyswithvalue/getKeysWithValue.sol";
 import { GameStarted, GameStartedTableId } from "../codegen/Tables.sol";
-
+import { AttackExecuted, AttackExecutedData } from "../codegen/Tables.sol";
 
 contract TurnSystem is System {
 
@@ -70,7 +70,7 @@ contract TurnSystem is System {
     ActionPoint.set(_recipient, ActionPoint.get(_recipient) + 1);
   }
 
-  function attackPlayer(bytes32 _target) public {
+  function attackPlayer(uint256 timestamp, bytes32 _target) public {
     bytes32 player = addressToEntityKey(_msgSender());
     require(GameIsLive.get(), "Match is not live.");
     require(Alive.get(player), "Not possible when dead");
@@ -92,7 +92,16 @@ contract TurnSystem is System {
       Movable.set(_target, false);
       Range.set(_target, 0);
       Alive.set(_target, false);
-    }  
+    }
+
+    string memory attacker = Username.get(player);
+    string memory target = Username.get(_target);
+
+    AttackExecuted.emitEphemeral(timestamp, AttackExecutedData({
+      timestamp: timestamp,
+      attacker: attacker,
+      target: target
+    }));  
     
     bytes32[] memory remainingPlayers = getKeysWithValue(AliveTableId, Alive.encode(true));// return all records for alive players
     if (remainingPlayers.length == 1) {

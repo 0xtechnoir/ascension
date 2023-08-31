@@ -58,6 +58,17 @@ export default mudConfig({
       }, 
       ephemeral: true,
     },
+    AttackExecuted : {
+      keySchema: {
+        id: "uint256",
+      },
+      schema: {
+        timestamp: "uint256",
+        attacker: "string",
+        target: "string",
+      }, 
+      ephemeral: true,
+    },
     GameStarted: {
       keySchema: {},
       schema: "bool",
