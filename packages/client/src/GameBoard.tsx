@@ -10,7 +10,6 @@ import {
   HasValue,
 } from "@latticexyz/recs";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
-import { ErrorWithShortMessage } from "./CustomTypes";
 
 interface GameBoardProps {
   handleError: (
@@ -40,7 +39,6 @@ export const GameBoard: React.FC<GameBoardProps> = ({
       Turn,
       GameStartTime,
       Alive,
-      GameIsLive,
     },
     network: { playerEntity },
     systemCalls: { spawn, startMatch },
@@ -120,19 +118,6 @@ export const GameBoard: React.FC<GameBoardProps> = ({
     }
   };
 
-  const start = async () => {
-    const playersSpawned = mappedPlayers.length;
-    const startTime = Date.now();
-    try {
-      await startMatch(playersSpawned, startTime);
-    } catch (error) {
-      if (typeof error === "object" && error !== null) {
-        const message = (error as ErrorWithShortMessage).shortMessage;
-        handleError(message);
-      }
-    }
-  };
-
   // Get map width and height from MapConfig component
   const mapConfig = useComponentValue(MapConfig, singletonEntity);
   if (mapConfig == null) {
@@ -152,12 +137,6 @@ export const GameBoard: React.FC<GameBoardProps> = ({
         players={mappedPlayers}
         highlightedPlayer={highlightedPlayer}
       />
-      <button
-        onClick={start}
-        style={{ backgroundColor: "blue", color: "white" }}
-      >
-        Start Match
-      </button>
       <br />
       <div>
         {gameStartTime && startDate && startTime

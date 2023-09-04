@@ -1,4 +1,4 @@
-import { getComponentValue, Entity, Has, HasValue } from "@latticexyz/recs";
+import { getComponentValue, Entity } from "@latticexyz/recs";
 import { uuid } from "@latticexyz/utils";
 import { ClientComponents } from "./createClientComponents";
 import { SetupNetworkResult } from "./setupNetwork";
@@ -21,6 +21,10 @@ export function createSystemCalls(
       (y + mapConfig.height) % mapConfig.height,
     ];
   };
+
+  const vote = async (recipient: Entity) => {
+    console.log("vote called");
+  }
   
   const sendActionPoint = async (recipient: Entity) => {
     if (!playerEntity) {
@@ -32,6 +36,7 @@ export function createSystemCalls(
   };
   
   const attack = async (target: Entity) => {
+    console.log("attack called")
     if (!playerEntity) {
       throw new Error("no player");
     }
@@ -137,5 +142,6 @@ export function createSystemCalls(
     increaseRange,
     sendActionPoint,
     attack,
+    vote
   };
 }
