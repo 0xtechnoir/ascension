@@ -1,9 +1,8 @@
 import React from "react";
-import { ErrorWithShortMessage } from "./CustomTypes";
 import { useMUD } from "./MUDContext";
 import { Entity } from "@latticexyz/recs";
 import { useComponentValue } from "@latticexyz/react";
-import { useErrorContext } from "./ErrorContext";
+import { ActionButton } from "./ActionButton";
 
 type LivePlayerProps = {
   entity: Entity;
@@ -17,7 +16,6 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
   highlightedPlayer,
 }) => {
 
-  const { handleError } = useErrorContext();
   const {
     components: { Health, Range, ActionPoint, Username, Alive },
     systemCalls: { sendActionPoint, attack, increaseRange},
@@ -50,22 +48,10 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
             <p>Range: {range}</p>
             <p>Action Points: {ap}</p>
           </div>
-          <button
-            onClick={async () => {
-              try {
-                await increaseRange();
-              } catch (error) {
-                if (typeof error === "object" && error !== null) {
-                  const message = (error as ErrorWithShortMessage).shortMessage;
-                  handleError(message);
-                }
-              }
-            }}
-            className="h-10 px-6 font-semibold rounded-md border border-slate-200 text-slate-300"
-            type="button"
-          >
-            Increase Range (Requires 1 AP)
-          </button>
+          <ActionButton
+              label="Increase Range (Requires 1 AP)"
+              action={increaseRange}
+            />
           <br />
           <p>-----------------------------------</p>
           <br />
@@ -90,49 +76,14 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
           <p>Range: {range}</p>
           <p>Action Points: {ap}</p>
           <div className="flex">
-            <button
-              className="h-10 px-2 font-semibold rounded-md border border-slate-200 text-slate-300 mr-2"
-              type="button"
-              onClick={async () => {
-                if (highlightedPlayer) {
-                  try {
-                    await sendActionPoint(highlightedPlayer);
-                  } catch (error) {
-                    if (typeof error === "object" && error !== null) {
-                      const message = (error as ErrorWithShortMessage)
-                        .shortMessage;
-                      handleError(message);
-                    }
-                  }
-                }
-              }}
-            >
-              Donate Action Point
-            </button>
-            <br />
-            <button
-              className="h-10 px-6 font-semibold rounded-md border border-slate-200 text-slate-300"
-              type="button"
-              onClick={async () => {
-                if (highlightedPlayer) {
-                  try {
-                    console.log("trying to attack");
-                    await attack(highlightedPlayer);
-                    console.log("Attack successful!");
-                  } catch (error) {
-                    console.log("typeof error: ", typeof error);
-                    console.log("error: ", error);
-                    if (typeof error === "object" && error !== null) {
-                      const message = (error as ErrorWithShortMessage)
-                        .shortMessage;
-                      handleError(message);
-                    }
-                  }
-                }
-              }}
-            >
-              Attack Player
-            </button>
+          <ActionButton
+            label="Donate Action Point"
+            action={() => sendActionPoint(highlightedPlayer!)}
+          />
+          <ActionButton
+            label="Attack Player"
+            action={() => attack(highlightedPlayer!)}
+          />
           </div>
           <br />
           <p>-----------------------------------</p>
