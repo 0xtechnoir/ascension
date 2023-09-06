@@ -10,13 +10,9 @@ import {
   HasValue,
 } from "@latticexyz/recs";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
+import { useErrorContext } from "./ErrorContext";
 
 interface GameBoardProps {
-  handleError: (
-    message: string,
-    actionButtonText?: string,
-    onActionButtonClick?: () => void
-  ) => void;
   players: Entity[];
   highlightedPlayer: Entity | null;
   setHighlightedPlayer: (player: Entity | null) => void;
@@ -24,13 +20,13 @@ interface GameBoardProps {
 }
 
 export const GameBoard: React.FC<GameBoardProps> = ({
-  handleError,
   players,
   highlightedPlayer,
   setHighlightedPlayer,
 }) => {
   const [showUsernameInput, setShowUsernameInput] = useState(false);
 
+  const { handleError } = useErrorContext();
   const {
     components: {
       MapConfig,
@@ -40,7 +36,6 @@ export const GameBoard: React.FC<GameBoardProps> = ({
       Alive,
     },
     network: { playerEntity },
-    systemCalls: { spawn, startMatch },
   } = useMUD();
 
   const deadPlayers = useEntityQuery([

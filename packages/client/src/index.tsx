@@ -6,6 +6,7 @@ import { setup } from "./mud/setup";
 import { MUDProvider } from "./MUDContext";
 import mudConfig from "contracts/mud.config";
 import { ToastContainer } from "react-toastify";
+import { ErrorProvider } from "./ErrorContext";
 
 const rootElement = document.getElementById("react-root");
 if (!rootElement) throw new Error("React root not found");
@@ -15,8 +16,10 @@ const root = ReactDOM.createRoot(rootElement);
 setup().then(async (result) => {
   root.render(
     <MUDProvider value={result}>
-      <App />
-      <ToastContainer position="bottom-right" draggable={false} theme="dark" />
+      <ErrorProvider>
+        <App />
+        <ToastContainer position="bottom-right" draggable={false} theme="dark" />
+      </ErrorProvider>
     </MUDProvider>
   )
   

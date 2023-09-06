@@ -3,18 +3,12 @@ import { Entity } from "@latticexyz/recs";
 import { DeadPlayer } from "./DeadPlayer";
 
 type DeadPlayersListComponentProps = {
-  handleError: (
-    message: string,
-    actionButtonText?: string,
-    onActionButtonClick?: () => void
-  ) => void;
   players: Entity[];
   highlightedPlayer: Entity | null;
   setHighlightedPlayer: (player: Entity | null) => void;
 };
 
 export const DeadPlayersListComponent: React.FC<DeadPlayersListComponentProps> = ({
-  handleError,
   players,
   highlightedPlayer,
   setHighlightedPlayer,
@@ -33,7 +27,6 @@ export const DeadPlayersListComponent: React.FC<DeadPlayersListComponentProps> =
           entity={entity}
           setHighlightedPlayer={setHighlightedPlayer}
           highlightedPlayer={highlightedPlayer}
-          handleError={handleError}
         />
       })}
     </div>

@@ -3,18 +3,12 @@ import { Entity } from "@latticexyz/recs";
 import { LivePlayer } from "./LivePlayer";
 
 type LivePlayersListComponentProps = {
-  handleError: (
-    message: string,
-    actionButtonText?: string,
-    onActionButtonClick?: () => void
-  ) => void;
   players: Entity[];
   highlightedPlayer: Entity | null;
   setHighlightedPlayer: (player: Entity | null) => void;
 };
 
 export const LivePlayersListComponent: React.FC<LivePlayersListComponentProps> = ({
-  handleError,
   players,
   highlightedPlayer,
   setHighlightedPlayer,
@@ -34,7 +28,6 @@ export const LivePlayersListComponent: React.FC<LivePlayersListComponentProps> =
           entity={entity}
           setHighlightedPlayer={setHighlightedPlayer}
           highlightedPlayer={highlightedPlayer}
-          handleError={handleError}
         />;
       })}
     </div>

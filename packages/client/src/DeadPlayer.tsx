@@ -3,25 +3,21 @@ import { ErrorWithShortMessage } from "./CustomTypes";
 import { useMUD } from "./MUDContext";
 import { Entity } from "@latticexyz/recs";
 import { useComponentValue } from "@latticexyz/react";
+import { useErrorContext } from "./ErrorContext";
 
 type DeadPlayerProps = {
   entity: Entity;
   setHighlightedPlayer: (player: Entity | null) => void;
   highlightedPlayer: Entity | null;
-  handleError: (
-    message: string,
-    actionButtonText?: string,
-    onActionButtonClick?: () => void
-  ) => void;
 };
 
 export const DeadPlayer: React.FC<DeadPlayerProps> = ({
   entity,
   setHighlightedPlayer,
   highlightedPlayer,
-  handleError,
 }) => {
 
+  const { handleError } = useErrorContext();
   const {
     components: { Username, Alive },
     systemCalls: { vote },
