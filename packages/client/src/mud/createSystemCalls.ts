@@ -22,7 +22,15 @@ export function createSystemCalls(
   };
 
   const vote = async (recipient: Entity) => {
-    console.log("vote called");
+    if (!playerEntity) {
+      throw new Error("no player");
+    }
+    const bigIntTimestamp = BigInt(Date.now());
+    const tx = await worldContract.write.vote([
+      bigIntTimestamp,
+      recipient,
+    ]);
+    await waitForTransaction(tx);
   };
 
   const sendActionPoint = async (recipient: Entity) => {
@@ -146,6 +154,16 @@ export function createSystemCalls(
     await waitForTransaction(tx);
   };
 
+  const claimVotingPoint = async () => {
+    console.log("claimVotingPoint called");
+    if (!playerEntity) {
+      throw new Error("no player");
+    }
+    const bigIntTimestamp = BigInt(Date.now());
+    const tx = await worldContract.write.claimVotingPoint([bigIntTimestamp]);
+    await waitForTransaction(tx);
+  };
+
   return {
     moveTo,
     moveBy,
@@ -156,5 +174,6 @@ export function createSystemCalls(
     attack,
     vote,
     claimActionPoint,
+    claimVotingPoint,
   };
 }

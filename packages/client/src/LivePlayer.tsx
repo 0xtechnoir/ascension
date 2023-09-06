@@ -24,7 +24,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
       Username,
       Alive,
       LastActionPointClaim,
-      APClaimInterval,
+      ClaimInterval,
     },
     systemCalls: { sendActionPoint, attack, increaseRange, claimActionPoint },
     network: { playerEntity },
@@ -38,22 +38,21 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
   const range = useComponentValue(Range, entity)?.value;
   const ap = useComponentValue(ActionPoint, entity)?.value;
   const alive = useComponentValue(Alive, entity)?.value;
+ 
   const lastActionPointClaim = useComponentValue(
     LastActionPointClaim,
     entity
   )?.value;
-  const actionPointClaimInterval = useComponentValue(
-    APClaimInterval,
+
+  const claimInterval = useComponentValue(
+    ClaimInterval,
     singletonEntity
   )?.value;
 
-  console.log("lastActionPointClaim", lastActionPointClaim);
-  console.log("actionPointClaimInterval", actionPointClaimInterval);
-
   useEffect(() => {
     const lastClaim = new Date(Number(lastActionPointClaim));
-    const claimInterval = Number(actionPointClaimInterval);
-    const nextClaimDate = new Date(lastClaim.getTime() + claimInterval);
+    const interval = Number(claimInterval);
+    const nextClaimDate = new Date(lastClaim.getTime() + interval);
 
     // Function to update the time left for the next claim
     const updateTimer = () => {
@@ -76,7 +75,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
     const intervalId = setInterval(updateTimer, 1000);
     // Clear the interval when the component is unmounted
     return () => clearInterval(intervalId);
-  }, [lastActionPointClaim, actionPointClaimInterval]);
+  }, [lastActionPointClaim, claimInterval]);
 
   if (entity === playerEntity) {
     return (

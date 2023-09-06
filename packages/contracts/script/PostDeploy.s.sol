@@ -4,7 +4,7 @@ pragma solidity >=0.8.0;
 import { Script } from "forge-std/Script.sol";
 import { console } from "forge-std/console.sol";
 import { IWorld } from "../src/codegen/world/IWorld.sol";
-import { MapConfig, APClaimInterval } from "../src/codegen/Tables.sol";
+import { MapConfig, ClaimInterval } from "../src/codegen/Tables.sol";
 
 contract PostDeploy is Script {
   function run(address worldAddress) external {
@@ -19,7 +19,7 @@ contract PostDeploy is Script {
     uint32 height = 11;
     uint32 width = 11;
     MapConfig.set(world, width, height);
-    APClaimInterval.set(world, 30000);
+    ClaimInterval.set(world, 30000);
 
     vm.stopBroadcast();
   }

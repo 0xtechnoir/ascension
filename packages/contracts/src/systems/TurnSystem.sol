@@ -1,7 +1,30 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0;
 import { System } from "@latticexyz/world/src/System.sol";
-import { MapConfig, Movable, Player, PlayerTableId, Position, Health, Range, ActionPoint, Turn, GameIsLive, Alive, Champion, Username, LastActionPointClaim, APClaimInterval, ActionPointClaimExecuted, ActionPointClaimExecutedData } from "../codegen/Tables.sol";
+import { 
+  MapConfig, 
+  Movable, 
+  Player, 
+  PlayerTableId, 
+  Position, 
+  Health, 
+  Range, 
+  ActionPoint,
+  VotingPoint, 
+  Turn, 
+  GameIsLive, 
+  Alive, 
+  Champion, 
+  Username, 
+  LastActionPointClaim, 
+  LastVotingPointClaim, 
+  ClaimInterval, 
+  ActionPointClaimExecuted, 
+  ActionPointClaimExecutedData,
+  VotingPointClaimExecuted, 
+  VotingPointClaimExecutedData,
+  VoteExecuted,
+  VoteExecutedData } from "../codegen/Tables.sol";
 import { addressToEntityKey } from "../addressToEntityKey.sol";
 import { positionToEntityKey } from "../positionToEntityKey.sol";
 import { getKeysInTable } from "@latticexyz/world/src/modules/keysintable/getKeysInTable.sol";
@@ -131,7 +154,7 @@ contract TurnSystem is System {
     bytes32 player = addressToEntityKey(_msgSender());
     require(Alive.get(player), "Not possible when dead");
 
-    uint32 claimInterval = APClaimInterval.get();
+    uint32 claimInterval = ClaimInterval.get();
     uint256 lastClaimed = LastActionPointClaim.get(player);
 
     // if lastClaimed is equal to 0 this is the first time they are claiming so we can skip the check
@@ -146,6 +169,50 @@ contract TurnSystem is System {
     ActionPointClaimExecuted.emitEphemeral(timestamp, ActionPointClaimExecutedData({
       timestamp: timestamp,
       player: username
+    }));  
+  }
+  function claimVotingPoint(uint256 timestamp) public {
+    require(GameIsLive.get(), "Match is not live.");
+    bytes32 player = addressToEntityKey(_msgSender());
+    require(!Alive.get(player), "Player must be dead to claim voting point");
+
+    uint32 claimInterval = ClaimInterval.get();
+    uint256 lastClaimed = LastVotingPointClaim.get(player);
+
+    // if lastClaimed is equal to 0 this is the first time they are claiming so we can skip the check
+    if (lastClaimed != 0) {
+      require(timestamp - lastClaimed > claimInterval, "You can only claim a voting point every 30 seconds");
+    }
+    LastVotingPointClaim.set(player, timestamp);
+    uint32 currentVotingPoints = VotingPoint.get(player);
+    VotingPoint.set(player, currentVotingPoints + 1);
+
+    string memory username = Username.get(player);
+    VotingPointClaimExecuted.emitEphemeral(timestamp, VotingPointClaimExecutedData({
+      timestamp: timestamp,
+      player: username
+    }));  
+  }
+
+  function vote(uint256 timestamp, bytes32 _recipient) public {
+    require(GameIsLive.get(), "Match is not live.");
+    bytes32 player = addressToEntityKey(_msgSender());
+    require(!Alive.get(player), "Player must be dead to vote");
+    require(Alive.get(_recipient), "Cannot vote for a dead player");
+
+    uint32 currentVotingPoints = VotingPoint.get(player);
+    require(currentVotingPoints > 0, "You need a voting point in order to vote");
+    VotingPoint.set(player, currentVotingPoints - 1);
+
+    // increment recipient's AP by 1
+    ActionPoint.set(_recipient, ActionPoint.get(_recipient) + 1);
+
+    string memory voter = Username.get(player);
+    string memory elected = Username.get(_recipient);
+    VoteExecuted.emitEphemeral(timestamp, VoteExecutedData({
+      timestamp: timestamp,
+      voter: voter,
+      recipient: elected
     }));  
   }
 

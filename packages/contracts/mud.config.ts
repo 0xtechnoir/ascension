@@ -20,7 +20,7 @@ export default mudConfig({
       keySchema: {},
       schema: "bool",
     },
-    APClaimInterval: {
+    ClaimInterval: {
       keySchema: {},
       schema: "uint32",
     },
@@ -32,7 +32,9 @@ export default mudConfig({
     Health: "uint32",
     Range: "uint32",
     LastActionPointClaim: "uint256",
+    LastVotingPointClaim: "uint256",
     ActionPoint: "uint32",
+    VotingPoint: "uint32",
     Position: {
       dataStruct: false,
       schema: {
@@ -106,6 +108,37 @@ export default mudConfig({
       schema: {
         timestamp: "uint256",
         player: "string",
+      }, 
+      ephemeral: true,
+    },
+    ClaimExecuted : {
+      keySchema: {
+        id: "uint256",
+      },
+      schema: {
+        timestamp: "uint256",
+        player: "string",
+      }, 
+      ephemeral: true,
+    },
+    VotingPointClaimExecuted : {
+      keySchema: {
+        id: "uint256",
+      },
+      schema: {
+        timestamp: "uint256",
+        player: "string",
+      }, 
+      ephemeral: true,
+    },
+    VoteExecuted : {
+      keySchema: {
+        id: "uint256",
+      },
+      schema: {
+        timestamp: "uint256",
+        voter: "string",
+        recipient: "string",
       }, 
       ephemeral: true,
     },

@@ -15,4 +15,8 @@ interface ITurnSystem {
   function attackPlayer(uint256 timestamp, bytes32 _target) external;
 
   function claimActionPoint(uint256 timestamp) external;
+
+  function claimVotingPoint(uint256 timestamp) external;
+
+  function vote(uint256 timestamp, bytes32 _recipient) external;
 }

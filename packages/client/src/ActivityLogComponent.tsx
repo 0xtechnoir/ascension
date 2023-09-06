@@ -14,7 +14,9 @@ const ActivityLogComponent: React.FC = () => {
       RangeIncreaseExecuted,
       GameStarted,
       PlayerSpawned,
-      ActionPointClaimExecuted
+      ActionPointClaimExecuted,
+      VoteExecuted,
+      VotingPointClaimExecuted
     },
   } = useMUD();
 
@@ -24,6 +26,8 @@ const ActivityLogComponent: React.FC = () => {
   const allRangeIncreaseLogs = useEntityQuery([Has(RangeIncreaseExecuted)]);
   const allPlayerSpawnedLogs = useEntityQuery([Has(PlayerSpawned)]);
   const allActionPointClaimExecutedLogs = useEntityQuery([Has(ActionPointClaimExecuted)]);
+  const allVotingPointClaimExecutedLogs = useEntityQuery([Has(VotingPointClaimExecuted)]);
+  const allVoteExecutedLogs = useEntityQuery([Has(VoteExecuted)]);
   const gameStarted = useEntityQuery([Has(GameStarted)]);
   let mappedLogs: LogMessage[] = [];
 
@@ -132,6 +136,34 @@ const ActivityLogComponent: React.FC = () => {
     });
   };
 
+  const mapVoteExecutedLogs = () => {
+    return allVoteExecutedLogs.map((entity) => {
+      const rec = getComponentValue(VoteExecuted, entity);
+      const voter = rec?.voter;
+      const ts = rec?.timestamp;
+      const numTs = Number(ts);
+      const recipient = rec?.recipient;
+      const mappedLog: LogMessage = {
+        timestamp: numTs,
+        message: `${voter} voted to send ${recipient} an additional action point`,
+      };
+      return mappedLog;
+    });
+  };
+
+  const mapVotingPointClaimExecutedLogs = () => {
+    return allVotingPointClaimExecutedLogs.map((entity) => {
+      const rec = getComponentValue(VotingPointClaimExecuted, entity);
+      const player = rec?.player;
+      const ts = rec?.timestamp;
+      const numTs = Number(ts);
+      const mappedLog: LogMessage = {
+        timestamp: numTs,
+        message: `${player} claimed a dead player voting point`,
+      };
+      return mappedLog;
+    });
+  };
 
   const mappedMoveLogs = mapMoveLogs();
   const mappedAttackLogs = mapAttackLogs();
@@ -140,6 +172,8 @@ const ActivityLogComponent: React.FC = () => {
   const mappedStartedLog = mapGameStartedLog();
   const mappedPlayerSpawnedLogs = mapPlayerSpawnedLogs();
   const mappedActionPointClaimExecutedLogs = mapActionPointClaimExecutedLogs();
+  const mappedVoteExecutedLogs = mapVoteExecutedLogs();
+  const mappedVotingPointClaimExecutedLogs = mapVotingPointClaimExecutedLogs();
   
   mappedLogs = mappedLogs.concat(
     mappedPlayerSpawnedLogs,
@@ -148,7 +182,9 @@ const ActivityLogComponent: React.FC = () => {
     mappedAttackLogs,
     mappedSendActionPointLogs,
     mappedRangeIncreaseLogs,
-    mappedActionPointClaimExecutedLogs
+    mappedActionPointClaimExecutedLogs,
+    mappedVoteExecutedLogs,
+    mappedVotingPointClaimExecutedLogs
   );
 
   return (
