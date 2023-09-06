@@ -20,6 +20,10 @@ export default mudConfig({
       keySchema: {},
       schema: "bool",
     },
+    APClaimInterval: {
+      keySchema: {},
+      schema: "uint32",
+    },
     Username: "string",
     Champion: "bool",
     Movable: "bool",
@@ -27,6 +31,7 @@ export default mudConfig({
     Alive: "bool",
     Health: "uint32",
     Range: "uint32",
+    LastActionPointClaim: "uint256",
     ActionPoint: "uint32",
     Position: {
       dataStruct: false,
@@ -35,11 +40,7 @@ export default mudConfig({
         y: "uint32",
       }
     },
-    ActivityLog: {
-      schema: {
-        message: "string",
-      },
-    },
+    // Ephemeral tables ====================================
     PlayerSpawned : {
       keySchema: {
         id: "uint256",
@@ -89,6 +90,16 @@ export default mudConfig({
       ephemeral: true,
     },
     RangeIncreaseExecuted : {
+      keySchema: {
+        id: "uint256",
+      },
+      schema: {
+        timestamp: "uint256",
+        player: "string",
+      }, 
+      ephemeral: true,
+    },
+    ActionPointClaimExecuted : {
       keySchema: {
         id: "uint256",
       },

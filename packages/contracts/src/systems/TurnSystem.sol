@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0;
 import { System } from "@latticexyz/world/src/System.sol";
-import { MapConfig, Movable, Player, PlayerTableId, Position, Health, Range, ActionPoint, Turn, GameIsLive, Alive, Champion, Username } from "../codegen/Tables.sol";
+import { MapConfig, Movable, Player, PlayerTableId, Position, Health, Range, ActionPoint, Turn, GameIsLive, Alive, Champion, Username, LastActionPointClaim, APClaimInterval, ActionPointClaimExecuted, ActionPointClaimExecutedData } from "../codegen/Tables.sol";
 import { addressToEntityKey } from "../addressToEntityKey.sol";
 import { positionToEntityKey } from "../positionToEntityKey.sol";
 import { getKeysInTable } from "@latticexyz/world/src/modules/keysintable/getKeysInTable.sol";
@@ -124,6 +124,29 @@ contract TurnSystem is System {
       GameIsLive.set(false);
       Champion.set(remainingPlayers[0], true);
     }
+  }
+
+  function claimActionPoint(uint256 timestamp) public {
+    require(GameIsLive.get(), "Match is not live.");
+    bytes32 player = addressToEntityKey(_msgSender());
+    require(Alive.get(player), "Not possible when dead");
+
+    uint32 claimInterval = APClaimInterval.get();
+    uint256 lastClaimed = LastActionPointClaim.get(player);
+
+    // if lastClaimed is equal to 0 this is the first time they are claiming so we can skip the check
+    if (lastClaimed != 0) {
+      require(timestamp - lastClaimed > claimInterval, "You can only claim an action point every 30 seconds");
+    }
+    LastActionPointClaim.set(player, timestamp);
+    uint32 currentActionPoints = ActionPoint.get(player);
+    ActionPoint.set(player, currentActionPoints + 1);
+
+    string memory username = Username.get(player);
+    ActionPointClaimExecuted.emitEphemeral(timestamp, ActionPointClaimExecutedData({
+      timestamp: timestamp,
+      player: username
+    }));  
   }
 
   function distance(uint32 fromX, uint32 fromY, uint32 toX, uint32 toY) internal pure returns (uint32) {

@@ -13,4 +13,6 @@ interface ITurnSystem {
   function sendActionPoint(uint256 timestamp, bytes32 _recipient) external;
 
   function attackPlayer(uint256 timestamp, bytes32 _target) external;
+
+  function claimActionPoint(uint256 timestamp) external;
 }

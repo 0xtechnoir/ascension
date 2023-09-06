@@ -10,7 +10,6 @@ export function createSystemCalls(
   { playerEntity, worldContract, waitForTransaction }: SetupNetworkResult,
   { MapConfig, Player, Position }: ClientComponents
 ) {
-
   const wrapPosition = (x: number, y: number) => {
     const mapConfig = getComponentValue(MapConfig, singletonEntity);
     if (!mapConfig) {
@@ -24,27 +23,33 @@ export function createSystemCalls(
 
   const vote = async (recipient: Entity) => {
     console.log("vote called");
-  }
-  
+  };
+
   const sendActionPoint = async (recipient: Entity) => {
     if (!playerEntity) {
       throw new Error("no player");
     }
     const bigIntTimestamp = BigInt(Date.now());
-    const tx = await worldContract.write.sendActionPoint([bigIntTimestamp, recipient]);
+    const tx = await worldContract.write.sendActionPoint([
+      bigIntTimestamp,
+      recipient,
+    ]);
     await waitForTransaction(tx);
   };
-  
+
   const attack = async (target: Entity) => {
-    console.log("attack called")
+    console.log("attack called");
     if (!playerEntity) {
       throw new Error("no player");
     }
     const bigIntTimestamp = BigInt(Date.now());
-    const tx = await worldContract.write.attackPlayer([bigIntTimestamp, target]);
+    const tx = await worldContract.write.attackPlayer([
+      bigIntTimestamp,
+      target,
+    ]);
     await waitForTransaction(tx);
   };
-  
+
   const increaseRange = async () => {
     console.log("increaseRange called");
     if (!playerEntity) {
@@ -54,7 +59,7 @@ export function createSystemCalls(
     const tx = await worldContract.write.increaseRange([bigIntTimestamp]);
     await waitForTransaction(tx);
   };
-  
+
   const startMatch = async (playersSpawned: number, startTime: number) => {
     const bigIntStartTime = BigInt(startTime);
     // generate a random number for the gameID
@@ -65,14 +70,6 @@ export function createSystemCalls(
       playersSpawned,
       bigIntStartTime,
     ]);
-    await waitForTransaction(tx);
-    setInterval(() => {
-      incrementTurn();
-    }, 30000); // 30 seconds turn length
-  };
-
-  const incrementTurn = async () => {
-    const tx = await worldContract.write.incrementTurn();
     await waitForTransaction(tx);
   };
 
@@ -89,7 +86,7 @@ export function createSystemCalls(
 
     try {
       const bigIntTimestamp = BigInt(Date.now());
-      const tx = await worldContract.write.move([bigIntTimestamp, x, y])
+      const tx = await worldContract.write.move([bigIntTimestamp, x, y]);
       await waitForTransaction(tx);
     } catch (error) {
       console.log("error: ", error);
@@ -139,6 +136,16 @@ export function createSystemCalls(
     }
   };
 
+  const claimActionPoint = async () => {
+    console.log("claimActionPoint called");
+    if (!playerEntity) {
+      throw new Error("no player");
+    }
+    const bigIntTimestamp = BigInt(Date.now());
+    const tx = await worldContract.write.claimActionPoint([bigIntTimestamp]);
+    await waitForTransaction(tx);
+  };
+
   return {
     moveTo,
     moveBy,
@@ -147,6 +154,7 @@ export function createSystemCalls(
     increaseRange,
     sendActionPoint,
     attack,
-    vote
+    vote,
+    claimActionPoint,
   };
 }

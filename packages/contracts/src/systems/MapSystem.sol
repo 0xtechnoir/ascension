@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0;
 import { System } from "@latticexyz/world/src/System.sol";
-import { MapConfig, Movable, Player, PlayerTableId, Position, PositionTableId, Health, Range, ActionPoint, GameIsLive, Username, Alive } from "../codegen/Tables.sol";
+import { MapConfig, Movable, Player, PlayerTableId, Position, PositionTableId, Health, Range, ActionPoint, GameIsLive, Username, Alive, LastActionPointClaim } from "../codegen/Tables.sol";
 import { addressToEntityKey } from "../addressToEntityKey.sol";
 import { positionToEntityKey } from "../positionToEntityKey.sol";
 import { query, QueryFragment, QueryType } from "@latticexyz/world/src/modules/keysintable/query.sol";
@@ -61,7 +61,8 @@ contract MapSystem is System {
     Movable.set(player, true);
     Health.set(player, 3);
     Range.set(player, 2);
-    ActionPoint.set(player, 1);  
+    ActionPoint.set(player, 0);
+    LastActionPointClaim.set(player, 0); 
 
     PlayerSpawned.emitEphemeral(timestamp, PlayerSpawnedData({
       timestamp: timestamp,

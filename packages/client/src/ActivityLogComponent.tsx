@@ -14,6 +14,7 @@ const ActivityLogComponent: React.FC = () => {
       RangeIncreaseExecuted,
       GameStarted,
       PlayerSpawned,
+      ActionPointClaimExecuted
     },
   } = useMUD();
 
@@ -22,6 +23,7 @@ const ActivityLogComponent: React.FC = () => {
   const allSendActionPointLogs = useEntityQuery([Has(SendActionPointExecuted)]);
   const allRangeIncreaseLogs = useEntityQuery([Has(RangeIncreaseExecuted)]);
   const allPlayerSpawnedLogs = useEntityQuery([Has(PlayerSpawned)]);
+  const allActionPointClaimExecutedLogs = useEntityQuery([Has(ActionPointClaimExecuted)]);
   const gameStarted = useEntityQuery([Has(GameStarted)]);
   let mappedLogs: LogMessage[] = [];
 
@@ -116,6 +118,20 @@ const ActivityLogComponent: React.FC = () => {
     });
   };
 
+  const mapActionPointClaimExecutedLogs = () => {
+    return allActionPointClaimExecutedLogs.map((entity) => {
+      const rec = getComponentValue(ActionPointClaimExecuted, entity);
+      const player = rec?.player;
+      const ts = rec?.timestamp;
+      const numTs = Number(ts);
+      const mappedLog: LogMessage = {
+        timestamp: numTs,
+        message: `${player} claimed an action point`,
+      };
+      return mappedLog;
+    });
+  };
+
 
   const mappedMoveLogs = mapMoveLogs();
   const mappedAttackLogs = mapAttackLogs();
@@ -123,6 +139,7 @@ const ActivityLogComponent: React.FC = () => {
   const mappedRangeIncreaseLogs = mapRangeIncreaseLogs();
   const mappedStartedLog = mapGameStartedLog();
   const mappedPlayerSpawnedLogs = mapPlayerSpawnedLogs();
+  const mappedActionPointClaimExecutedLogs = mapActionPointClaimExecutedLogs();
   
   mappedLogs = mappedLogs.concat(
     mappedPlayerSpawnedLogs,
@@ -130,7 +147,8 @@ const ActivityLogComponent: React.FC = () => {
     mappedMoveLogs,
     mappedAttackLogs,
     mappedSendActionPointLogs,
-    mappedRangeIncreaseLogs
+    mappedRangeIncreaseLogs,
+    mappedActionPointClaimExecutedLogs
   );
 
   return (
