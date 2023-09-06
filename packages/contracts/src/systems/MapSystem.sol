@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0;
 import { System } from "@latticexyz/world/src/System.sol";
-import { MapConfig, Movable, Player, PlayerTableId, Position, PositionTableId, Health, Range, ActionPoint, GameStartTime, GameIsLive, Username, Alive } from "../codegen/Tables.sol";
+import { MapConfig, Movable, Player, PlayerTableId, Position, PositionTableId, Health, Range, ActionPoint, GameIsLive, Username, Alive } from "../codegen/Tables.sol";
 import { addressToEntityKey } from "../addressToEntityKey.sol";
 import { positionToEntityKey } from "../positionToEntityKey.sol";
 import { query, QueryFragment, QueryType } from "@latticexyz/world/src/modules/keysintable/query.sol";
@@ -9,15 +9,19 @@ import { getKeysInTable } from "@latticexyz/world/src/modules/keysintable/getKey
 import { getKeysWithValue } from "@latticexyz/world/src/modules/keyswithvalue/getKeysWithValue.sol";
 import { console } from "forge-std/console.sol";
 import { MoveExecuted, MoveExecutedData } from "../codegen/Tables.sol";
+import { PlayerSpawned, PlayerSpawnedData } from "../codegen/Tables.sol";
 
 contract MapSystem is System {
 
   struct Point {
-      uint32 x;
-      uint32 y;
+      uint16 x;
+      uint16 y;
   }
   
-  function spawn(string memory username) public {
+  function spawn(uint256 timestamp, string memory username) public {
+
+    uint16 x;
+    uint16 y;
 
     // not a nice way to achieve this but it works for now - TODO - find a better way to do this
     Point[] memory points = new Point[](8);
@@ -43,7 +47,9 @@ contract MapSystem is System {
         // check if there is already a player at the given position, if not then spawn the player at that position
         bytes32[] memory keysWithValue = getKeysWithValue(PositionTableId, Position.encode(points[i].x, points[i].y));
         if (keysWithValue.length == 0) {
-            Position.set(player, points[i].x, points[i].y);
+            x = points[i].x;
+            y = points[i].y;
+            // Position.set(player, points[i].x, points[i].y);
             break;
         }
     }
@@ -51,10 +57,18 @@ contract MapSystem is System {
     Alive.set(player, true);
     Player.set(player, true);
     Username.set(player, username);
+    Position.set(player, x, y);
     Movable.set(player, true);
     Health.set(player, 3);
     Range.set(player, 2);
-    ActionPoint.set(player, 1);   
+    ActionPoint.set(player, 1);  
+
+    PlayerSpawned.emitEphemeral(timestamp, PlayerSpawnedData({
+      timestamp: timestamp,
+      x: x, 
+      y: y, 
+      player: username
+    })); 
   }
   function move(uint256 timestamp, uint32 x, uint32 y) public {
 

@@ -5,7 +5,6 @@ pragma solidity >=0.8.0;
 
 import { MapConfig, MapConfigTableId } from "./tables/MapConfig.sol";
 import { Turn, TurnTableId } from "./tables/Turn.sol";
-import { GameStartTime, GameStartTimeTableId } from "./tables/GameStartTime.sol";
 import { GameIsLive, GameIsLiveTableId } from "./tables/GameIsLive.sol";
 import { Username, UsernameTableId } from "./tables/Username.sol";
 import { Champion, ChampionTableId } from "./tables/Champion.sol";
@@ -17,6 +16,7 @@ import { Range, RangeTableId } from "./tables/Range.sol";
 import { ActionPoint, ActionPointTableId } from "./tables/ActionPoint.sol";
 import { Position, PositionTableId } from "./tables/Position.sol";
 import { ActivityLog, ActivityLogTableId } from "./tables/ActivityLog.sol";
+import { PlayerSpawned, PlayerSpawnedData, PlayerSpawnedTableId } from "./tables/PlayerSpawned.sol";
 import { MoveExecuted, MoveExecutedData, MoveExecutedTableId } from "./tables/MoveExecuted.sol";
 import { AttackExecuted, AttackExecutedData, AttackExecutedTableId } from "./tables/AttackExecuted.sol";
 import { SendActionPointExecuted, SendActionPointExecutedData, SendActionPointExecutedTableId } from "./tables/SendActionPointExecuted.sol";

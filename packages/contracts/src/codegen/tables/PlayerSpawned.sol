@@ -17,14 +17,24 @@ import { EncodeArray } from "@latticexyz/store/src/tightcoder/EncodeArray.sol";
 import { Schema, SchemaLib } from "@latticexyz/store/src/Schema.sol";
 import { PackedCounter, PackedCounterLib } from "@latticexyz/store/src/PackedCounter.sol";
 
-bytes32 constant _tableId = bytes32(abi.encodePacked(bytes16(""), bytes16("GameStarted")));
-bytes32 constant GameStartedTableId = _tableId;
+bytes32 constant _tableId = bytes32(abi.encodePacked(bytes16(""), bytes16("PlayerSpawned")));
+bytes32 constant PlayerSpawnedTableId = _tableId;
 
-library GameStarted {
+struct PlayerSpawnedData {
+  uint256 timestamp;
+  uint32 x;
+  uint32 y;
+  string player;
+}
+
+library PlayerSpawned {
   /** Get the table's schema */
   function getSchema() internal pure returns (Schema) {
-    SchemaType[] memory _schema = new SchemaType[](1);
+    SchemaType[] memory _schema = new SchemaType[](4);
     _schema[0] = SchemaType.UINT256;
+    _schema[1] = SchemaType.UINT32;
+    _schema[2] = SchemaType.UINT32;
+    _schema[3] = SchemaType.STRING;
 
     return SchemaLib.encode(_schema);
   }
@@ -38,9 +48,12 @@ library GameStarted {
 
   /** Get the table's metadata */
   function getMetadata() internal pure returns (string memory, string[] memory) {
-    string[] memory _fieldNames = new string[](1);
+    string[] memory _fieldNames = new string[](4);
     _fieldNames[0] = "timestamp";
-    return ("GameStarted", _fieldNames);
+    _fieldNames[1] = "x";
+    _fieldNames[2] = "y";
+    _fieldNames[3] = "player";
+    return ("PlayerSpawned", _fieldNames);
   }
 
   /** Register the table's schema */
@@ -66,8 +79,8 @@ library GameStarted {
   }
 
   /** Emit the ephemeral event using individual values */
-  function emitEphemeral(uint256 id, uint256 timestamp) internal {
-    bytes memory _data = encode(timestamp);
+  function emitEphemeral(uint256 id, uint256 timestamp, uint32 x, uint32 y, string memory player) internal {
+    bytes memory _data = encode(timestamp, x, y, player);
 
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
@@ -76,8 +89,15 @@ library GameStarted {
   }
 
   /** Emit the ephemeral event using individual values (using the specified store) */
-  function emitEphemeral(IStore _store, uint256 id, uint256 timestamp) internal {
-    bytes memory _data = encode(timestamp);
+  function emitEphemeral(
+    IStore _store,
+    uint256 id,
+    uint256 timestamp,
+    uint32 x,
+    uint32 y,
+    string memory player
+  ) internal {
+    bytes memory _data = encode(timestamp, x, y, player);
 
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
@@ -85,9 +105,23 @@ library GameStarted {
     _store.emitEphemeralRecord(_tableId, _keyTuple, _data);
   }
 
+  /** Emit the ephemeral event using the data struct */
+  function emitEphemeral(uint256 id, PlayerSpawnedData memory _table) internal {
+    emitEphemeral(id, _table.timestamp, _table.x, _table.y, _table.player);
+  }
+
+  /** Emit the ephemeral event using the data struct (using the specified store) */
+  function emitEphemeral(IStore _store, uint256 id, PlayerSpawnedData memory _table) internal {
+    emitEphemeral(_store, id, _table.timestamp, _table.x, _table.y, _table.player);
+  }
+
   /** Tightly pack full data using this table's schema */
-  function encode(uint256 timestamp) internal pure returns (bytes memory) {
-    return abi.encodePacked(timestamp);
+  function encode(uint256 timestamp, uint32 x, uint32 y, string memory player) internal pure returns (bytes memory) {
+    uint40[] memory _counters = new uint40[](1);
+    _counters[0] = uint40(bytes(player).length);
+    PackedCounter _encodedLengths = PackedCounterLib.pack(_counters);
+
+    return abi.encodePacked(timestamp, x, y, _encodedLengths.unwrap(), bytes((player)));
   }
 
   /** Encode keys as a bytes32 array using this table's schema */

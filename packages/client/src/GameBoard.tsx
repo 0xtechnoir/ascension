@@ -37,7 +37,6 @@ export const GameBoard: React.FC<GameBoardProps> = ({
       Player,
       Position,
       Turn,
-      GameStartTime,
       Alive,
     },
     network: { playerEntity },
@@ -92,19 +91,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   }, [moveMessage]);
 
   const turn = useComponentValue(Turn, singletonEntity)?.value;
-  const gameStartTime = useComponentValue(
-    GameStartTime,
-    singletonEntity
-  )?.value;
-
   let startDate, startTime;
-
-  if (gameStartTime) {
-    const num = Number(gameStartTime);
-    let dateObj = new Date(num);
-    startDate = dateObj.toLocaleDateString();
-    startTime = dateObj.toLocaleTimeString();
-  }
 
   // Function to handle the button click
   const selectPlayer = (inputX: number, inputY: number) => {
@@ -137,12 +124,6 @@ export const GameBoard: React.FC<GameBoardProps> = ({
         players={mappedPlayers}
         highlightedPlayer={highlightedPlayer}
       />
-      <br />
-      <div>
-        {gameStartTime && startDate && startTime
-          ? `Game Start Date: ${startDate}, Time: ${startTime}`
-          : ""}
-      </div>
     </div>
   );
 };

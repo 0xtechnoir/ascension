@@ -12,6 +12,8 @@ const ActivityLogComponent: React.FC = () => {
       AttackExecuted,
       SendActionPointExecuted,
       RangeIncreaseExecuted,
+      GameStarted,
+      PlayerSpawned,
     },
   } = useMUD();
 
@@ -19,6 +21,8 @@ const ActivityLogComponent: React.FC = () => {
   const allAttackLogs = useEntityQuery([Has(AttackExecuted)]);
   const allSendActionPointLogs = useEntityQuery([Has(SendActionPointExecuted)]);
   const allRangeIncreaseLogs = useEntityQuery([Has(RangeIncreaseExecuted)]);
+  const allPlayerSpawnedLogs = useEntityQuery([Has(PlayerSpawned)]);
+  const gameStarted = useEntityQuery([Has(GameStarted)]);
   let mappedLogs: LogMessage[] = [];
 
   const mapMoveLogs = () => {
@@ -83,11 +87,46 @@ const ActivityLogComponent: React.FC = () => {
     });
   };
 
+  const mapGameStartedLog = () => {
+    return gameStarted.map((entity) => {
+      const rec = getComponentValue(GameStarted, entity);
+      const ts = rec?.timestamp;
+      const numTs = Number(ts);
+      const mappedLog: LogMessage = {
+        timestamp: numTs,
+        message: `Game Started`,
+      };
+      return mappedLog;
+    });
+  };
+
+  const mapPlayerSpawnedLogs = () => {
+    return allPlayerSpawnedLogs.map((entity) => {
+      const rec = getComponentValue(PlayerSpawned, entity);
+      const player = rec?.player;
+      const ts = rec?.timestamp;
+      const numTs = Number(ts);
+      const x = rec?.x;
+      const y = rec?.y;
+      const mappedLog: LogMessage = {
+        timestamp: numTs,
+        message: `${player} spawned at (${x}, ${y})`,
+      };
+      return mappedLog;
+    });
+  };
+
+
   const mappedMoveLogs = mapMoveLogs();
   const mappedAttackLogs = mapAttackLogs();
   const mappedSendActionPointLogs = mapSendActionPointLogs();
   const mappedRangeIncreaseLogs = mapRangeIncreaseLogs();
+  const mappedStartedLog = mapGameStartedLog();
+  const mappedPlayerSpawnedLogs = mapPlayerSpawnedLogs();
+  
   mappedLogs = mappedLogs.concat(
+    mappedPlayerSpawnedLogs,
+    mappedStartedLog,
     mappedMoveLogs,
     mappedAttackLogs,
     mappedSendActionPointLogs,

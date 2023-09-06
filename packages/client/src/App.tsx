@@ -24,15 +24,13 @@ export const App = () => {
   // MUD Context
   const {
     components: { SyncProgress, Player, Position, GameIsLive, Alive },
-    network: { playerEntity },
     systemCalls: { spawn, startMatch },
   } = useMUD();
   
   // Constants 
-  const gameIsLive = useComponentValue(GameIsLive, singletonEntity)?.value;
+  const gameIsLive = (useComponentValue(GameIsLive, singletonEntity)?.value) || false;
   const allPlayers = useEntityQuery([Has(Player), Has(Position)]);
   const livePlayers = useEntityQuery([Has(Player), HasValue(Alive, { value: true })]);
-  const otherPlayers = allPlayers.filter((entity) => entity !== playerEntity);
   const deadPlayers = useEntityQuery([Has(Player), HasValue(Alive, { value: false })]);
   const syncProgress = useComponentValue(SyncProgress, singletonEntity, {
     step: SyncStep.INITIALIZE,
@@ -137,10 +135,10 @@ export const App = () => {
                   )}
                 <button
                   onClick={start}
-                  style={{ backgroundColor: "blue", color: "white" }}
+                  className={`text-white ${gameIsLive ? 'bg-green-500' : 'bg-blue-500'}`}
                   disabled={gameStarted}
                   >
-                {GameIsLive ? "Match Started" : "Start Match"}
+                {gameIsLive ? "Match Started" : "Start Match"}
                 </button>
                 <GameBoard
                   handleError={handleError}

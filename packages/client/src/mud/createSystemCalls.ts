@@ -57,7 +57,11 @@ export function createSystemCalls(
   
   const startMatch = async (playersSpawned: number, startTime: number) => {
     const bigIntStartTime = BigInt(startTime);
+    // generate a random number for the gameID
+    const gameId = BigInt(Math.floor(Math.random() * 1000000000));
+    console.log("gameId: ", gameId);
     const tx = await worldContract.write.startMatch([
+      gameId,
       playersSpawned,
       bigIntStartTime,
     ]);
@@ -117,6 +121,7 @@ export function createSystemCalls(
       throw new Error("already spawned");
     }
 
+    const bigIntTimestamp = BigInt(Date.now());
     const playerId = uuid();
     Player.addOverride(playerId, {
       entity: playerEntity,
@@ -124,7 +129,7 @@ export function createSystemCalls(
     });
 
     try {
-      const tx = await worldContract.write.spawn([username]);
+      const tx = await worldContract.write.spawn([bigIntTimestamp, username]);
       await waitForTransaction(tx);
     } catch (error) {
       console.log("spawn error: ", error);

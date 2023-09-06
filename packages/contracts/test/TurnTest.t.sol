@@ -5,7 +5,7 @@ import { MudTest } from "@latticexyz/store/src/MudTest.sol";
 import { getKeysWithValue } from "@latticexyz/world/src/modules/keyswithvalue/getKeysWithValue.sol";
 import { console } from "forge-std/console.sol";
 import { IWorld } from "../src/codegen/world/IWorld.sol";
-import { GameIsLive, Turn, GameStartTime } from "../src/codegen/Tables.sol";
+import { GameIsLive, Turn } from "../src/codegen/Tables.sol";
 
 contract TurnTest is MudTest {
   IWorld public world;
@@ -25,14 +25,13 @@ contract TurnTest is MudTest {
   }
 
   function testStartMatchWithValidInputs() public {
-    world.startMatch(2, 1629474300);
+    world.startMatch(1629474300, 2, 1629474300);
     assertTrue(GameIsLive.get(), "Game should be live");
     assertEq(Turn.get(), 1, "Current turn should be 1");
-    assertEq(GameStartTime.get(), 1629474300, "Game start time should be set");
   }
 
   function testStartMatchWithInsufficientPlayers() public {
-    try world.startMatch(1, 1629474300) {
+    try world.startMatch(1629474300, 2, 1629474300) {
       fail("Should have reverted");
       } catch Error(string memory reason) {
       assertEq(reason, "Not enough players to start match");
@@ -40,8 +39,8 @@ contract TurnTest is MudTest {
   }
 
   function testStartMatchWhenGameIsAlreadyLive() public {
-    world.startMatch(2, 1629474300);
-    try world.startMatch(2, 1629474400) {
+    world.startMatch(1629474300, 2, 1629474300);
+    try world.startMatch(1629474300, 2, 1629474300) {
       fail("Should have reverted");
     } catch Error(string memory reason) {
       assertEq(reason, "Match has already started");

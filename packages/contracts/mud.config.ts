@@ -16,10 +16,6 @@ export default mudConfig({
       keySchema: {},
       schema: "uint32",
     },
-    GameStartTime: {
-      keySchema: {},
-      schema: "uint256",
-    },
     GameIsLive: {
       keySchema: {},
       schema: "bool",
@@ -43,6 +39,18 @@ export default mudConfig({
       schema: {
         message: "string",
       },
+    },
+    PlayerSpawned : {
+      keySchema: {
+        id: "uint256",
+      },
+      schema: {
+        timestamp: "uint256",
+        x: "uint32",
+        y: "uint32", 
+        player: "string",
+      }, 
+      ephemeral: true,
     },
     MoveExecuted : {
       keySchema: {
@@ -91,8 +99,12 @@ export default mudConfig({
       ephemeral: true,
     },
     GameStarted: {
-      keySchema: {},
-      schema: "bool",
+      keySchema: {
+        id: "uint256",
+      },
+      schema: {
+        timestamp: "uint256",
+      },
       ephemeral: true,
     },
     GameEnded: {

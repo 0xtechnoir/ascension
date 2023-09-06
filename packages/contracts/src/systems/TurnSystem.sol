@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0;
 import { System } from "@latticexyz/world/src/System.sol";
-import { MapConfig, Movable, Player, PlayerTableId, Position, Health, Range, ActionPoint, Turn, GameStartTime, GameIsLive, Alive, Champion, Username } from "../codegen/Tables.sol";
+import { MapConfig, Movable, Player, PlayerTableId, Position, Health, Range, ActionPoint, Turn, GameIsLive, Alive, Champion, Username } from "../codegen/Tables.sol";
 import { addressToEntityKey } from "../addressToEntityKey.sol";
 import { positionToEntityKey } from "../positionToEntityKey.sol";
 import { getKeysInTable } from "@latticexyz/world/src/modules/keysintable/getKeysInTable.sol";
@@ -15,13 +15,12 @@ import { RangeIncreaseExecuted, RangeIncreaseExecutedData } from "../codegen/Tab
 
 contract TurnSystem is System {
 
-  function startMatch(uint32 playersSpawned, uint256 startTime) public {
+  function startMatch(uint256 gameId, uint32 playersSpawned, uint256 startTime) public {
     require(playersSpawned > 1, "Not enough players to start match");
     require(!GameIsLive.get(), "Match has already started");
     GameIsLive.set(true);
     Turn.set(1);
-    GameStartTime.set(startTime);
-    GameStarted.emitEphemeral(true);
+    GameStarted.emitEphemeral(gameId, startTime);
   }
 
   function incrementTurn() public {
