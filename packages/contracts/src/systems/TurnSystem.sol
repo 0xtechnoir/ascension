@@ -11,7 +11,6 @@ import {
   Range, 
   ActionPoint,
   VotingPoint, 
-  Turn, 
   GameIsLive, 
   Alive, 
   Champion, 
@@ -42,16 +41,7 @@ contract TurnSystem is System {
     require(playersSpawned > 1, "Not enough players to start match");
     require(!GameIsLive.get(), "Match has already started");
     GameIsLive.set(true);
-    Turn.set(1);
     GameStarted.emitEphemeral(gameId, startTime);
-  }
-
-  function incrementTurn() public {
-    require(GameIsLive.get(), "Match has not started yet.");
-    // TODO - Should have some logic in here that stops people from arbitrarily incrementing the turn
-    uint32 currentTurn = Turn.get();
-    Turn.set(currentTurn + 1);
-    assignActionPointsToAllLivePlayers();
   }
 
   function assignActionPointsToAllLivePlayers() private {

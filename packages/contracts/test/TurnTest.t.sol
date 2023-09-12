@@ -5,7 +5,7 @@ import { MudTest } from "@latticexyz/store/src/MudTest.sol";
 import { getKeysWithValue } from "@latticexyz/world/src/modules/keyswithvalue/getKeysWithValue.sol";
 import { console } from "forge-std/console.sol";
 import { IWorld } from "../src/codegen/world/IWorld.sol";
-import { GameIsLive, Turn } from "../src/codegen/Tables.sol";
+import { GameIsLive } from "../src/codegen/Tables.sol";
 
 contract TurnTest is MudTest {
   IWorld public world;
@@ -27,7 +27,6 @@ contract TurnTest is MudTest {
   function testStartMatchWithValidInputs() public {
     world.startMatch(1629474300, 2, 1629474300);
     assertTrue(GameIsLive.get(), "Game should be live");
-    assertEq(Turn.get(), 1, "Current turn should be 1");
   }
 
   function testStartMatchWithInsufficientPlayers() public {

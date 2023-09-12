@@ -32,7 +32,6 @@ export const GameBoard: React.FC<GameBoardProps> = ({
       MapConfig,
       Player,
       Position,
-      Turn,
       Alive,
     },
     network: { playerEntity },
@@ -85,9 +84,6 @@ export const GameBoard: React.FC<GameBoardProps> = ({
     }
   }, [moveMessage]);
 
-  const turn = useComponentValue(Turn, singletonEntity)?.value;
-  let startDate, startTime;
-
   // Function to handle the button click
   const selectPlayer = (inputX: number, inputY: number) => {
     const player = mappedPlayers.find((player) => {
@@ -111,7 +107,6 @@ export const GameBoard: React.FC<GameBoardProps> = ({
 
   return (
     <div>
-      <div>Turn: {turn}</div>
       <GameMap
         width={width}
         height={height}

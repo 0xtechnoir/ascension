@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import Modal from "@material-ui/core/Modal";
 import { useComponentValue, useEntityQuery } from "@latticexyz/react";
 import { Entity, Has, HasValue } from "@latticexyz/recs";
 import { useMUD } from "./MUDContext";
@@ -43,47 +42,22 @@ export const App = () => {
   });
 
   // Hooks
-  // const [showErrorModal, setShowErrorModal] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
   const [highlightedPlayer, setHighlightedPlayer] = useState<Entity | null>(null);
   const [gameStarted, setGameStarted] = useState(false);
   const [showSpawnButton, setShowSpawnButton] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [enteredUsername, setEnteredUsername] = useState("");
-  // const [isLoading, setIsLoading] = useState(false);
-  
+
   useEffect(() => {
     if (gameIsLive) {
       setGameStarted(true);
+      setShowSpawnButton(false);
+      // TODO: Fix Spawn button bug - Once player has spawned, the spawn button should be hidden, even across page refreshes
     }
   }, [gameIsLive]);
 
   const handleSpawnClick = () => {
     setShowModal(true);
   };
-
-  // const handleModalSubmit = async () => {
-  //   setIsLoading(true);
-  //   console.log("username entered: ", enteredUsername);
-
-  //   try {
-  //     await spawn(enteredUsername);
-  //   } catch (error) {
-  //     console.log("handleModalSubmit error: ", error);
-  //     if (typeof error === "object" && error !== null) {
-  //       const message = (error as ErrorWithShortMessage).shortMessage;
-  //       handleError(message);
-  //     }
-  //   } finally {
-  //     setIsLoading(false);
-  //     setShowModal(false);
-  //     setShowSpawnButton(false);
-  //   }
-  // };
-
-  // const handleCloseModal = () => {
-  //   setShowModal(false);
-  // };
 
   const start = async () => {
     const playersSpawned = allPlayers.length;
@@ -97,6 +71,8 @@ export const App = () => {
       }
     }
   };
+
+  console.log("showSpawnButton: ", showSpawnButton);
 
   return (
     <div className="items-center justify-center">
@@ -115,7 +91,7 @@ export const App = () => {
                 />
               </div>
               <div className="w-2/4">
-                {showSpawnButton && (
+                {showSpawnButton &&(
                   <button onClick={handleSpawnClick}>Spawn</button>
                   )}
                 <button
@@ -147,11 +123,6 @@ export const App = () => {
               showModal={showModal}
               setShowModal={setShowModal}
               setShowSpawnButton={setShowSpawnButton}
-              // handleCloseModal={handleCloseModal}
-              // handleModalSubmit={handleModalSubmit}
-              // isLoading={isLoading}
-              // enteredUsername={enteredUsername}
-              // setEnteredUsername={setEnteredUsername}
             />
         </div>
       )}

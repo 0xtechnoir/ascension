@@ -49,16 +49,17 @@ const SpawnModal: React.FC<SpawnModalProps> = ({
           }
         try {
             await spawn(sanitizedUsername);
+            setShowSpawnButton(false);
           } catch (error) {
             console.log("handleModalSubmit error: ", error);
             if (typeof error === "object" && error !== null) {
               const message = (error as ErrorWithShortMessage).shortMessage;
               handleError(message);
+              // TODO: This error doesn't show in UI
             }
           } finally {
             setIsLoading(false);
             setShowModal(false);
-            setShowSpawnButton(false);
           }
       };
 

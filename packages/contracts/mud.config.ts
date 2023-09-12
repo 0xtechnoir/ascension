@@ -12,10 +12,6 @@ export default mudConfig({
         height: "uint32",
       }
     },
-    Turn: {
-      keySchema: {},
-      schema: "uint32",
-    },
     GameIsLive: {
       keySchema: {},
       schema: "bool",

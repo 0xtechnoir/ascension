@@ -5,7 +5,7 @@ import { MudTest } from "@latticexyz/store/src/MudTest.sol";
 import { getKeysWithValue } from "@latticexyz/world/src/modules/keyswithvalue/getKeysWithValue.sol";
 import { console } from "forge-std/console.sol";
 import { IWorld } from "../src/codegen/world/IWorld.sol";
-import { GameIsLive, Turn, Username, UsernameTableId } from "../src/codegen/Tables.sol";
+import { GameIsLive, Username, UsernameTableId } from "../src/codegen/Tables.sol";
 import { addressToEntityKey } from "../src/addressToEntityKey.sol";
 
 contract MapSystemTest is MudTest {
