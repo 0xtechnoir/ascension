@@ -55,7 +55,6 @@ const SpawnModal: React.FC<SpawnModalProps> = ({
             if (typeof error === "object" && error !== null) {
               const message = (error as ErrorWithShortMessage).shortMessage;
               handleError(message);
-              // TODO: This error doesn't show in UI
             }
           } finally {
             setIsLoading(false);

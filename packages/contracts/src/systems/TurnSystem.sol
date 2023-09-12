@@ -79,8 +79,7 @@ contract TurnSystem is System {
     require(Alive.get(_recipient), "Cannot send AP to a dead player");
     uint32 currentActionPoints = ActionPoint.get(player);
     require(currentActionPoints > 0, "You need an action point in order to transfer an action point");
-    
-    // TODO - check if recipient is within range
+
     (uint32 target_x, uint32 target_y) = Position.get(_recipient);
     (uint32 player_x, uint32 player_y) = Position.get(player);
     uint32 playerRange = Range.get(player);

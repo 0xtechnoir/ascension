@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useComponentValue, useEntityQuery } from "@latticexyz/react";
-import { Entity, Has, HasValue } from "@latticexyz/recs";
 import { useMUD } from "./MUDContext";
+import { Entity, Has, HasValue, getComponentValue } from "@latticexyz/recs";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
 import { GameBoard } from "./GameBoard";
 import { LivePlayersListComponent } from "./LivePlayersListComponent";
@@ -24,6 +24,7 @@ export const App = () => {
   // Contexts
   const { handleError } = useErrorContext();
   const {
+    network: { playerEntity },
     components: { SyncProgress, Player, Position, GameIsLive, Alive },
     systemCalls: { spawn, startMatch },
   } = useMUD();
@@ -50,10 +51,16 @@ export const App = () => {
   useEffect(() => {
     if (gameIsLive) {
       setGameStarted(true);
-      setShowSpawnButton(false);
-      // TODO: Fix Spawn button bug - Once player has spawned, the spawn button should be hidden, even across page refreshes
     }
   }, [gameIsLive]);
+
+  useEffect(() => {
+    // Hide spawn button if player is already spawned
+    const canSpawn = getComponentValue(Player, playerEntity)?.value !== true;
+    if (!canSpawn) {
+      setShowSpawnButton(false);
+    }
+  });
 
   const handleSpawnClick = () => {
     setShowModal(true);
