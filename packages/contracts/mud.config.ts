@@ -12,6 +12,15 @@ export default mudConfig({
         height: "uint32",
       }
     },
+    GameId: {
+      keySchema: {
+        id: "uint256",
+      },
+      schema: {
+        isLive: "bool",
+        startTime: "uint256",
+      }
+    },
     GameIsLive: {
       keySchema: {},
       schema: "bool",
@@ -27,6 +36,7 @@ export default mudConfig({
     Alive: "bool",
     Health: "uint32",
     Range: "uint32",
+    InGame: "string",
     LastActionPointClaim: "uint256",
     LastVotingPointClaim: "uint256",
     ActionPoint: "uint32",
@@ -48,6 +58,7 @@ export default mudConfig({
         x: "uint32",
         y: "uint32", 
         player: "string",
+        gameID: "string",
       }, 
       ephemeral: true,
     },
@@ -167,6 +178,13 @@ export default mudConfig({
       root: true,
       args: [
         resolveTableId("Position"), 
+      ],
+    },
+    {
+      name: "KeysWithValueModule",
+      root: true,
+      args: [
+        resolveTableId("InGame"), 
       ],
     },
     {

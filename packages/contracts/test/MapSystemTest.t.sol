@@ -5,7 +5,7 @@ import { MudTest } from "@latticexyz/store/src/MudTest.sol";
 import { getKeysWithValue } from "@latticexyz/world/src/modules/keyswithvalue/getKeysWithValue.sol";
 import { console } from "forge-std/console.sol";
 import { IWorld } from "../src/codegen/world/IWorld.sol";
-import { GameIsLive, Username, UsernameTableId } from "../src/codegen/Tables.sol";
+import { GameIsLive, Username, UsernameTableId, GameId, GameIdTableId } from "../src/codegen/Tables.sol";
 import { addressToEntityKey } from "../src/addressToEntityKey.sol";
 
 contract MapSystemTest is MudTest {
@@ -27,9 +27,12 @@ contract MapSystemTest is MudTest {
 
   function testSpawn() public {
     string memory username = "test_player";
+    string memory gameID = "123456789";
     uint32 timestamp = 1629474300;
-    world.spawn(timestamp, username);
+    world.spawn(timestamp, username, gameID);
     bytes32[] memory keysWithValue = getKeysWithValue(UsernameTableId, Username.encode(username));
     assertEq(keysWithValue.length, 1);
+    bytes32[] memory gameIdValue = getKeysWithValue(GameIdTableId, GameId.encode(true, timestamp));
+    assertEq(gameIdValue.length, 1);
   }
 }

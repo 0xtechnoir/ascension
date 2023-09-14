@@ -10,8 +10,12 @@ import ActivityLogComponent from "./ActivityLogComponent";
 import { DeadPlayersListComponent } from "./DeadPlayersListComponent";
 import { useErrorContext } from "./ErrorContext";
 import SpawnModal from './SpawnModal';
+import Lobby from './Lobby';
 
 export const App = () => {
+
+  const [gameID, setGameID] = useState('');
+  const [showGameBoard, setShowGameBoard] = useState(false);
   
   // Custom Types
   enum SyncStep {
@@ -25,15 +29,16 @@ export const App = () => {
   const { handleError } = useErrorContext();
   const {
     network: { playerEntity },
-    components: { SyncProgress, Player, Position, GameIsLive, Alive },
+    components: { SyncProgress, Player, Position, GameIsLive, Alive, GameId, InGame },
     systemCalls: { spawn, startMatch },
   } = useMUD();
   
   // Constants 
   const gameIsLive = (useComponentValue(GameIsLive, singletonEntity)?.value) || false;
-  const allPlayers = useEntityQuery([Has(Player), Has(Position)]);
-  const livePlayers = useEntityQuery([Has(Player), HasValue(Alive, { value: true })]);
-  const deadPlayers = useEntityQuery([Has(Player), HasValue(Alive, { value: false })]);
+  const currentGameID = useComponentValue(InGame, playerEntity)?.value || "";
+  const allPlayers = useEntityQuery([HasValue(InGame, { value: gameID }), Has(Player), Has(Position)]);
+  const livePlayers = useEntityQuery([HasValue(InGame, { value: gameID }), Has(Player), HasValue(Alive, { value: true })]);
+  const deadPlayers = useEntityQuery([HasValue(InGame, { value: gameID }), Has(Player), HasValue(Alive, { value: false })]);
   const syncProgress = useComponentValue(SyncProgress, singletonEntity, {
     step: SyncStep.INITIALIZE,
     message: "Connecting",
@@ -79,11 +84,12 @@ export const App = () => {
     }
   };
 
-  console.log("showSpawnButton: ", showSpawnButton);
-
   return (
     <div className="items-center justify-center">
-      {syncProgress.step !== SyncStep.LIVE ? (
+      
+      {!showGameBoard ? (
+        <Lobby setGameID={setGameID} setShowGameBoard={setShowGameBoard} showGameBoard={showGameBoard} currentGameID={currentGameID} />
+      ) : syncProgress.step !== SyncStep.LIVE ? (
         <div>
           {syncProgress.message} ({Math.floor(syncProgress.percentage)}%)
         </div>
@@ -98,9 +104,11 @@ export const App = () => {
                 />
               </div>
               <div className="w-2/4">
+                
                 {showSpawnButton &&(
                   <button onClick={handleSpawnClick}>Spawn</button>
                   )}
+
                 <button
                   onClick={start}
                   className={`text-white ${gameIsLive ? 'bg-green-500' : 'bg-blue-500'}`}
@@ -113,8 +121,18 @@ export const App = () => {
                   highlightedPlayer={highlightedPlayer}
                   setHighlightedPlayer={setHighlightedPlayer}
                   setGameStarted={setGameStarted}
-                />
-                <ActivityLogComponent />
+                  />
+                  {currentGameID ? 
+                    <>
+                      <p>Game ID: {currentGameID}</p>
+                      <p>Share this with other players so they can join your game</p>
+                      <p>When you have enough players (min 2), hit "Start Match"</p>
+                    </>
+                    :
+                    <p>Spawn to get a sharable game ID</p>
+                  }
+                <br />
+                <ActivityLogComponent currentGameID={currentGameID}/>
               </div>
               <div className="w-1/4">
                 <div className="h-15 overflow-scroll">
@@ -130,9 +148,11 @@ export const App = () => {
               showModal={showModal}
               setShowModal={setShowModal}
               setShowSpawnButton={setShowSpawnButton}
-            />
+              gameID={gameID}
+              />
         </div>
       )}
+      {showGameBoard && <button onClick={() => setShowGameBoard(false)}>Back to Lobby</button>}
     </div>
   );
 };

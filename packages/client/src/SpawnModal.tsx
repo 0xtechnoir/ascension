@@ -3,17 +3,20 @@ import Modal from '@material-ui/core/Modal';
 import { useErrorContext } from "./ErrorContext";
 import { useMUD } from "./MUDContext";
 import { ErrorWithShortMessage } from "./CustomTypes";
+import { Entity, Has, HasValue, getComponentValue } from "@latticexyz/recs";
 
 type SpawnModalProps = {
   showModal: boolean;
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
   setShowSpawnButton: React.Dispatch<React.SetStateAction<boolean>>;
+  gameID: string;
 };
 
 const SpawnModal: React.FC<SpawnModalProps> = ({
   showModal,
   setShowModal,
-  setShowSpawnButton
+  setShowSpawnButton,
+  gameID,
 }) => {
 
     const [error, setError] = useState("");
@@ -23,6 +26,8 @@ const SpawnModal: React.FC<SpawnModalProps> = ({
       // Contexts
     const { handleError } = useErrorContext();
     const {
+        network: { playerEntity },
+        components: { InGame },
         systemCalls: { spawn },
     } = useMUD();
 
@@ -43,13 +48,16 @@ const SpawnModal: React.FC<SpawnModalProps> = ({
         setError("");
         setIsLoading(true);
         const sanitizedUsername = sanitizeInput(enteredUsername);
+
         if (!sanitizedUsername) {
             setIsLoading(false);
             return; // Stop if invalid
           }
         try {
-            await spawn(sanitizedUsername);
+            await spawn(sanitizedUsername, gameID);
             setShowSpawnButton(false);
+            const result = getComponentValue(InGame, playerEntity);
+            console.log("Player successfully spawned into game: ", result);
           } catch (error) {
             console.log("handleModalSubmit error: ", error);
             if (typeof error === "object" && error !== null) {

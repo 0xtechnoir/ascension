@@ -1,11 +1,16 @@
 import React from "react";
-import { getComponentValue, Has } from "@latticexyz/recs";
+import { getComponentValue, Has, HasValue } from "@latticexyz/recs";
 import { useEntityQuery } from "@latticexyz/react";
 import { useMUD } from "./MUDContext";
 import { LogMessage } from "./CustomTypes";
 import { formatDate } from "./utils";
 
-const ActivityLogComponent: React.FC = () => {
+interface ActivityLogComponentProps {
+  currentGameID: string;
+}
+
+const ActivityLogComponent: React.FC<ActivityLogComponentProps> = ({ currentGameID }) => {
+  console.log("currentGameID: ", currentGameID)
   const {
     components: {
       MoveExecuted,
@@ -24,7 +29,7 @@ const ActivityLogComponent: React.FC = () => {
   const allAttackLogs = useEntityQuery([Has(AttackExecuted)]);
   const allSendActionPointLogs = useEntityQuery([Has(SendActionPointExecuted)]);
   const allRangeIncreaseLogs = useEntityQuery([Has(RangeIncreaseExecuted)]);
-  const allPlayerSpawnedLogs = useEntityQuery([Has(PlayerSpawned)]);
+  const allPlayerSpawnedLogs = useEntityQuery([Has(PlayerSpawned), HasValue(PlayerSpawned, { gameID : currentGameID })]);
   const allActionPointClaimExecutedLogs = useEntityQuery([Has(ActionPointClaimExecuted)]);
   const allVotingPointClaimExecutedLogs = useEntityQuery([Has(VotingPointClaimExecuted)]);
   const allVoteExecutedLogs = useEntityQuery([Has(VoteExecuted)]);

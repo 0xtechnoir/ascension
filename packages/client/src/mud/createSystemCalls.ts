@@ -117,7 +117,7 @@ export function createSystemCalls(
     await moveTo(playerPosition.x + deltaX, playerPosition.y + deltaY);
   };
 
-  const spawn = async (username: string) => {
+  const spawn = async (username: string, gameID: string) => {
     if (!playerEntity) {
       throw new Error("no player");
     }
@@ -125,6 +125,7 @@ export function createSystemCalls(
     if (!canSpawn) {
       throw new Error("already spawned");
     }
+    console.log("spawn called with gameID: ", gameID);
 
     const bigIntTimestamp = BigInt(Date.now());
     const playerId = uuid();
@@ -134,7 +135,7 @@ export function createSystemCalls(
     });
 
     try {
-      const tx = await worldContract.write.spawn([bigIntTimestamp, username]);
+      const tx = await worldContract.write.spawn([bigIntTimestamp, username, gameID]);
       await waitForTransaction(tx);
     } catch (error) {
       console.log("spawn error: ", error);

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0;
 import { System } from "@latticexyz/world/src/System.sol";
-import { MapConfig, Movable, Player, PlayerTableId, Position, PositionTableId, Health, Range, ActionPoint, GameIsLive, Username, Alive, LastActionPointClaim } from "../codegen/Tables.sol";
+import { MapConfig, Movable, Player, PlayerTableId, Position, PositionTableId, Health, Range, ActionPoint, GameIsLive, Username, Alive, LastActionPointClaim, InGame, InGameTableId } from "../codegen/Tables.sol";
 import { addressToEntityKey } from "../addressToEntityKey.sol";
 import { positionToEntityKey } from "../positionToEntityKey.sol";
 import { query, QueryFragment, QueryType } from "@latticexyz/world/src/modules/keysintable/query.sol";
@@ -18,12 +18,12 @@ contract MapSystem is System {
       uint16 y;
   }
   
-  function spawn(uint256 timestamp, string memory username) public {
+  function spawn(uint256 timestamp, string memory username, string memory gameID) public {
 
     uint16 x;
     uint16 y;
 
-    // not a nice way to achieve this but it works for now - TODO - find a better way to do this
+    // TODO - find a better way to do this
     Point[] memory points = new Point[](8);
     points[0] = Point(0, 0);
     points[1] = Point(0, 5);
@@ -34,8 +34,6 @@ contract MapSystem is System {
     points[6] = Point(10, 5);
     points[7] = Point(10, 10);
       
-    console.log("Spawn function called");
-    console.log("points: %s", points.length);
     require(!GameIsLive.get(), "Cannot spawn players after match has started");
     // create a player entity using the message senders address as the key
     bytes32 player = addressToEntityKey(address(_msgSender()));
@@ -44,15 +42,17 @@ contract MapSystem is System {
 
     // loop through the points array and find a point that is not already occupied
     for (uint i = 0; i < points.length; i++) {
-        // check if there is already a player at the given position, if not then spawn the player at that position
-        bytes32[] memory keysWithValue = getKeysWithValue(PositionTableId, Position.encode(points[i].x, points[i].y));
-        if (keysWithValue.length == 0) {
-            x = points[i].x;
-            y = points[i].y;
-            // Position.set(player, points[i].x, points[i].y);
-            break;
-        }
+      QueryFragment[] memory fragments = new QueryFragment[](2);
+      fragments[0] = QueryFragment(QueryType.HasValue, InGameTableId, InGame.encode(gameID));
+      fragments[1] = QueryFragment(QueryType.HasValue, PositionTableId, Position.encode(points[i].x, points[i].y));
+      bytes32[][] memory keyTuples = query(fragments);
+      if (keyTuples.length == 0) {
+          x = points[i].x;
+          y = points[i].y;
+          break;
+      }
     }
+
     // set the players attributes
     Alive.set(player, true);
     Player.set(player, true);
@@ -61,6 +61,7 @@ contract MapSystem is System {
     Movable.set(player, true);
     Health.set(player, 3);
     Range.set(player, 2);
+    InGame.set(player, gameID);
     ActionPoint.set(player, 0);
     LastActionPointClaim.set(player, 0); 
 
@@ -68,7 +69,8 @@ contract MapSystem is System {
       timestamp: timestamp,
       x: x, 
       y: y, 
-      player: username
+      player: username,
+      gameID: gameID
     })); 
   }
   function move(uint256 timestamp, uint32 x, uint32 y) public {
