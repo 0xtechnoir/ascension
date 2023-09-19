@@ -21,8 +21,15 @@ bytes32 constant _tableId = bytes32(abi.encodePacked(bytes16(""), bytes16("MapCo
 bytes32 constant MapConfigTableId = _tableId;
 
 library MapConfig {
-  /** Get the table's schema */
-  function getSchema() internal pure returns (Schema) {
+  /** Get the table's key schema */
+  function getKeySchema() internal pure returns (Schema) {
+    SchemaType[] memory _schema = new SchemaType[](0);
+
+    return SchemaLib.encode(_schema);
+  }
+
+  /** Get the table's value schema */
+  function getValueSchema() internal pure returns (Schema) {
     SchemaType[] memory _schema = new SchemaType[](2);
     _schema[0] = SchemaType.UINT32;
     _schema[1] = SchemaType.UINT32;
@@ -30,47 +37,33 @@ library MapConfig {
     return SchemaLib.encode(_schema);
   }
 
-  function getKeySchema() internal pure returns (Schema) {
-    SchemaType[] memory _schema = new SchemaType[](0);
-
-    return SchemaLib.encode(_schema);
+  /** Get the table's key names */
+  function getKeyNames() internal pure returns (string[] memory keyNames) {
+    keyNames = new string[](0);
   }
 
-  /** Get the table's metadata */
-  function getMetadata() internal pure returns (string memory, string[] memory) {
-    string[] memory _fieldNames = new string[](2);
-    _fieldNames[0] = "width";
-    _fieldNames[1] = "height";
-    return ("MapConfig", _fieldNames);
+  /** Get the table's field names */
+  function getFieldNames() internal pure returns (string[] memory fieldNames) {
+    fieldNames = new string[](2);
+    fieldNames[0] = "width";
+    fieldNames[1] = "height";
   }
 
-  /** Register the table's schema */
-  function registerSchema() internal {
-    StoreSwitch.registerSchema(_tableId, getSchema(), getKeySchema());
+  /** Register the table's key schema, value schema, key names and value names */
+  function register() internal {
+    StoreSwitch.registerTable(_tableId, getKeySchema(), getValueSchema(), getKeyNames(), getFieldNames());
   }
 
-  /** Register the table's schema (using the specified store) */
-  function registerSchema(IStore _store) internal {
-    _store.registerSchema(_tableId, getSchema(), getKeySchema());
-  }
-
-  /** Set the table's metadata */
-  function setMetadata() internal {
-    (string memory _tableName, string[] memory _fieldNames) = getMetadata();
-    StoreSwitch.setMetadata(_tableId, _tableName, _fieldNames);
-  }
-
-  /** Set the table's metadata (using the specified store) */
-  function setMetadata(IStore _store) internal {
-    (string memory _tableName, string[] memory _fieldNames) = getMetadata();
-    _store.setMetadata(_tableId, _tableName, _fieldNames);
+  /** Register the table's key schema, value schema, key names and value names (using the specified store) */
+  function register(IStore _store) internal {
+    _store.registerTable(_tableId, getKeySchema(), getValueSchema(), getKeyNames(), getFieldNames());
   }
 
   /** Get width */
   function getWidth() internal view returns (uint32 width) {
     bytes32[] memory _keyTuple = new bytes32[](0);
 
-    bytes memory _blob = StoreSwitch.getField(_tableId, _keyTuple, 0);
+    bytes memory _blob = StoreSwitch.getField(_tableId, _keyTuple, 0, getValueSchema());
     return (uint32(Bytes.slice4(_blob, 0)));
   }
 
@@ -78,7 +71,7 @@ library MapConfig {
   function getWidth(IStore _store) internal view returns (uint32 width) {
     bytes32[] memory _keyTuple = new bytes32[](0);
 
-    bytes memory _blob = _store.getField(_tableId, _keyTuple, 0);
+    bytes memory _blob = _store.getField(_tableId, _keyTuple, 0, getValueSchema());
     return (uint32(Bytes.slice4(_blob, 0)));
   }
 
@@ -86,21 +79,21 @@ library MapConfig {
   function setWidth(uint32 width) internal {
     bytes32[] memory _keyTuple = new bytes32[](0);
 
-    StoreSwitch.setField(_tableId, _keyTuple, 0, abi.encodePacked((width)));
+    StoreSwitch.setField(_tableId, _keyTuple, 0, abi.encodePacked((width)), getValueSchema());
   }
 
   /** Set width (using the specified store) */
   function setWidth(IStore _store, uint32 width) internal {
     bytes32[] memory _keyTuple = new bytes32[](0);
 
-    _store.setField(_tableId, _keyTuple, 0, abi.encodePacked((width)));
+    _store.setField(_tableId, _keyTuple, 0, abi.encodePacked((width)), getValueSchema());
   }
 
   /** Get height */
   function getHeight() internal view returns (uint32 height) {
     bytes32[] memory _keyTuple = new bytes32[](0);
 
-    bytes memory _blob = StoreSwitch.getField(_tableId, _keyTuple, 1);
+    bytes memory _blob = StoreSwitch.getField(_tableId, _keyTuple, 1, getValueSchema());
     return (uint32(Bytes.slice4(_blob, 0)));
   }
 
@@ -108,7 +101,7 @@ library MapConfig {
   function getHeight(IStore _store) internal view returns (uint32 height) {
     bytes32[] memory _keyTuple = new bytes32[](0);
 
-    bytes memory _blob = _store.getField(_tableId, _keyTuple, 1);
+    bytes memory _blob = _store.getField(_tableId, _keyTuple, 1, getValueSchema());
     return (uint32(Bytes.slice4(_blob, 0)));
   }
 
@@ -116,21 +109,21 @@ library MapConfig {
   function setHeight(uint32 height) internal {
     bytes32[] memory _keyTuple = new bytes32[](0);
 
-    StoreSwitch.setField(_tableId, _keyTuple, 1, abi.encodePacked((height)));
+    StoreSwitch.setField(_tableId, _keyTuple, 1, abi.encodePacked((height)), getValueSchema());
   }
 
   /** Set height (using the specified store) */
   function setHeight(IStore _store, uint32 height) internal {
     bytes32[] memory _keyTuple = new bytes32[](0);
 
-    _store.setField(_tableId, _keyTuple, 1, abi.encodePacked((height)));
+    _store.setField(_tableId, _keyTuple, 1, abi.encodePacked((height)), getValueSchema());
   }
 
   /** Get the full data */
   function get() internal view returns (uint32 width, uint32 height) {
     bytes32[] memory _keyTuple = new bytes32[](0);
 
-    bytes memory _blob = StoreSwitch.getRecord(_tableId, _keyTuple, getSchema());
+    bytes memory _blob = StoreSwitch.getRecord(_tableId, _keyTuple, getValueSchema());
     return decode(_blob);
   }
 
@@ -138,7 +131,7 @@ library MapConfig {
   function get(IStore _store) internal view returns (uint32 width, uint32 height) {
     bytes32[] memory _keyTuple = new bytes32[](0);
 
-    bytes memory _blob = _store.getRecord(_tableId, _keyTuple, getSchema());
+    bytes memory _blob = _store.getRecord(_tableId, _keyTuple, getValueSchema());
     return decode(_blob);
   }
 
@@ -148,7 +141,7 @@ library MapConfig {
 
     bytes32[] memory _keyTuple = new bytes32[](0);
 
-    StoreSwitch.setRecord(_tableId, _keyTuple, _data);
+    StoreSwitch.setRecord(_tableId, _keyTuple, _data, getValueSchema());
   }
 
   /** Set the full data using individual values (using the specified store) */
@@ -157,7 +150,7 @@ library MapConfig {
 
     bytes32[] memory _keyTuple = new bytes32[](0);
 
-    _store.setRecord(_tableId, _keyTuple, _data);
+    _store.setRecord(_tableId, _keyTuple, _data, getValueSchema());
   }
 
   /** Decode the tightly packed blob using this table's schema */
@@ -173,21 +166,23 @@ library MapConfig {
   }
 
   /** Encode keys as a bytes32 array using this table's schema */
-  function encodeKeyTuple() internal pure returns (bytes32[] memory _keyTuple) {
-    _keyTuple = new bytes32[](0);
+  function encodeKeyTuple() internal pure returns (bytes32[] memory) {
+    bytes32[] memory _keyTuple = new bytes32[](0);
+
+    return _keyTuple;
   }
 
   /* Delete all data for given keys */
   function deleteRecord() internal {
     bytes32[] memory _keyTuple = new bytes32[](0);
 
-    StoreSwitch.deleteRecord(_tableId, _keyTuple);
+    StoreSwitch.deleteRecord(_tableId, _keyTuple, getValueSchema());
   }
 
   /* Delete all data for given keys (using the specified store) */
   function deleteRecord(IStore _store) internal {
     bytes32[] memory _keyTuple = new bytes32[](0);
 
-    _store.deleteRecord(_tableId, _keyTuple);
+    _store.deleteRecord(_tableId, _keyTuple, getValueSchema());
   }
 }

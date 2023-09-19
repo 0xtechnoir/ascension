@@ -31,8 +31,16 @@ struct MoveExecutedData {
 }
 
 library MoveExecuted {
-  /** Get the table's schema */
-  function getSchema() internal pure returns (Schema) {
+  /** Get the table's key schema */
+  function getKeySchema() internal pure returns (Schema) {
+    SchemaType[] memory _schema = new SchemaType[](1);
+    _schema[0] = SchemaType.UINT256;
+
+    return SchemaLib.encode(_schema);
+  }
+
+  /** Get the table's value schema */
+  function getValueSchema() internal pure returns (Schema) {
     SchemaType[] memory _schema = new SchemaType[](7);
     _schema[0] = SchemaType.UINT256;
     _schema[1] = SchemaType.UINT32;
@@ -45,46 +53,32 @@ library MoveExecuted {
     return SchemaLib.encode(_schema);
   }
 
-  function getKeySchema() internal pure returns (Schema) {
-    SchemaType[] memory _schema = new SchemaType[](1);
-    _schema[0] = SchemaType.UINT256;
-
-    return SchemaLib.encode(_schema);
+  /** Get the table's key names */
+  function getKeyNames() internal pure returns (string[] memory keyNames) {
+    keyNames = new string[](1);
+    keyNames[0] = "id";
   }
 
-  /** Get the table's metadata */
-  function getMetadata() internal pure returns (string memory, string[] memory) {
-    string[] memory _fieldNames = new string[](7);
-    _fieldNames[0] = "timestamp";
-    _fieldNames[1] = "fromX";
-    _fieldNames[2] = "fromY";
-    _fieldNames[3] = "toX";
-    _fieldNames[4] = "toY";
-    _fieldNames[5] = "player";
-    _fieldNames[6] = "gameId";
-    return ("MoveExecuted", _fieldNames);
+  /** Get the table's field names */
+  function getFieldNames() internal pure returns (string[] memory fieldNames) {
+    fieldNames = new string[](7);
+    fieldNames[0] = "timestamp";
+    fieldNames[1] = "fromX";
+    fieldNames[2] = "fromY";
+    fieldNames[3] = "toX";
+    fieldNames[4] = "toY";
+    fieldNames[5] = "player";
+    fieldNames[6] = "gameId";
   }
 
-  /** Register the table's schema */
-  function registerSchema() internal {
-    StoreSwitch.registerSchema(_tableId, getSchema(), getKeySchema());
+  /** Register the table's key schema, value schema, key names and value names */
+  function register() internal {
+    StoreSwitch.registerTable(_tableId, getKeySchema(), getValueSchema(), getKeyNames(), getFieldNames());
   }
 
-  /** Register the table's schema (using the specified store) */
-  function registerSchema(IStore _store) internal {
-    _store.registerSchema(_tableId, getSchema(), getKeySchema());
-  }
-
-  /** Set the table's metadata */
-  function setMetadata() internal {
-    (string memory _tableName, string[] memory _fieldNames) = getMetadata();
-    StoreSwitch.setMetadata(_tableId, _tableName, _fieldNames);
-  }
-
-  /** Set the table's metadata (using the specified store) */
-  function setMetadata(IStore _store) internal {
-    (string memory _tableName, string[] memory _fieldNames) = getMetadata();
-    _store.setMetadata(_tableId, _tableName, _fieldNames);
+  /** Register the table's key schema, value schema, key names and value names (using the specified store) */
+  function register(IStore _store) internal {
+    _store.registerTable(_tableId, getKeySchema(), getValueSchema(), getKeyNames(), getFieldNames());
   }
 
   /** Emit the ephemeral event using individual values */
@@ -103,7 +97,7 @@ library MoveExecuted {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
 
-    StoreSwitch.emitEphemeralRecord(_tableId, _keyTuple, _data);
+    StoreSwitch.emitEphemeralRecord(_tableId, _keyTuple, _data, getValueSchema());
   }
 
   /** Emit the ephemeral event using individual values (using the specified store) */
@@ -123,7 +117,7 @@ library MoveExecuted {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
 
-    _store.emitEphemeralRecord(_tableId, _keyTuple, _data);
+    _store.emitEphemeralRecord(_tableId, _keyTuple, _data, getValueSchema());
   }
 
   /** Emit the ephemeral event using the data struct */
@@ -165,18 +159,21 @@ library MoveExecuted {
     string memory player,
     string memory gameId
   ) internal pure returns (bytes memory) {
-    uint40[] memory _counters = new uint40[](2);
-    _counters[0] = uint40(bytes(player).length);
-    _counters[1] = uint40(bytes(gameId).length);
-    PackedCounter _encodedLengths = PackedCounterLib.pack(_counters);
+    PackedCounter _encodedLengths;
+    // Lengths are effectively checked during copy by 2**40 bytes exceeding gas limits
+    unchecked {
+      _encodedLengths = PackedCounterLib.pack(bytes(player).length, bytes(gameId).length);
+    }
 
     return
       abi.encodePacked(timestamp, fromX, fromY, toX, toY, _encodedLengths.unwrap(), bytes((player)), bytes((gameId)));
   }
 
   /** Encode keys as a bytes32 array using this table's schema */
-  function encodeKeyTuple(uint256 id) internal pure returns (bytes32[] memory _keyTuple) {
-    _keyTuple = new bytes32[](1);
+  function encodeKeyTuple(uint256 id) internal pure returns (bytes32[] memory) {
+    bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
+
+    return _keyTuple;
   }
 }

@@ -26,15 +26,7 @@ struct GameIdData {
 }
 
 library GameId {
-  /** Get the table's schema */
-  function getSchema() internal pure returns (Schema) {
-    SchemaType[] memory _schema = new SchemaType[](2);
-    _schema[0] = SchemaType.BOOL;
-    _schema[1] = SchemaType.UINT256;
-
-    return SchemaLib.encode(_schema);
-  }
-
+  /** Get the table's key schema */
   function getKeySchema() internal pure returns (Schema) {
     SchemaType[] memory _schema = new SchemaType[](1);
     _schema[0] = SchemaType.UINT256;
@@ -42,34 +34,36 @@ library GameId {
     return SchemaLib.encode(_schema);
   }
 
-  /** Get the table's metadata */
-  function getMetadata() internal pure returns (string memory, string[] memory) {
-    string[] memory _fieldNames = new string[](2);
-    _fieldNames[0] = "isLive";
-    _fieldNames[1] = "startTime";
-    return ("GameId", _fieldNames);
+  /** Get the table's value schema */
+  function getValueSchema() internal pure returns (Schema) {
+    SchemaType[] memory _schema = new SchemaType[](2);
+    _schema[0] = SchemaType.BOOL;
+    _schema[1] = SchemaType.UINT256;
+
+    return SchemaLib.encode(_schema);
   }
 
-  /** Register the table's schema */
-  function registerSchema() internal {
-    StoreSwitch.registerSchema(_tableId, getSchema(), getKeySchema());
+  /** Get the table's key names */
+  function getKeyNames() internal pure returns (string[] memory keyNames) {
+    keyNames = new string[](1);
+    keyNames[0] = "id";
   }
 
-  /** Register the table's schema (using the specified store) */
-  function registerSchema(IStore _store) internal {
-    _store.registerSchema(_tableId, getSchema(), getKeySchema());
+  /** Get the table's field names */
+  function getFieldNames() internal pure returns (string[] memory fieldNames) {
+    fieldNames = new string[](2);
+    fieldNames[0] = "isLive";
+    fieldNames[1] = "startTime";
   }
 
-  /** Set the table's metadata */
-  function setMetadata() internal {
-    (string memory _tableName, string[] memory _fieldNames) = getMetadata();
-    StoreSwitch.setMetadata(_tableId, _tableName, _fieldNames);
+  /** Register the table's key schema, value schema, key names and value names */
+  function register() internal {
+    StoreSwitch.registerTable(_tableId, getKeySchema(), getValueSchema(), getKeyNames(), getFieldNames());
   }
 
-  /** Set the table's metadata (using the specified store) */
-  function setMetadata(IStore _store) internal {
-    (string memory _tableName, string[] memory _fieldNames) = getMetadata();
-    _store.setMetadata(_tableId, _tableName, _fieldNames);
+  /** Register the table's key schema, value schema, key names and value names (using the specified store) */
+  function register(IStore _store) internal {
+    _store.registerTable(_tableId, getKeySchema(), getValueSchema(), getKeyNames(), getFieldNames());
   }
 
   /** Get isLive */
@@ -77,7 +71,7 @@ library GameId {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
 
-    bytes memory _blob = StoreSwitch.getField(_tableId, _keyTuple, 0);
+    bytes memory _blob = StoreSwitch.getField(_tableId, _keyTuple, 0, getValueSchema());
     return (_toBool(uint8(Bytes.slice1(_blob, 0))));
   }
 
@@ -86,7 +80,7 @@ library GameId {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
 
-    bytes memory _blob = _store.getField(_tableId, _keyTuple, 0);
+    bytes memory _blob = _store.getField(_tableId, _keyTuple, 0, getValueSchema());
     return (_toBool(uint8(Bytes.slice1(_blob, 0))));
   }
 
@@ -95,7 +89,7 @@ library GameId {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
 
-    StoreSwitch.setField(_tableId, _keyTuple, 0, abi.encodePacked((isLive)));
+    StoreSwitch.setField(_tableId, _keyTuple, 0, abi.encodePacked((isLive)), getValueSchema());
   }
 
   /** Set isLive (using the specified store) */
@@ -103,7 +97,7 @@ library GameId {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
 
-    _store.setField(_tableId, _keyTuple, 0, abi.encodePacked((isLive)));
+    _store.setField(_tableId, _keyTuple, 0, abi.encodePacked((isLive)), getValueSchema());
   }
 
   /** Get startTime */
@@ -111,7 +105,7 @@ library GameId {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
 
-    bytes memory _blob = StoreSwitch.getField(_tableId, _keyTuple, 1);
+    bytes memory _blob = StoreSwitch.getField(_tableId, _keyTuple, 1, getValueSchema());
     return (uint256(Bytes.slice32(_blob, 0)));
   }
 
@@ -120,7 +114,7 @@ library GameId {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
 
-    bytes memory _blob = _store.getField(_tableId, _keyTuple, 1);
+    bytes memory _blob = _store.getField(_tableId, _keyTuple, 1, getValueSchema());
     return (uint256(Bytes.slice32(_blob, 0)));
   }
 
@@ -129,7 +123,7 @@ library GameId {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
 
-    StoreSwitch.setField(_tableId, _keyTuple, 1, abi.encodePacked((startTime)));
+    StoreSwitch.setField(_tableId, _keyTuple, 1, abi.encodePacked((startTime)), getValueSchema());
   }
 
   /** Set startTime (using the specified store) */
@@ -137,7 +131,7 @@ library GameId {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
 
-    _store.setField(_tableId, _keyTuple, 1, abi.encodePacked((startTime)));
+    _store.setField(_tableId, _keyTuple, 1, abi.encodePacked((startTime)), getValueSchema());
   }
 
   /** Get the full data */
@@ -145,7 +139,7 @@ library GameId {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
 
-    bytes memory _blob = StoreSwitch.getRecord(_tableId, _keyTuple, getSchema());
+    bytes memory _blob = StoreSwitch.getRecord(_tableId, _keyTuple, getValueSchema());
     return decode(_blob);
   }
 
@@ -154,7 +148,7 @@ library GameId {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
 
-    bytes memory _blob = _store.getRecord(_tableId, _keyTuple, getSchema());
+    bytes memory _blob = _store.getRecord(_tableId, _keyTuple, getValueSchema());
     return decode(_blob);
   }
 
@@ -165,7 +159,7 @@ library GameId {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
 
-    StoreSwitch.setRecord(_tableId, _keyTuple, _data);
+    StoreSwitch.setRecord(_tableId, _keyTuple, _data, getValueSchema());
   }
 
   /** Set the full data using individual values (using the specified store) */
@@ -175,7 +169,7 @@ library GameId {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
 
-    _store.setRecord(_tableId, _keyTuple, _data);
+    _store.setRecord(_tableId, _keyTuple, _data, getValueSchema());
   }
 
   /** Set the full data using the data struct */
@@ -201,9 +195,11 @@ library GameId {
   }
 
   /** Encode keys as a bytes32 array using this table's schema */
-  function encodeKeyTuple(uint256 id) internal pure returns (bytes32[] memory _keyTuple) {
-    _keyTuple = new bytes32[](1);
+  function encodeKeyTuple(uint256 id) internal pure returns (bytes32[] memory) {
+    bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
+
+    return _keyTuple;
   }
 
   /* Delete all data for given keys */
@@ -211,7 +207,7 @@ library GameId {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
 
-    StoreSwitch.deleteRecord(_tableId, _keyTuple);
+    StoreSwitch.deleteRecord(_tableId, _keyTuple, getValueSchema());
   }
 
   /* Delete all data for given keys (using the specified store) */
@@ -219,7 +215,7 @@ library GameId {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
 
-    _store.deleteRecord(_tableId, _keyTuple);
+    _store.deleteRecord(_tableId, _keyTuple, getValueSchema());
   }
 }
 
