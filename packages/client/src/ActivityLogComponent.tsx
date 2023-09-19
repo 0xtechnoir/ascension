@@ -4,13 +4,12 @@ import { useEntityQuery } from "@latticexyz/react";
 import { useMUD } from "./MUDContext";
 import { LogMessage } from "./CustomTypes";
 import { formatDate } from "./utils";
+import { useGameContext } from "./GameContext";
 
-interface ActivityLogComponentProps {
-  currentGameID: string;
-}
-
-const ActivityLogComponent: React.FC<ActivityLogComponentProps> = ({ currentGameID }) => {
-  console.log("currentGameID: ", currentGameID)
+const ActivityLogComponent = () => {
+  
+  const { gameId } = useGameContext();
+  
   const {
     components: {
       MoveExecuted,
@@ -29,11 +28,11 @@ const ActivityLogComponent: React.FC<ActivityLogComponentProps> = ({ currentGame
   const allAttackLogs = useEntityQuery([Has(AttackExecuted)]);
   const allSendActionPointLogs = useEntityQuery([Has(SendActionPointExecuted)]);
   const allRangeIncreaseLogs = useEntityQuery([Has(RangeIncreaseExecuted)]);
-  const allPlayerSpawnedLogs = useEntityQuery([Has(PlayerSpawned), HasValue(PlayerSpawned, { gameID : currentGameID })]);
-  const allActionPointClaimExecutedLogs = useEntityQuery([Has(ActionPointClaimExecuted)]);
+  const allPlayerSpawnedLogs = useEntityQuery([HasValue(PlayerSpawned, { gameId : gameId })]);
+  const allActionPointClaimExecutedLogs = useEntityQuery([HasValue(ActionPointClaimExecuted, { gameId : gameId })]);
   const allVotingPointClaimExecutedLogs = useEntityQuery([Has(VotingPointClaimExecuted)]);
   const allVoteExecutedLogs = useEntityQuery([Has(VoteExecuted)]);
-  const gameStarted = useEntityQuery([Has(GameStarted)]);
+  const gameStarted = useEntityQuery([HasValue(GameStarted, { gameId : gameId })]);
   let mappedLogs: LogMessage[] = [];
 
   const mapMoveLogs = () => {

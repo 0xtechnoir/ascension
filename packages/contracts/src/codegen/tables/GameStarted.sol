@@ -20,11 +20,17 @@ import { PackedCounter, PackedCounterLib } from "@latticexyz/store/src/PackedCou
 bytes32 constant _tableId = bytes32(abi.encodePacked(bytes16(""), bytes16("GameStarted")));
 bytes32 constant GameStartedTableId = _tableId;
 
+struct GameStartedData {
+  uint256 timestamp;
+  string gameId;
+}
+
 library GameStarted {
   /** Get the table's schema */
   function getSchema() internal pure returns (Schema) {
-    SchemaType[] memory _schema = new SchemaType[](1);
+    SchemaType[] memory _schema = new SchemaType[](2);
     _schema[0] = SchemaType.UINT256;
+    _schema[1] = SchemaType.STRING;
 
     return SchemaLib.encode(_schema);
   }
@@ -38,8 +44,9 @@ library GameStarted {
 
   /** Get the table's metadata */
   function getMetadata() internal pure returns (string memory, string[] memory) {
-    string[] memory _fieldNames = new string[](1);
+    string[] memory _fieldNames = new string[](2);
     _fieldNames[0] = "timestamp";
+    _fieldNames[1] = "gameId";
     return ("GameStarted", _fieldNames);
   }
 
@@ -66,8 +73,8 @@ library GameStarted {
   }
 
   /** Emit the ephemeral event using individual values */
-  function emitEphemeral(uint256 id, uint256 timestamp) internal {
-    bytes memory _data = encode(timestamp);
+  function emitEphemeral(uint256 id, uint256 timestamp, string memory gameId) internal {
+    bytes memory _data = encode(timestamp, gameId);
 
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
@@ -76,8 +83,8 @@ library GameStarted {
   }
 
   /** Emit the ephemeral event using individual values (using the specified store) */
-  function emitEphemeral(IStore _store, uint256 id, uint256 timestamp) internal {
-    bytes memory _data = encode(timestamp);
+  function emitEphemeral(IStore _store, uint256 id, uint256 timestamp, string memory gameId) internal {
+    bytes memory _data = encode(timestamp, gameId);
 
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
@@ -85,9 +92,23 @@ library GameStarted {
     _store.emitEphemeralRecord(_tableId, _keyTuple, _data);
   }
 
+  /** Emit the ephemeral event using the data struct */
+  function emitEphemeral(uint256 id, GameStartedData memory _table) internal {
+    emitEphemeral(id, _table.timestamp, _table.gameId);
+  }
+
+  /** Emit the ephemeral event using the data struct (using the specified store) */
+  function emitEphemeral(IStore _store, uint256 id, GameStartedData memory _table) internal {
+    emitEphemeral(_store, id, _table.timestamp, _table.gameId);
+  }
+
   /** Tightly pack full data using this table's schema */
-  function encode(uint256 timestamp) internal pure returns (bytes memory) {
-    return abi.encodePacked(timestamp);
+  function encode(uint256 timestamp, string memory gameId) internal pure returns (bytes memory) {
+    uint40[] memory _counters = new uint40[](1);
+    _counters[0] = uint40(bytes(gameId).length);
+    PackedCounter _encodedLengths = PackedCounterLib.pack(_counters);
+
+    return abi.encodePacked(timestamp, _encodedLengths.unwrap(), bytes((gameId)));
   }
 
   /** Encode keys as a bytes32 array using this table's schema */

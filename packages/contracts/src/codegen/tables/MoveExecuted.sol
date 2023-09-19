@@ -27,18 +27,20 @@ struct MoveExecutedData {
   uint32 toX;
   uint32 toY;
   string player;
+  string gameId;
 }
 
 library MoveExecuted {
   /** Get the table's schema */
   function getSchema() internal pure returns (Schema) {
-    SchemaType[] memory _schema = new SchemaType[](6);
+    SchemaType[] memory _schema = new SchemaType[](7);
     _schema[0] = SchemaType.UINT256;
     _schema[1] = SchemaType.UINT32;
     _schema[2] = SchemaType.UINT32;
     _schema[3] = SchemaType.UINT32;
     _schema[4] = SchemaType.UINT32;
     _schema[5] = SchemaType.STRING;
+    _schema[6] = SchemaType.STRING;
 
     return SchemaLib.encode(_schema);
   }
@@ -52,13 +54,14 @@ library MoveExecuted {
 
   /** Get the table's metadata */
   function getMetadata() internal pure returns (string memory, string[] memory) {
-    string[] memory _fieldNames = new string[](6);
+    string[] memory _fieldNames = new string[](7);
     _fieldNames[0] = "timestamp";
     _fieldNames[1] = "fromX";
     _fieldNames[2] = "fromY";
     _fieldNames[3] = "toX";
     _fieldNames[4] = "toY";
     _fieldNames[5] = "player";
+    _fieldNames[6] = "gameId";
     return ("MoveExecuted", _fieldNames);
   }
 
@@ -92,9 +95,10 @@ library MoveExecuted {
     uint32 fromY,
     uint32 toX,
     uint32 toY,
-    string memory player
+    string memory player,
+    string memory gameId
   ) internal {
-    bytes memory _data = encode(timestamp, fromX, fromY, toX, toY, player);
+    bytes memory _data = encode(timestamp, fromX, fromY, toX, toY, player, gameId);
 
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
@@ -111,9 +115,10 @@ library MoveExecuted {
     uint32 fromY,
     uint32 toX,
     uint32 toY,
-    string memory player
+    string memory player,
+    string memory gameId
   ) internal {
-    bytes memory _data = encode(timestamp, fromX, fromY, toX, toY, player);
+    bytes memory _data = encode(timestamp, fromX, fromY, toX, toY, player, gameId);
 
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
@@ -123,12 +128,31 @@ library MoveExecuted {
 
   /** Emit the ephemeral event using the data struct */
   function emitEphemeral(uint256 id, MoveExecutedData memory _table) internal {
-    emitEphemeral(id, _table.timestamp, _table.fromX, _table.fromY, _table.toX, _table.toY, _table.player);
+    emitEphemeral(
+      id,
+      _table.timestamp,
+      _table.fromX,
+      _table.fromY,
+      _table.toX,
+      _table.toY,
+      _table.player,
+      _table.gameId
+    );
   }
 
   /** Emit the ephemeral event using the data struct (using the specified store) */
   function emitEphemeral(IStore _store, uint256 id, MoveExecutedData memory _table) internal {
-    emitEphemeral(_store, id, _table.timestamp, _table.fromX, _table.fromY, _table.toX, _table.toY, _table.player);
+    emitEphemeral(
+      _store,
+      id,
+      _table.timestamp,
+      _table.fromX,
+      _table.fromY,
+      _table.toX,
+      _table.toY,
+      _table.player,
+      _table.gameId
+    );
   }
 
   /** Tightly pack full data using this table's schema */
@@ -138,13 +162,16 @@ library MoveExecuted {
     uint32 fromY,
     uint32 toX,
     uint32 toY,
-    string memory player
+    string memory player,
+    string memory gameId
   ) internal pure returns (bytes memory) {
-    uint40[] memory _counters = new uint40[](1);
+    uint40[] memory _counters = new uint40[](2);
     _counters[0] = uint40(bytes(player).length);
+    _counters[1] = uint40(bytes(gameId).length);
     PackedCounter _encodedLengths = PackedCounterLib.pack(_counters);
 
-    return abi.encodePacked(timestamp, fromX, fromY, toX, toY, _encodedLengths.unwrap(), bytes((player)));
+    return
+      abi.encodePacked(timestamp, fromX, fromY, toX, toY, _encodedLengths.unwrap(), bytes((player)), bytes((gameId)));
   }
 
   /** Encode keys as a bytes32 array using this table's schema */

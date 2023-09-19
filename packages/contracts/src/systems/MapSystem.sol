@@ -1,7 +1,23 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0;
 import { System } from "@latticexyz/world/src/System.sol";
-import { MapConfig, Movable, Player, PlayerTableId, Position, PositionTableId, Health, Range, ActionPoint, GameIsLive, Username, Alive, LastActionPointClaim, InGame, InGameTableId } from "../codegen/Tables.sol";
+import { 
+  MapConfig, 
+  Movable, 
+  Player, 
+  PlayerTableId, 
+  Position, 
+  PositionTableId, 
+  Health, 
+  Range, 
+  ActionPoint, 
+  GameIsLive, 
+  Username, 
+  Alive, 
+  LastActionPointClaim, 
+  InGame, 
+  InGameTableId,
+  GameId } from "../codegen/Tables.sol";
 import { addressToEntityKey } from "../addressToEntityKey.sol";
 import { positionToEntityKey } from "../positionToEntityKey.sol";
 import { query, QueryFragment, QueryType } from "@latticexyz/world/src/modules/keysintable/query.sol";
@@ -18,7 +34,7 @@ contract MapSystem is System {
       uint16 y;
   }
   
-  function spawn(uint256 timestamp, string memory username, string memory gameID) public {
+  function spawn(uint256 _timestamp, string memory _username, string memory _gameId) public {
 
     uint16 x;
     uint16 y;
@@ -43,7 +59,7 @@ contract MapSystem is System {
     // loop through the points array and find a point that is not already occupied
     for (uint i = 0; i < points.length; i++) {
       QueryFragment[] memory fragments = new QueryFragment[](2);
-      fragments[0] = QueryFragment(QueryType.HasValue, InGameTableId, InGame.encode(gameID));
+      fragments[0] = QueryFragment(QueryType.HasValue, InGameTableId, InGame.encode(_gameId));
       fragments[1] = QueryFragment(QueryType.HasValue, PositionTableId, Position.encode(points[i].x, points[i].y));
       bytes32[][] memory keyTuples = query(fragments);
       if (keyTuples.length == 0) {
@@ -56,24 +72,24 @@ contract MapSystem is System {
     // set the players attributes
     Alive.set(player, true);
     Player.set(player, true);
-    Username.set(player, username);
+    Username.set(player, _username);
     Position.set(player, x, y);
     Movable.set(player, true);
     Health.set(player, 3);
     Range.set(player, 2);
-    InGame.set(player, gameID);
+    InGame.set(player, _gameId);
     ActionPoint.set(player, 0);
     LastActionPointClaim.set(player, 0); 
 
-    PlayerSpawned.emitEphemeral(timestamp, PlayerSpawnedData({
-      timestamp: timestamp,
+    PlayerSpawned.emitEphemeral(_timestamp, PlayerSpawnedData({
+      timestamp: _timestamp,
       x: x, 
       y: y, 
-      player: username,
-      gameID: gameID
+      player: _username,
+      gameId: _gameId
     })); 
   }
-  function move(uint256 timestamp, uint32 x, uint32 y) public {
+  function move(uint256 timestamp, uint32 _x, uint32 _y, string memory _gameId) public {
 
     bytes32 player = addressToEntityKey(_msgSender());
     
@@ -85,30 +101,43 @@ contract MapSystem is System {
 
     // retrieve the players current position
     (uint32 fromX, uint32 fromY) = Position.get(player);
-    require(distance(fromX, fromY, x, y) == 1, "You can only move to adjacent spaces");
+    require(distance(fromX, fromY, _x, _y) == 1, "You can only move to adjacent spaces");
 
     // Constrain position to map size, wrapping around if necessary
     (uint32 width, uint32 height ) = MapConfig.get();
-    x = (x + width) % width;
-    y = (y + height) % height;
+    _x = (_x + width) % width;
+    _y = (_y + height) % height;
     
-    // check if there is already a player at the given position
-    bytes32[] memory keysWithValue = getKeysWithValue(PositionTableId, Position.encode(x, y));
-    require(keysWithValue.length == 0, "There is already a player at the given position");
-    string memory username = Username.get(player);
+    bytes32[][] memory keyTuples = queryPosition(_x, _y, _gameId);
+    require(keyTuples.length == 0, "There is already a player at the given position");
 
-    Position.set(player, x, y);
+    string memory username = Username.get(player);
+    Position.set(player, _x, _y);
     
     MoveExecuted.emitEphemeral(timestamp, MoveExecutedData({
       timestamp: timestamp,
       player: username,
       fromX: fromX, 
       fromY: fromY, 
-      toX: x, 
-      toY: y
+      toX: _x, 
+      toY: _y,
+      gameId: _gameId
     }));
 
     ActionPoint.set(player, currentActionPoints - 1);
+  }
+
+  function queryPosition(uint32 _x, uint32 _y, string memory _gameId) public view returns (bytes32[][] memory) {
+    QueryFragment[] memory fragments = new QueryFragment[](2);
+    fragments[0] = QueryFragment(QueryType.HasValue, InGameTableId, InGame.encode(_gameId));
+    fragments[1] = QueryFragment(QueryType.HasValue, PositionTableId, Position.encode(_x, _y));
+    return query(fragments);
+  }
+  function queryisLive(uint32 _x, uint32 _y, string memory _gameId) public view returns (bytes32[][] memory) {
+    QueryFragment[] memory fragments = new QueryFragment[](2);
+    fragments[0] = QueryFragment(QueryType.HasValue, InGameTableId, InGame.encode(_gameId));
+    fragments[1] = QueryFragment(QueryType.HasValue, PositionTableId, Position.encode(_x, _y));
+    return query(fragments);
   }
 
   function distance(uint32 fromX, uint32 fromY, uint32 toX, uint32 toY) internal pure returns (uint32) {

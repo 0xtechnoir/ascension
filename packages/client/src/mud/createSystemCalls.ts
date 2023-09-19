@@ -68,20 +68,17 @@ export function createSystemCalls(
     await waitForTransaction(tx);
   };
 
-  const startMatch = async (playersSpawned: number, startTime: number) => {
+  const startMatch = async (gameId: string, playersSpawned: number, startTime: number) => {
     const bigIntStartTime = BigInt(startTime);
-    // generate a random number for the gameID
-    const gameId = BigInt(Math.floor(Math.random() * 1000000000));
-    console.log("gameId: ", gameId);
     const tx = await worldContract.write.startMatch([
       gameId,
       playersSpawned,
       bigIntStartTime,
     ]);
-    await waitForTransaction(tx);
+    const res = await waitForTransaction(tx);
   };
 
-  const moveTo = async (inputX: number, inputY: number) => {
+  const moveTo = async (inputX: number, inputY: number, gameId: string) => {
     if (!playerEntity) {
       throw new Error("no player");
     }
@@ -94,7 +91,7 @@ export function createSystemCalls(
 
     try {
       const bigIntTimestamp = BigInt(Date.now());
-      const tx = await worldContract.write.move([bigIntTimestamp, x, y]);
+      const tx = await worldContract.write.move([bigIntTimestamp, x, y, gameId]);
       await waitForTransaction(tx);
     } catch (error) {
       console.log("error: ", error);
@@ -104,7 +101,7 @@ export function createSystemCalls(
     }
   };
 
-  const moveBy = async (deltaX: number, deltaY: number) => {
+  const moveBy = async (deltaX: number, deltaY: number, gameId: string) => {
     if (!playerEntity) {
       throw new Error("no player");
     }
@@ -114,7 +111,7 @@ export function createSystemCalls(
       console.warn("cannot moveBy without a player position, not yet spawned?");
       return;
     }
-    await moveTo(playerPosition.x + deltaX, playerPosition.y + deltaY);
+    await moveTo(playerPosition.x + deltaX, playerPosition.y + deltaY, gameId);
   };
 
   const spawn = async (username: string, gameID: string) => {
@@ -138,20 +135,18 @@ export function createSystemCalls(
       const tx = await worldContract.write.spawn([bigIntTimestamp, username, gameID]);
       await waitForTransaction(tx);
     } catch (error) {
-      console.log("spawn error: ", error);
       throw error;
     } finally {
       Player.removeOverride(playerId);
     }
   };
 
-  const claimActionPoint = async () => {
-    console.log("claimActionPoint called");
+  const claimActionPoint = async (gameId: string) => {
     if (!playerEntity) {
       throw new Error("no player");
     }
     const bigIntTimestamp = BigInt(Date.now());
-    const tx = await worldContract.write.claimActionPoint([bigIntTimestamp]);
+    const tx = await worldContract.write.claimActionPoint([bigIntTimestamp, gameId]);
     await waitForTransaction(tx);
   };
 

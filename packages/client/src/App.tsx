@@ -8,13 +8,13 @@ import { LivePlayersListComponent } from "./LivePlayersListComponent";
 import { ErrorWithShortMessage } from "./CustomTypes";
 import ActivityLogComponent from "./ActivityLogComponent";
 import { DeadPlayersListComponent } from "./DeadPlayersListComponent";
-import { useErrorContext } from "./ErrorContext";
+import { useGameContext } from "./GameContext";
 import SpawnModal from './SpawnModal';
 import Lobby from './Lobby';
 
 export const App = () => {
 
-  const [gameID, setGameID] = useState('');
+  // const [gameID, setGameID] = useState('');
   const [showGameBoard, setShowGameBoard] = useState(false);
   
   // Custom Types
@@ -26,15 +26,16 @@ export const App = () => {
   }
 
   // Contexts
-  const { handleError } = useErrorContext();
+  const { handleError, gameId: gameID, setGameId: setGameID } = useGameContext();
   const {
     network: { playerEntity },
     components: { SyncProgress, Player, Position, GameIsLive, Alive, GameId, InGame },
-    systemCalls: { spawn, startMatch },
+    systemCalls: { startMatch },
   } = useMUD();
   
   // Constants 
-  const gameIsLive = (useComponentValue(GameIsLive, singletonEntity)?.value) || false;
+  // const gameIsLive = (useComponentValue(GameIsLive, singletonEntity)?.value) || false;
+  const gameIsLive = useEntityQuery([HasValue(InGame, { value: gameID }), Has(GameIsLive)]);
   const currentGameID = useComponentValue(InGame, playerEntity)?.value || "";
   const allPlayers = useEntityQuery([HasValue(InGame, { value: gameID }), Has(Player), Has(Position)]);
   const livePlayers = useEntityQuery([HasValue(InGame, { value: gameID }), Has(Player), HasValue(Alive, { value: true })]);
@@ -75,7 +76,7 @@ export const App = () => {
     const playersSpawned = allPlayers.length;
     const startTime = Date.now();
     try {
-      await startMatch(playersSpawned, startTime);
+      await startMatch(gameID, playersSpawned, startTime);
     } catch (error) {
       if (typeof error === "object" && error !== null) {
         const message = (error as ErrorWithShortMessage).shortMessage;
@@ -132,7 +133,7 @@ export const App = () => {
                     <p>Spawn to get a sharable game ID</p>
                   }
                 <br />
-                <ActivityLogComponent currentGameID={currentGameID}/>
+                <ActivityLogComponent />
               </div>
               <div className="w-1/4">
                 <div className="h-15 overflow-scroll">

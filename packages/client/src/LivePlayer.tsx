@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useMUD } from "./MUDContext";
+import { useGameContext } from "./GameContext";
 import { Entity } from "@latticexyz/recs";
 import { useComponentValue } from "@latticexyz/react";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
@@ -29,6 +30,8 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
     systemCalls: { sendActionPoint, attack, increaseRange, claimActionPoint },
     network: { playerEntity },
   } = useMUD();
+
+  const { gameId } = useGameContext();
 
   const [timeUntilNextClaim, setTimeUntilNextClaim] =
     useState<string>("Calculating...");

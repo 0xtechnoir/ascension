@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useMUD } from "./MUDContext";
 import { ErrorWithShortMessage } from "./CustomTypes";
+import { useGameContext } from "./GameContext";
 
 export const useKeyboardMovement = () => {
   const {
@@ -8,6 +9,7 @@ export const useKeyboardMovement = () => {
   } = useMUD();
 
   const [moveMessage, setMoveMessage] = useState<string>("");
+  const { gameId } = useGameContext();
 
   const clearMoveMessage = () => {
     setMoveMessage("");
@@ -17,16 +19,16 @@ export const useKeyboardMovement = () => {
     const listener = async (e: KeyboardEvent) => {
       try {
         if (e.key === "ArrowUp") {
-          await moveBy(0, -1);
+          await moveBy(0, -1, gameId);
         }
         if (e.key === "ArrowDown") {
-          await moveBy(0, 1);
+          await moveBy(0, 1, gameId);
         }
         if (e.key === "ArrowLeft") {
-          await moveBy(-1, 0);
+          await moveBy(-1, 0, gameId);
         }
         if (e.key === "ArrowRight") {
-          await moveBy(1, 0);
+          await moveBy(1, 0, gameId);
         }
       } catch (error) {
         console.log("catch block triggerd. Error: ", error);

@@ -55,6 +55,7 @@ const Lobby: React.FC<LobbyProps> = ({ setGameID, setShowGameBoard, showGameBoar
                 <br />
                 <input
                         type="text"
+                        className="text-black"
                         placeholder="Enter Game ID"
                         value={inputGameID}
                         onChange={(e) => setInputGameID(e.target.value)}

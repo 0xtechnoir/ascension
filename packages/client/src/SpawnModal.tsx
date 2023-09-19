@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Modal from '@material-ui/core/Modal';
-import { useErrorContext } from "./ErrorContext";
+import { useGameContext } from "./GameContext";
 import { useMUD } from "./MUDContext";
 import { ErrorWithShortMessage } from "./CustomTypes";
 import { Entity, Has, HasValue, getComponentValue } from "@latticexyz/recs";
@@ -24,7 +24,7 @@ const SpawnModal: React.FC<SpawnModalProps> = ({
     const [enteredUsername, setEnteredUsername] = useState("");
 
       // Contexts
-    const { handleError } = useErrorContext();
+    const { handleError } = useGameContext();
     const {
         network: { playerEntity },
         components: { InGame },

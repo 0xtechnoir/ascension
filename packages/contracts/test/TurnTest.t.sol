@@ -9,6 +9,8 @@ import { GameIsLive } from "../src/codegen/Tables.sol";
 
 contract TurnTest is MudTest {
   IWorld public world;
+  string gameId = "5027d732-5461-46c4-906a-2a4c1d84702d";
+  uint256 timestamp = 1629474300;
 
   function setUp() public override {
     super.setUp();
@@ -25,12 +27,12 @@ contract TurnTest is MudTest {
   }
 
   function testStartMatchWithValidInputs() public {
-    world.startMatch(1629474300, 2, 1629474300);
+    world.startMatch(gameId, 2, timestamp);
     assertTrue(GameIsLive.get(), "Game should be live");
   }
 
   function testStartMatchWithInsufficientPlayers() public {
-    try world.startMatch(1629474300, 2, 1629474300) {
+    try world.startMatch(gameId, 2, timestamp) {
       fail("Should have reverted");
       } catch Error(string memory reason) {
       assertEq(reason, "Not enough players to start match");
@@ -38,8 +40,8 @@ contract TurnTest is MudTest {
   }
 
   function testStartMatchWhenGameIsAlreadyLive() public {
-    world.startMatch(1629474300, 2, 1629474300);
-    try world.startMatch(1629474300, 2, 1629474300) {
+    world.startMatch(gameId, 2, timestamp);
+    try world.startMatch(gameId, 2, timestamp) {
       fail("Should have reverted");
     } catch Error(string memory reason) {
       assertEq(reason, "Match has already started");

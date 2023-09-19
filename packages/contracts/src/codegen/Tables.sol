@@ -29,5 +29,5 @@ import { ActionPointClaimExecuted, ActionPointClaimExecutedData, ActionPointClai
 import { ClaimExecuted, ClaimExecutedData, ClaimExecutedTableId } from "./tables/ClaimExecuted.sol";
 import { VotingPointClaimExecuted, VotingPointClaimExecutedData, VotingPointClaimExecutedTableId } from "./tables/VotingPointClaimExecuted.sol";
 import { VoteExecuted, VoteExecutedData, VoteExecutedTableId } from "./tables/VoteExecuted.sol";
-import { GameStarted, GameStartedTableId } from "./tables/GameStarted.sol";
+import { GameStarted, GameStartedData, GameStartedTableId } from "./tables/GameStarted.sol";
 import { GameEnded, GameEndedTableId } from "./tables/GameEnded.sol";

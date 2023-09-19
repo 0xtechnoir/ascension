@@ -30,18 +30,21 @@ import { getKeysInTable } from "@latticexyz/world/src/modules/keysintable/getKey
 import { query, QueryFragment, QueryType } from "@latticexyz/world/src/modules/keysintable/query.sol";
 import { PlayerTableId, Position, PositionTableId, AliveTableId } from "../codegen/Tables.sol";
 import { getKeysWithValue } from "@latticexyz/world/src/modules/keyswithvalue/getKeysWithValue.sol";
-import { GameStarted, GameStartedTableId } from "../codegen/Tables.sol";
+import { GameStarted, GameStartedData } from "../codegen/Tables.sol";
 import { AttackExecuted, AttackExecutedData } from "../codegen/Tables.sol";
 import { SendActionPointExecuted, SendActionPointExecutedData } from "../codegen/Tables.sol";
 import { RangeIncreaseExecuted, RangeIncreaseExecutedData } from "../codegen/Tables.sol";
 
 contract TurnSystem is System {
 
-  function startMatch(uint256 gameId, uint32 playersSpawned, uint256 startTime) public {
+  function startMatch(string memory gameId, uint32 playersSpawned, uint256 startTime) public {
     require(playersSpawned > 1, "Not enough players to start match");
     require(!GameIsLive.get(), "Match has already started");
     GameIsLive.set(true);
-    GameStarted.emitEphemeral(gameId, startTime);
+    GameStarted.emitEphemeral(startTime, GameStartedData({
+      timestamp: startTime,
+      gameId: gameId
+    }));
   }
 
   function assignActionPointsToAllLivePlayers() private {
@@ -138,7 +141,7 @@ contract TurnSystem is System {
     }
   }
 
-  function claimActionPoint(uint256 timestamp) public {
+  function claimActionPoint(uint256 _timestamp, string memory _gameId) public {
     require(GameIsLive.get(), "Match is not live.");
     bytes32 player = addressToEntityKey(_msgSender());
     require(Alive.get(player), "Not possible when dead");
@@ -148,16 +151,17 @@ contract TurnSystem is System {
 
     // if lastClaimed is equal to 0 this is the first time they are claiming so we can skip the check
     if (lastClaimed != 0) {
-      require(timestamp - lastClaimed > claimInterval, "You can only claim an action point every 30 seconds");
+      require(_timestamp - lastClaimed > claimInterval, "You can only claim an action point every 30 seconds");
     }
-    LastActionPointClaim.set(player, timestamp);
+    LastActionPointClaim.set(player, _timestamp);
     uint32 currentActionPoints = ActionPoint.get(player);
     ActionPoint.set(player, currentActionPoints + 1);
 
     string memory username = Username.get(player);
-    ActionPointClaimExecuted.emitEphemeral(timestamp, ActionPointClaimExecutedData({
-      timestamp: timestamp,
-      player: username
+    ActionPointClaimExecuted.emitEphemeral(_timestamp, ActionPointClaimExecutedData({
+      timestamp: _timestamp,
+      player: username,
+      gameId: _gameId
     }));  
   }
   function claimVotingPoint(uint256 timestamp) public {

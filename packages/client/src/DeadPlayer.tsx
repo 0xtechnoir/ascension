@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { ErrorWithShortMessage } from "./CustomTypes";
 import { useMUD } from "./MUDContext";
 import { Entity } from "@latticexyz/recs";
 import { useComponentValue } from "@latticexyz/react";
-import { useErrorContext } from "./ErrorContext";
 import { ActionButton } from "./ActionButton";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
 
@@ -19,7 +17,6 @@ export const DeadPlayer: React.FC<DeadPlayerProps> = ({
   highlightedPlayer,
 }) => {
 
-  const { handleError } = useErrorContext();
   const {
     components: { Username, Alive, LastVotingPointClaim, ClaimInterval, VotingPoint },
     systemCalls: { vote, claimVotingPoint },

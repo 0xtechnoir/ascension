@@ -10,7 +10,7 @@ import {
   HasValue,
 } from "@latticexyz/recs";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
-import { useErrorContext } from "./ErrorContext";
+import { useGameContext } from "./GameContext";
 
 interface GameBoardProps {
   players: Entity[];
@@ -26,7 +26,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
 }) => {
   const [showUsernameInput, setShowUsernameInput] = useState(false);
 
-  const { handleError } = useErrorContext();
+  const { handleError } = useGameContext();
   const {
     components: {
       MapConfig,

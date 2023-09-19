@@ -25,7 +25,7 @@ struct PlayerSpawnedData {
   uint32 x;
   uint32 y;
   string player;
-  string gameID;
+  string gameId;
 }
 
 library PlayerSpawned {
@@ -55,7 +55,7 @@ library PlayerSpawned {
     _fieldNames[1] = "x";
     _fieldNames[2] = "y";
     _fieldNames[3] = "player";
-    _fieldNames[4] = "gameID";
+    _fieldNames[4] = "gameId";
     return ("PlayerSpawned", _fieldNames);
   }
 
@@ -88,9 +88,9 @@ library PlayerSpawned {
     uint32 x,
     uint32 y,
     string memory player,
-    string memory gameID
+    string memory gameId
   ) internal {
-    bytes memory _data = encode(timestamp, x, y, player, gameID);
+    bytes memory _data = encode(timestamp, x, y, player, gameId);
 
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
@@ -106,9 +106,9 @@ library PlayerSpawned {
     uint32 x,
     uint32 y,
     string memory player,
-    string memory gameID
+    string memory gameId
   ) internal {
-    bytes memory _data = encode(timestamp, x, y, player, gameID);
+    bytes memory _data = encode(timestamp, x, y, player, gameId);
 
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
@@ -118,12 +118,12 @@ library PlayerSpawned {
 
   /** Emit the ephemeral event using the data struct */
   function emitEphemeral(uint256 id, PlayerSpawnedData memory _table) internal {
-    emitEphemeral(id, _table.timestamp, _table.x, _table.y, _table.player, _table.gameID);
+    emitEphemeral(id, _table.timestamp, _table.x, _table.y, _table.player, _table.gameId);
   }
 
   /** Emit the ephemeral event using the data struct (using the specified store) */
   function emitEphemeral(IStore _store, uint256 id, PlayerSpawnedData memory _table) internal {
-    emitEphemeral(_store, id, _table.timestamp, _table.x, _table.y, _table.player, _table.gameID);
+    emitEphemeral(_store, id, _table.timestamp, _table.x, _table.y, _table.player, _table.gameId);
   }
 
   /** Tightly pack full data using this table's schema */
@@ -132,14 +132,14 @@ library PlayerSpawned {
     uint32 x,
     uint32 y,
     string memory player,
-    string memory gameID
+    string memory gameId
   ) internal pure returns (bytes memory) {
     uint40[] memory _counters = new uint40[](2);
     _counters[0] = uint40(bytes(player).length);
-    _counters[1] = uint40(bytes(gameID).length);
+    _counters[1] = uint40(bytes(gameId).length);
     PackedCounter _encodedLengths = PackedCounterLib.pack(_counters);
 
-    return abi.encodePacked(timestamp, x, y, _encodedLengths.unwrap(), bytes((player)), bytes((gameID)));
+    return abi.encodePacked(timestamp, x, y, _encodedLengths.unwrap(), bytes((player)), bytes((gameId)));
   }
 
   /** Encode keys as a bytes32 array using this table's schema */

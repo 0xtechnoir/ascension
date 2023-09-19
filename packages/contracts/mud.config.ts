@@ -58,7 +58,7 @@ export default mudConfig({
         x: "uint32",
         y: "uint32", 
         player: "string",
-        gameID: "string",
+        gameId: "string",
       }, 
       ephemeral: true,
     },
@@ -73,6 +73,7 @@ export default mudConfig({
         toX: "uint32",
         toY: "uint32", 
         player: "string",
+        gameId: "string",
       }, 
       ephemeral: true,
     },
@@ -115,6 +116,7 @@ export default mudConfig({
       schema: {
         timestamp: "uint256",
         player: "string",
+        gameId: "string",
       }, 
       ephemeral: true,
     },
@@ -125,6 +127,7 @@ export default mudConfig({
       schema: {
         timestamp: "uint256",
         player: "string",
+        gameId: "string",
       }, 
       ephemeral: true,
     },
@@ -155,6 +158,7 @@ export default mudConfig({
       },
       schema: {
         timestamp: "uint256",
+        gameId: "string",
       },
       ephemeral: true,
     },
