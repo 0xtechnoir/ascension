@@ -22,6 +22,7 @@ bytes32 constant AttackExecutedTableId = _tableId;
 
 struct AttackExecutedData {
   uint256 timestamp;
+  uint32 gameId;
   string attacker;
   string target;
 }
@@ -37,10 +38,11 @@ library AttackExecuted {
 
   /** Get the table's value schema */
   function getValueSchema() internal pure returns (Schema) {
-    SchemaType[] memory _schema = new SchemaType[](3);
+    SchemaType[] memory _schema = new SchemaType[](4);
     _schema[0] = SchemaType.UINT256;
-    _schema[1] = SchemaType.STRING;
+    _schema[1] = SchemaType.UINT32;
     _schema[2] = SchemaType.STRING;
+    _schema[3] = SchemaType.STRING;
 
     return SchemaLib.encode(_schema);
   }
@@ -53,10 +55,11 @@ library AttackExecuted {
 
   /** Get the table's field names */
   function getFieldNames() internal pure returns (string[] memory fieldNames) {
-    fieldNames = new string[](3);
+    fieldNames = new string[](4);
     fieldNames[0] = "timestamp";
-    fieldNames[1] = "attacker";
-    fieldNames[2] = "target";
+    fieldNames[1] = "gameId";
+    fieldNames[2] = "attacker";
+    fieldNames[3] = "target";
   }
 
   /** Register the table's key schema, value schema, key names and value names */
@@ -70,8 +73,14 @@ library AttackExecuted {
   }
 
   /** Emit the ephemeral event using individual values */
-  function emitEphemeral(uint256 id, uint256 timestamp, string memory attacker, string memory target) internal {
-    bytes memory _data = encode(timestamp, attacker, target);
+  function emitEphemeral(
+    uint256 id,
+    uint256 timestamp,
+    uint32 gameId,
+    string memory attacker,
+    string memory target
+  ) internal {
+    bytes memory _data = encode(timestamp, gameId, attacker, target);
 
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
@@ -84,10 +93,11 @@ library AttackExecuted {
     IStore _store,
     uint256 id,
     uint256 timestamp,
+    uint32 gameId,
     string memory attacker,
     string memory target
   ) internal {
-    bytes memory _data = encode(timestamp, attacker, target);
+    bytes memory _data = encode(timestamp, gameId, attacker, target);
 
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
@@ -97,17 +107,18 @@ library AttackExecuted {
 
   /** Emit the ephemeral event using the data struct */
   function emitEphemeral(uint256 id, AttackExecutedData memory _table) internal {
-    emitEphemeral(id, _table.timestamp, _table.attacker, _table.target);
+    emitEphemeral(id, _table.timestamp, _table.gameId, _table.attacker, _table.target);
   }
 
   /** Emit the ephemeral event using the data struct (using the specified store) */
   function emitEphemeral(IStore _store, uint256 id, AttackExecutedData memory _table) internal {
-    emitEphemeral(_store, id, _table.timestamp, _table.attacker, _table.target);
+    emitEphemeral(_store, id, _table.timestamp, _table.gameId, _table.attacker, _table.target);
   }
 
   /** Tightly pack full data using this table's schema */
   function encode(
     uint256 timestamp,
+    uint32 gameId,
     string memory attacker,
     string memory target
   ) internal pure returns (bytes memory) {
@@ -117,7 +128,7 @@ library AttackExecuted {
       _encodedLengths = PackedCounterLib.pack(bytes(attacker).length, bytes(target).length);
     }
 
-    return abi.encodePacked(timestamp, _encodedLengths.unwrap(), bytes((attacker)), bytes((target)));
+    return abi.encodePacked(timestamp, gameId, _encodedLengths.unwrap(), bytes((attacker)), bytes((target)));
   }
 
   /** Encode keys as a bytes32 array using this table's schema */

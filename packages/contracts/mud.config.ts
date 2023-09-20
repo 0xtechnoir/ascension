@@ -80,6 +80,7 @@ export default mudConfig({
       },
       schema: {
         timestamp: "uint256",
+        gameId: "uint32",
         attacker: "string",
         target: "string",
       }, 

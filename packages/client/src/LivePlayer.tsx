@@ -106,7 +106,11 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
           action={() => () => increaseRange(gameId!)}
         />
         <br />
-        <ActionButton label="Claim Action Point" action={() => () => claimActionPoint(gameId!)} />
+        <ActionButton 
+          label="Claim Action Point" 
+          action={() => () => claimActionPoint(gameId!)} 
+          buttonColour={timeUntilNextClaim === "Now!" ? "bg-orange-500" : ""}
+        />
         <p>-----------------------------------</p>
         <br />
       </>
@@ -136,7 +140,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
           />
           <ActionButton
             label="Attack Player"
-            action={() => () => attack(highlightedPlayer!)}
+            action={() => () => attack(highlightedPlayer!, gameId!)}
           />
         </div>
         <br />

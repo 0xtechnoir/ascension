@@ -48,7 +48,7 @@ export function createSystemCalls(
     await waitForTransaction(tx);
   };
 
-  const attack = async (target: Entity) => {
+  const attack = async (target: Entity, gameId: number) => {
     console.log("attack called");
     if (!playerEntity) {
       throw new Error("no player");
@@ -57,6 +57,7 @@ export function createSystemCalls(
     const tx = await worldContract.write.attackPlayer([
       bigIntTimestamp,
       target,
+      gameId,
     ]);
     await waitForTransaction(tx);
   };

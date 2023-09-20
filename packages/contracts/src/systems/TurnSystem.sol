@@ -108,11 +108,12 @@ contract TurnSystem is System {
     })); 
   }
 
-  function attackPlayer(uint256 timestamp, bytes32 _target) public {
+  function attackPlayer(uint256 timestamp, bytes32 _target, uint32 gameId) public {
     bytes32 player = addressToEntityKey(_msgSender());
     // require(GameIsLive.get(), "Match is not live.");
     require(Alive.get(player), "Not possible when dead");
     require(Alive.get(_target), "Cannot attack a dead player");
+    require(InGame.get(_target) == gameId, "Cannot attack a player in a different game session");
     uint32 currentActionPoints = ActionPoint.get(player);
     require(currentActionPoints > 0, "You need an action point in order to attack");
     
@@ -137,6 +138,7 @@ contract TurnSystem is System {
 
     AttackExecuted.emitEphemeral(timestamp, AttackExecutedData({
       timestamp: timestamp,
+      gameId: gameId,
       attacker: attacker,
       target: target
     }));  

@@ -4,16 +4,18 @@ import { useGameContext } from "./GameContext";
 type ActionButtonProps = {
   label: string;
   action: () => () => Promise<void>;
+  buttonColour?: string,
 };
 
 export const ActionButton: React.FC<ActionButtonProps> = ({
   label,
   action,
+  buttonColour = '',
 }) => {
   const { handleError, gameId } = useGameContext();
   return (
     <button
-      className="h-10 px-6 font-semibold rounded-md border border-slate-200 text-slate-300"
+      className={`h-10 px-6 font-semibold rounded-md border border-slate-200 text-slate-300 ${buttonColour}`}
       type="button"
       onClick={async () => {
         
