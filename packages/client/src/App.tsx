@@ -35,7 +35,7 @@ export const App = () => {
   
   // Constants 
   // const gameSession = useEntityQuery([HasValue(GameSession, { gameId: gameId })]);
-  const gameSession = useEntityQuery([Has(GameSession)]);
+  const gameSessions = useEntityQuery([Has(GameSession)]);
   const currentGameID = useComponentValue(InGame, playerEntity)?.value || "";
   const allPlayers = useEntityQuery([HasValue(InGame, { value: gameId }), Has(Player), Has(Position)]);
   const livePlayers = useEntityQuery([HasValue(InGame, { value: gameId }), Has(Player), HasValue(Alive, { value: true })]);
@@ -49,11 +49,19 @@ export const App = () => {
   });
 
   let gameIsLive = false;
-  if (gameSession) {
-    console.log("gameSession: ", gameSession);
-    console.log("gameId: ", gameId);
-    gameIsLive = getComponentValue(GameSession, gameSession[0])?.isLive || false;
-    console.log("gameIsLive: ", gameIsLive);
+  if (gameSessions) {
+    // loop through gameSessions and find the one with the matching gameId
+    for (let i = 0; i < gameSessions.length; i++) {
+      const gameSession = gameSessions[i];
+      const rec = getComponentValue(GameSession, gameSession);
+      if (rec?.gameId === gameId) {
+        gameIsLive = rec?.isLive || false;
+      }
+    }
+    // console.log("gameSession: ", gameSessions);
+    // console.log("gameId: ", gameId);
+    // gameIsLive = getComponentValue(GameSession, gameSessions[0])?.isLive || false;
+    // console.log("gameIsLive: ", gameIsLive);
   }
 
   // Hooks

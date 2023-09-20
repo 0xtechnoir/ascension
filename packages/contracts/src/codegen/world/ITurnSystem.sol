@@ -6,7 +6,7 @@ pragma solidity >=0.8.0;
 interface ITurnSystem {
   function startMatch(uint32 gameId, uint32 playersSpawned, uint256 startTime) external;
 
-  function increaseRange(uint256 timestamp) external;
+  function increaseRange(uint256 timestamp, uint32 gameId) external;
 
   function sendActionPoint(uint256 timestamp, bytes32 _recipient) external;
 

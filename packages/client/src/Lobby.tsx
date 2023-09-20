@@ -12,10 +12,10 @@ interface LobbyProps {
 
 const Lobby: React.FC<LobbyProps> = ({ setShowGameBoard, currentGameID }) => {
 
-    const { setGameId } = useGameContext();
+    const { setGameId, handleError } = useGameContext();
     const { components: { GameSession } } = useMUD();
 
-    const [inputGameID, setInputGameID] = useState<number>(0);
+    const [inputGameID, setInputGameID] = useState<number | undefined>();
     
     const allGameSessions = useEntityQuery([Has(GameSession)]);
     const allGameIds = allGameSessions.map((entity) => {
@@ -38,7 +38,7 @@ const Lobby: React.FC<LobbyProps> = ({ setShowGameBoard, currentGameID }) => {
       console.log("handleCreateGame GameId created: ", gameId);
     }
     const handleJoinGame = (eventOrGameID?: React.MouseEvent<HTMLButtonElement, MouseEvent> | number) => {
-        let gameIDToJoin: number;
+        let gameIDToJoin: number | undefined;
         if (typeof eventOrGameID === 'number') {
           gameIDToJoin = eventOrGameID;
         } else {
@@ -71,7 +71,7 @@ const Lobby: React.FC<LobbyProps> = ({ setShowGameBoard, currentGameID }) => {
                         value={inputGameID}
                         onChange={(e) => setInputGameID(Number(e.target.value))}
                         />
-                        <button onClick={() => handleJoinGame(inputGameID)}>Join Game</button>
+                        <button onClick={() => inputGameID ? handleJoinGame(inputGameID) : handleError("Please enter a game ID")}>Join Game</button>
                     </div>
                 </>
             }

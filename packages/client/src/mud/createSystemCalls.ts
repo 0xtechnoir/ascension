@@ -58,13 +58,13 @@ export function createSystemCalls(
     await waitForTransaction(tx);
   };
 
-  const increaseRange = async () => {
+  const increaseRange = async (gameId: number) => {
     console.log("increaseRange called");
     if (!playerEntity) {
       throw new Error("no player");
     }
     const bigIntTimestamp = BigInt(Date.now());
-    const tx = await worldContract.write.increaseRange([bigIntTimestamp]);
+    const tx = await worldContract.write.increaseRange([bigIntTimestamp, gameId]);
     await waitForTransaction(tx);
   };
 

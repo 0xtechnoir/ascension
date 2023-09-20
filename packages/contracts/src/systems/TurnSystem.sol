@@ -62,9 +62,9 @@ contract TurnSystem is System {
     }
   }
 
-  function increaseRange(uint256 timestamp) public {
+  function increaseRange(uint256 timestamp, uint32 gameId) public {
     bytes32 player = addressToEntityKey(_msgSender());
-    // require(GameIsLive.get(), "Match is not live.");
+    require(GameSession.getIsLive(gameId), "Match hasn't started yet");
     require(Alive.get(player), "Not possible when dead");
     uint32 currentRange = Range.get(player);
     uint32 currentActionPoints = ActionPoint.get(player);
@@ -75,6 +75,7 @@ contract TurnSystem is System {
     string memory sender = Username.get(player);
     RangeIncreaseExecuted.emitEphemeral(timestamp, RangeIncreaseExecutedData({
       timestamp: timestamp,
+      gameId: gameId,
       player: sender
     })); 
   }

@@ -22,6 +22,7 @@ bytes32 constant RangeIncreaseExecutedTableId = _tableId;
 
 struct RangeIncreaseExecutedData {
   uint256 timestamp;
+  uint32 gameId;
   string player;
 }
 
@@ -36,9 +37,10 @@ library RangeIncreaseExecuted {
 
   /** Get the table's value schema */
   function getValueSchema() internal pure returns (Schema) {
-    SchemaType[] memory _schema = new SchemaType[](2);
+    SchemaType[] memory _schema = new SchemaType[](3);
     _schema[0] = SchemaType.UINT256;
-    _schema[1] = SchemaType.STRING;
+    _schema[1] = SchemaType.UINT32;
+    _schema[2] = SchemaType.STRING;
 
     return SchemaLib.encode(_schema);
   }
@@ -51,9 +53,10 @@ library RangeIncreaseExecuted {
 
   /** Get the table's field names */
   function getFieldNames() internal pure returns (string[] memory fieldNames) {
-    fieldNames = new string[](2);
+    fieldNames = new string[](3);
     fieldNames[0] = "timestamp";
-    fieldNames[1] = "player";
+    fieldNames[1] = "gameId";
+    fieldNames[2] = "player";
   }
 
   /** Register the table's key schema, value schema, key names and value names */
@@ -67,8 +70,8 @@ library RangeIncreaseExecuted {
   }
 
   /** Emit the ephemeral event using individual values */
-  function emitEphemeral(uint256 id, uint256 timestamp, string memory player) internal {
-    bytes memory _data = encode(timestamp, player);
+  function emitEphemeral(uint256 id, uint256 timestamp, uint32 gameId, string memory player) internal {
+    bytes memory _data = encode(timestamp, gameId, player);
 
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
@@ -77,8 +80,8 @@ library RangeIncreaseExecuted {
   }
 
   /** Emit the ephemeral event using individual values (using the specified store) */
-  function emitEphemeral(IStore _store, uint256 id, uint256 timestamp, string memory player) internal {
-    bytes memory _data = encode(timestamp, player);
+  function emitEphemeral(IStore _store, uint256 id, uint256 timestamp, uint32 gameId, string memory player) internal {
+    bytes memory _data = encode(timestamp, gameId, player);
 
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
@@ -88,23 +91,23 @@ library RangeIncreaseExecuted {
 
   /** Emit the ephemeral event using the data struct */
   function emitEphemeral(uint256 id, RangeIncreaseExecutedData memory _table) internal {
-    emitEphemeral(id, _table.timestamp, _table.player);
+    emitEphemeral(id, _table.timestamp, _table.gameId, _table.player);
   }
 
   /** Emit the ephemeral event using the data struct (using the specified store) */
   function emitEphemeral(IStore _store, uint256 id, RangeIncreaseExecutedData memory _table) internal {
-    emitEphemeral(_store, id, _table.timestamp, _table.player);
+    emitEphemeral(_store, id, _table.timestamp, _table.gameId, _table.player);
   }
 
   /** Tightly pack full data using this table's schema */
-  function encode(uint256 timestamp, string memory player) internal pure returns (bytes memory) {
+  function encode(uint256 timestamp, uint32 gameId, string memory player) internal pure returns (bytes memory) {
     PackedCounter _encodedLengths;
     // Lengths are effectively checked during copy by 2**40 bytes exceeding gas limits
     unchecked {
       _encodedLengths = PackedCounterLib.pack(bytes(player).length);
     }
 
-    return abi.encodePacked(timestamp, _encodedLengths.unwrap(), bytes((player)));
+    return abi.encodePacked(timestamp, gameId, _encodedLengths.unwrap(), bytes((player)));
   }
 
   /** Encode keys as a bytes32 array using this table's schema */
