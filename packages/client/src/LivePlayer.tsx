@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useMUD } from "./MUDContext";
-import { Entity } from "@latticexyz/recs";
-import { useComponentValue } from "@latticexyz/react";
+import { useComponentValue, useEntityQuery } from "@latticexyz/react";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
 import { ActionButton } from "./ActionButton";
 import { useGameContext } from "./GameContext";
+import { Entity, Has, HasValue, getComponentValue } from "@latticexyz/recs";
 
 type LivePlayerProps = {
   entity: Entity;
@@ -26,6 +26,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
       Alive,
       LastActionPointClaim,
       ClaimInterval,
+      GameSession,
     },
     systemCalls: { sendActionPoint, attack, increaseRange, claimActionPoint },
     network: { playerEntity },
@@ -41,7 +42,21 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
   const range = useComponentValue(Range, entity)?.value;
   const ap = useComponentValue(ActionPoint, entity)?.value;
   const alive = useComponentValue(Alive, entity)?.value;
- 
+
+  // is the game live yet? 
+  const gameSessions = useEntityQuery([Has(GameSession)]);
+  let gameIsLive = false;
+  if (gameSessions) {
+    // loop through gameSessions and find the one with the matching gameId
+    for (let i = 0; i < gameSessions.length; i++) {
+      const gameSession = gameSessions[i];
+      const rec = getComponentValue(GameSession, gameSession);
+      if (rec?.gameId === gameId) {
+        gameIsLive = rec?.isLive || false;
+      }
+    }
+  }
+
   const lastActionPointClaim = useComponentValue(
     LastActionPointClaim,
     entity
@@ -100,16 +115,20 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
           <p>Range: {range}</p>
           <p>Action Points: {ap}</p>
         </div>
-        <ActionButton
-          label="Increase Range (Requires 1 AP)"
-          action={() => () => increaseRange(gameId!)}
-        />
-        <br />
-        <ActionButton 
-          label={`Claim Action Point: ${timeUntilNextClaim}` }
-          action={() => () => claimActionPoint(gameId!)} 
-          buttonColour={timeUntilNextClaim === "Now!" ? "bg-orange-500" : ""}
-        />
+        {gameIsLive && (
+          <>
+            <ActionButton
+              label="Increase Range (Requires 1 AP)"
+              action={() => () => increaseRange(gameId!)}
+            />
+            <br />
+            <ActionButton 
+              label={`Claim Action Point: ${timeUntilNextClaim}` }
+              action={() => () => claimActionPoint(gameId!)} 
+              buttonColour={timeUntilNextClaim === "Now!" ? "bg-orange-500" : ""}
+            />
+          </>
+        )}
         <p>-----------------------------------</p>
         <br />
       </>
@@ -133,14 +152,18 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
         <p>Range: {range}</p>
         <p>Action Points: {ap}</p>
         <div className="flex">
-          <ActionButton
-            label="Donate Action Point"
-            action={() => () => sendActionPoint(highlightedPlayer!, gameId!)}
-          />
-          <ActionButton
-            label="Attack Player"
-            action={() => () => attack(highlightedPlayer!, gameId!)}
-          />
+        {gameIsLive && (
+          <>
+            <ActionButton
+              label="Donate Action Point"
+              action={() => () => sendActionPoint(highlightedPlayer!, gameId!)}
+            />
+            <ActionButton
+              label="Attack Player"
+              action={() => () => attack(highlightedPlayer!, gameId!)}
+            />
+          </> 
+        )}
         </div>
         <br />
         <p>-----------------------------------</p>
