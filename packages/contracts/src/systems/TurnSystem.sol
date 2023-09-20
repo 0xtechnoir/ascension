@@ -146,9 +146,7 @@ contract TurnSystem is System {
   }
 
   function claimActionPoint(uint256 _timestamp, uint32 _gameId) public {
-    // require(GameIsLive.get(), "Match is not live.");
-    // QueryFragment[] memory fragments = new QueryFragment[](1);
-    // fragments[0] = QueryFragment(QueryType.HasValue, GameSessionTableId, GameSession.encode(_gameId));
+    require(GameSession.getIsLive(_gameId), "Match hasn't started yet");
 
     bytes32 player = addressToEntityKey(_msgSender());
     require(Alive.get(player), "Not possible when dead");

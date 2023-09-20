@@ -3,7 +3,7 @@ import { useGameContext } from "./GameContext";
 
 type ActionButtonProps = {
   label: string;
-  action: (gameId: string) => Promise<void>;
+  action: (gameId: number | undefined) => Promise<void>;
 };
 
 export const ActionButton: React.FC<ActionButtonProps> = ({

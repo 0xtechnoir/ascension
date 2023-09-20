@@ -142,8 +142,11 @@ export function createSystemCalls(
   };
 
   const claimActionPoint = async (gameId: number) => {
+    if (!gameId) {
+      throw new Error("no gameId found");
+    }
     if (!playerEntity) {
-      throw new Error("no player");
+      throw new Error("no player found");
     }
     const bigIntTimestamp = BigInt(Date.now());
     const tx = await worldContract.write.claimActionPoint([bigIntTimestamp, gameId]);
