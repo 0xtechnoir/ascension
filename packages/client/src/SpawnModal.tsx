@@ -9,7 +9,6 @@ type SpawnModalProps = {
   showModal: boolean;
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
   setShowSpawnButton: React.Dispatch<React.SetStateAction<boolean>>;
-  gameID: string;
 };
 
 const SpawnModal: React.FC<SpawnModalProps> = ({

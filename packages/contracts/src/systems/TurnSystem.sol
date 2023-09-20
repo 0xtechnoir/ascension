@@ -25,7 +25,8 @@ import {
   VoteExecuted,
   VoteExecutedData,
   GameSession,
-  GameSessionTableId } from "../codegen/Tables.sol";
+  GameSessionTableId,
+  InGame } from "../codegen/Tables.sol";
 import { addressToEntityKey } from "../addressToEntityKey.sol";
 import { positionToEntityKey } from "../positionToEntityKey.sol";
 import { getKeysInTable } from "@latticexyz/world/src/modules/keysintable/getKeysInTable.sol";
@@ -80,11 +81,12 @@ contract TurnSystem is System {
     })); 
   }
 
-  function sendActionPoint(uint256 timestamp, bytes32 _recipient) public {
+  function sendActionPoint(uint256 timestamp, bytes32 _recipient, uint32 gameId) public {
     bytes32 player = addressToEntityKey(_msgSender());
-    // require(GameIsLive.get(), "Match is not live.");
+    require(GameSession.getIsLive(gameId), "Match hasn't started yet");
     require(Alive.get(player), "Not possible when dead");
     require(Alive.get(_recipient), "Cannot send AP to a dead player");
+    require(InGame.get(_recipient) == gameId, "Cannot send AP to a player in a different game session");
     uint32 currentActionPoints = ActionPoint.get(player);
     require(currentActionPoints > 0, "You need an action point in order to transfer an action point");
 
@@ -100,6 +102,7 @@ contract TurnSystem is System {
     string memory reciever = Username.get(_recipient);
     SendActionPointExecuted.emitEphemeral(timestamp, SendActionPointExecutedData({
       timestamp: timestamp,
+      gameId: gameId,
       sender: sender,
       reciever: reciever
     })); 

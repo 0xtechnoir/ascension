@@ -33,7 +33,9 @@ export function createSystemCalls(
     await waitForTransaction(tx);
   };
 
-  const sendActionPoint = async (recipient: Entity) => {
+  const sendActionPoint = async (recipient: Entity, gameId: number) => {
+    console.log("sendActionPoint called with recipient: ", recipient);
+    console.log("sendActionPoint called with gameId: ", gameId);
     if (!playerEntity) {
       throw new Error("no player");
     }
@@ -41,6 +43,7 @@ export function createSystemCalls(
     const tx = await worldContract.write.sendActionPoint([
       bigIntTimestamp,
       recipient,
+      gameId,
     ]);
     await waitForTransaction(tx);
   };

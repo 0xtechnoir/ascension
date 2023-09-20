@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useComponentValue, useEntityQuery } from "@latticexyz/react";
 import { useMUD } from "./MUDContext";
-import { Entity, Has, HasValue, getComponentValue, g } from "@latticexyz/recs";
+import { Entity, Has, HasValue, getComponentValue } from "@latticexyz/recs";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
 import { GameBoard } from "./GameBoard";
 import { LivePlayersListComponent } from "./LivePlayersListComponent";
@@ -32,11 +32,9 @@ export const App = () => {
       Alive, GameSession, InGame },
     systemCalls: { startMatch },
   } = useMUD();
-  
-  // Constants 
-  // const gameSession = useEntityQuery([HasValue(GameSession, { gameId: gameId })]);
+
   const gameSessions = useEntityQuery([Has(GameSession)]);
-  const currentGameID = useComponentValue(InGame, playerEntity)?.value || "";
+  const currentGameID = useComponentValue(InGame, playerEntity)?.value;
   const allPlayers = useEntityQuery([HasValue(InGame, { value: gameId }), Has(Player), Has(Position)]);
   const livePlayers = useEntityQuery([HasValue(InGame, { value: gameId }), Has(Player), HasValue(Alive, { value: true })]);
   const deadPlayers = useEntityQuery([HasValue(InGame, { value: gameId }), Has(Player), HasValue(Alive, { value: false })]);
@@ -58,10 +56,6 @@ export const App = () => {
         gameIsLive = rec?.isLive || false;
       }
     }
-    // console.log("gameSession: ", gameSessions);
-    // console.log("gameId: ", gameId);
-    // gameIsLive = getComponentValue(GameSession, gameSessions[0])?.isLive || false;
-    // console.log("gameIsLive: ", gameIsLive);
   }
 
   // Hooks
@@ -91,6 +85,9 @@ export const App = () => {
   const start = async () => {
     const playersSpawned = allPlayers.length;
     const startTime = Date.now();
+    if (!gameId) {
+      throw new Error("No game ID found");
+    }
     try {
       await startMatch(gameId, playersSpawned, startTime);
     } catch (error) {
@@ -165,7 +162,6 @@ export const App = () => {
               showModal={showModal}
               setShowModal={setShowModal}
               setShowSpawnButton={setShowSpawnButton}
-              gameID={gameId}
               />
         </div>
       )}

@@ -3,7 +3,7 @@ import { useGameContext } from "./GameContext";
 
 type ActionButtonProps = {
   label: string;
-  action: (gameId: number) => Promise<void>;
+  action: () => () => Promise<void>;
 };
 
 export const ActionButton: React.FC<ActionButtonProps> = ({
@@ -18,12 +18,13 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
       onClick={async () => {
         
         if(!gameId) {
-          handleError("No game ID found. Have ou joined a game?");
+          handleError("No game ID found. Have you joined a game?");
           return;
         }
 
         try {
-          await action(gameId);
+          const actionToExecute = action();
+          await actionToExecute();
         } catch (error) {
           if (typeof error === "object" && error !== null) {
             const message = (error as ErrorWithShortMessage).shortMessage;

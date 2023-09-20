@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { useGameContext } from "./GameContext";
 import { useEntityQuery } from "@latticexyz/react";
-import { getComponentValue, Has, HasValue } from "@latticexyz/recs";
+import { getComponentValue, Has } from "@latticexyz/recs";
 import { useMUD } from "./MUDContext";
 
 interface LobbyProps {
   setShowGameBoard: React.Dispatch<React.SetStateAction<boolean>>;
   showGameBoard: boolean;
-  currentGameID: number;
+  currentGameID: number | undefined;
 }
 
 const Lobby: React.FC<LobbyProps> = ({ setShowGameBoard, currentGameID }) => {
@@ -15,7 +15,7 @@ const Lobby: React.FC<LobbyProps> = ({ setShowGameBoard, currentGameID }) => {
     const { setGameId, handleError } = useGameContext();
     const { components: { GameSession } } = useMUD();
 
-    const [inputGameID, setInputGameID] = useState<number | undefined>();
+    const [inputGameID, setInputGameID] = useState<number | null>(null);
     
     const allGameSessions = useEntityQuery([Has(GameSession)]);
     const allGameIds = allGameSessions.map((entity) => {
@@ -38,7 +38,7 @@ const Lobby: React.FC<LobbyProps> = ({ setShowGameBoard, currentGameID }) => {
       console.log("handleCreateGame GameId created: ", gameId);
     }
     const handleJoinGame = (eventOrGameID?: React.MouseEvent<HTMLButtonElement, MouseEvent> | number) => {
-        let gameIDToJoin: number | undefined;
+        let gameIDToJoin: number | null;
         if (typeof eventOrGameID === 'number') {
           gameIDToJoin = eventOrGameID;
         } else {
@@ -68,7 +68,7 @@ const Lobby: React.FC<LobbyProps> = ({ setShowGameBoard, currentGameID }) => {
                         type="text"
                         className="text-black"
                         placeholder="Enter Game ID"
-                        value={inputGameID}
+                        value={inputGameID ? inputGameID : ''}
                         onChange={(e) => setInputGameID(Number(e.target.value))}
                         />
                         <button onClick={() => inputGameID ? handleJoinGame(inputGameID) : handleError("Please enter a game ID")}>Join Game</button>

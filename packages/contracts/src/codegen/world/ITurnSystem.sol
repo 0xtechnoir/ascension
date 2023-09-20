@@ -8,7 +8,7 @@ interface ITurnSystem {
 
   function increaseRange(uint256 timestamp, uint32 gameId) external;
 
-  function sendActionPoint(uint256 timestamp, bytes32 _recipient) external;
+  function sendActionPoint(uint256 timestamp, bytes32 _recipient, uint32 gameId) external;
 
   function attackPlayer(uint256 timestamp, bytes32 _target) external;
 

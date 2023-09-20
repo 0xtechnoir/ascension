@@ -25,7 +25,7 @@ const ActivityLogComponent = () => {
 
   const allMoveLogs = useEntityQuery([HasValue(MoveExecuted, { gameId : gameId })]);
   const allAttackLogs = useEntityQuery([Has(AttackExecuted)]);
-  const allSendActionPointLogs = useEntityQuery([Has(SendActionPointExecuted)]);
+  const allSendActionPointLogs = useEntityQuery([HasValue(SendActionPointExecuted, { gameId : gameId })]);
   const allRangeIncreaseLogs = useEntityQuery([HasValue(RangeIncreaseExecuted, { gameId : gameId })]);
   const allPlayerSpawnedLogs = useEntityQuery([HasValue(PlayerSpawned, { gameId : gameId })]);
   const allActionPointClaimExecutedLogs = useEntityQuery([HasValue(ActionPointClaimExecuted, { gameId : gameId })]);

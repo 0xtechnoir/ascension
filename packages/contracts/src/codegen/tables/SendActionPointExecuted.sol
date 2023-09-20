@@ -22,6 +22,7 @@ bytes32 constant SendActionPointExecutedTableId = _tableId;
 
 struct SendActionPointExecutedData {
   uint256 timestamp;
+  uint32 gameId;
   string sender;
   string reciever;
 }
@@ -37,10 +38,11 @@ library SendActionPointExecuted {
 
   /** Get the table's value schema */
   function getValueSchema() internal pure returns (Schema) {
-    SchemaType[] memory _schema = new SchemaType[](3);
+    SchemaType[] memory _schema = new SchemaType[](4);
     _schema[0] = SchemaType.UINT256;
-    _schema[1] = SchemaType.STRING;
+    _schema[1] = SchemaType.UINT32;
     _schema[2] = SchemaType.STRING;
+    _schema[3] = SchemaType.STRING;
 
     return SchemaLib.encode(_schema);
   }
@@ -53,10 +55,11 @@ library SendActionPointExecuted {
 
   /** Get the table's field names */
   function getFieldNames() internal pure returns (string[] memory fieldNames) {
-    fieldNames = new string[](3);
+    fieldNames = new string[](4);
     fieldNames[0] = "timestamp";
-    fieldNames[1] = "sender";
-    fieldNames[2] = "reciever";
+    fieldNames[1] = "gameId";
+    fieldNames[2] = "sender";
+    fieldNames[3] = "reciever";
   }
 
   /** Register the table's key schema, value schema, key names and value names */
@@ -70,8 +73,14 @@ library SendActionPointExecuted {
   }
 
   /** Emit the ephemeral event using individual values */
-  function emitEphemeral(uint256 id, uint256 timestamp, string memory sender, string memory reciever) internal {
-    bytes memory _data = encode(timestamp, sender, reciever);
+  function emitEphemeral(
+    uint256 id,
+    uint256 timestamp,
+    uint32 gameId,
+    string memory sender,
+    string memory reciever
+  ) internal {
+    bytes memory _data = encode(timestamp, gameId, sender, reciever);
 
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
@@ -84,10 +93,11 @@ library SendActionPointExecuted {
     IStore _store,
     uint256 id,
     uint256 timestamp,
+    uint32 gameId,
     string memory sender,
     string memory reciever
   ) internal {
-    bytes memory _data = encode(timestamp, sender, reciever);
+    bytes memory _data = encode(timestamp, gameId, sender, reciever);
 
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
@@ -97,17 +107,18 @@ library SendActionPointExecuted {
 
   /** Emit the ephemeral event using the data struct */
   function emitEphemeral(uint256 id, SendActionPointExecutedData memory _table) internal {
-    emitEphemeral(id, _table.timestamp, _table.sender, _table.reciever);
+    emitEphemeral(id, _table.timestamp, _table.gameId, _table.sender, _table.reciever);
   }
 
   /** Emit the ephemeral event using the data struct (using the specified store) */
   function emitEphemeral(IStore _store, uint256 id, SendActionPointExecutedData memory _table) internal {
-    emitEphemeral(_store, id, _table.timestamp, _table.sender, _table.reciever);
+    emitEphemeral(_store, id, _table.timestamp, _table.gameId, _table.sender, _table.reciever);
   }
 
   /** Tightly pack full data using this table's schema */
   function encode(
     uint256 timestamp,
+    uint32 gameId,
     string memory sender,
     string memory reciever
   ) internal pure returns (bytes memory) {
@@ -117,7 +128,7 @@ library SendActionPointExecuted {
       _encodedLengths = PackedCounterLib.pack(bytes(sender).length, bytes(reciever).length);
     }
 
-    return abi.encodePacked(timestamp, _encodedLengths.unwrap(), bytes((sender)), bytes((reciever)));
+    return abi.encodePacked(timestamp, gameId, _encodedLengths.unwrap(), bytes((sender)), bytes((reciever)));
   }
 
   /** Encode keys as a bytes32 array using this table's schema */

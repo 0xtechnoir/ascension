@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useMUD } from "./MUDContext";
-import { useGameContext } from "./GameContext";
 import { Entity } from "@latticexyz/recs";
 import { useComponentValue } from "@latticexyz/react";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
 import { ActionButton } from "./ActionButton";
+import { useGameContext } from "./GameContext";
 
 type LivePlayerProps = {
   entity: Entity;
@@ -33,6 +33,8 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
 
   const [timeUntilNextClaim, setTimeUntilNextClaim] =
     useState<string>("Calculating...");
+
+  const { gameId } = useGameContext();
 
   const username = useComponentValue(Username, entity)?.value;
   const health = useComponentValue(Health, entity)?.value;
@@ -101,10 +103,10 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
         </div>
         <ActionButton
           label="Increase Range (Requires 1 AP)"
-          action={increaseRange}
+          action={() => () => increaseRange(gameId!)}
         />
         <br />
-        <ActionButton label="Claim Action Point" action={claimActionPoint} />
+        <ActionButton label="Claim Action Point" action={() => () => claimActionPoint(gameId!)} />
         <p>-----------------------------------</p>
         <br />
       </>
@@ -130,11 +132,11 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
         <div className="flex">
           <ActionButton
             label="Donate Action Point"
-            action={() => sendActionPoint(highlightedPlayer!)}
+            action={() => () => sendActionPoint(highlightedPlayer!, gameId!)}
           />
           <ActionButton
             label="Attack Player"
-            action={() => attack(highlightedPlayer!)}
+            action={() => () => attack(highlightedPlayer!)}
           />
         </div>
         <br />
