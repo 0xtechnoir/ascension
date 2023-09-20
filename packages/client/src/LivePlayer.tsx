@@ -31,8 +31,6 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
     network: { playerEntity },
   } = useMUD();
 
-  const { gameId } = useGameContext();
-
   const [timeUntilNextClaim, setTimeUntilNextClaim] =
     useState<string>("Calculating...");
 

@@ -23,7 +23,7 @@ const ActivityLogComponent = () => {
     },
   } = useMUD();
 
-  const allMoveLogs = useEntityQuery([Has(MoveExecuted)]);
+  const allMoveLogs = useEntityQuery([HasValue(MoveExecuted, { gameId : gameId })]);
   const allAttackLogs = useEntityQuery([Has(AttackExecuted)]);
   const allSendActionPointLogs = useEntityQuery([Has(SendActionPointExecuted)]);
   const allRangeIncreaseLogs = useEntityQuery([Has(RangeIncreaseExecuted)]);

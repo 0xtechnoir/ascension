@@ -110,7 +110,7 @@ contract MapSystem is System {
     _y = (_y + height) % height;
     
     bytes32[][] memory keyTuples = queryPosition(_x, _y, _gameId);
-    require(keyTuples.length == 0, "There is already a player at the given position");
+    require(keyTuples.length == 0, "There is already a player at the given position in the same game");
 
     string memory username = Username.get(player);
     Position.set(player, _x, _y);
