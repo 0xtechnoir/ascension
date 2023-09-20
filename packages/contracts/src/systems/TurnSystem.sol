@@ -37,6 +37,7 @@ import { GameStarted, GameStartedData } from "../codegen/Tables.sol";
 import { AttackExecuted, AttackExecutedData } from "../codegen/Tables.sol";
 import { SendActionPointExecuted, SendActionPointExecutedData } from "../codegen/Tables.sol";
 import { RangeIncreaseExecuted, RangeIncreaseExecutedData } from "../codegen/Tables.sol";
+import { PlayerDied, PlayerDiedData } from "../codegen/Tables.sol";
 
 contract TurnSystem is System {
 
@@ -131,6 +132,11 @@ contract TurnSystem is System {
       Movable.set(_target, false);
       Range.set(_target, 0);
       Alive.set(_target, false);
+      PlayerDied.emitEphemeral(timestamp, PlayerDiedData({
+        timestamp: timestamp,
+        gameId: gameId,
+        player: Username.get(_target)
+      }));
     }
 
     string memory attacker = Username.get(player);
@@ -175,8 +181,8 @@ contract TurnSystem is System {
       gameId: _gameId
     }));  
   }
-  function claimVotingPoint(uint256 timestamp) public {
-    // require(GameIsLive.get(), "Match is not live.");
+  function claimVotingPoint(uint256 timestamp, uint32 _gameId) public {
+    require(GameSession.getIsLive(_gameId), "Match hasn't started yet");
     bytes32 player = addressToEntityKey(_msgSender());
     require(!Alive.get(player), "Player must be dead to claim voting point");
 
@@ -194,6 +200,7 @@ contract TurnSystem is System {
     string memory username = Username.get(player);
     VotingPointClaimExecuted.emitEphemeral(timestamp, VotingPointClaimExecutedData({
       timestamp: timestamp,
+      gameId: _gameId,
       player: username
     }));  
   }

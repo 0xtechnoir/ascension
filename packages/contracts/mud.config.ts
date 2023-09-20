@@ -59,6 +59,17 @@ export default mudConfig({
       }, 
       ephemeral: true,
     },
+    PlayerDied : {
+      keySchema: {
+        id: "uint256",
+      },
+      schema: {
+        timestamp: "uint256",
+        gameId: "uint32",
+        player: "string",
+      }, 
+      ephemeral: true,
+    },
     MoveExecuted : {
       keySchema: {
         id: "uint256",
@@ -137,6 +148,7 @@ export default mudConfig({
       },
       schema: {
         timestamp: "uint256",
+        gameId: "uint32",
         player: "string",
       }, 
       ephemeral: true,

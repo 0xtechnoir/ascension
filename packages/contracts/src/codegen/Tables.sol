@@ -20,6 +20,7 @@ import { ActionPoint, ActionPointTableId } from "./tables/ActionPoint.sol";
 import { VotingPoint, VotingPointTableId } from "./tables/VotingPoint.sol";
 import { Position, PositionTableId } from "./tables/Position.sol";
 import { PlayerSpawned, PlayerSpawnedData, PlayerSpawnedTableId } from "./tables/PlayerSpawned.sol";
+import { PlayerDied, PlayerDiedData, PlayerDiedTableId } from "./tables/PlayerDied.sol";
 import { MoveExecuted, MoveExecutedData, MoveExecutedTableId } from "./tables/MoveExecuted.sol";
 import { AttackExecuted, AttackExecutedData, AttackExecutedTableId } from "./tables/AttackExecuted.sol";
 import { SendActionPointExecuted, SendActionPointExecutedData, SendActionPointExecutedTableId } from "./tables/SendActionPointExecuted.sol";

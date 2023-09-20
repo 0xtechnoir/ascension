@@ -17,16 +17,16 @@ import { EncodeArray } from "@latticexyz/store/src/tightcoder/EncodeArray.sol";
 import { Schema, SchemaLib } from "@latticexyz/store/src/Schema.sol";
 import { PackedCounter, PackedCounterLib } from "@latticexyz/store/src/PackedCounter.sol";
 
-bytes32 constant _tableId = bytes32(abi.encodePacked(bytes16(""), bytes16("VotingPointClaim")));
-bytes32 constant VotingPointClaimExecutedTableId = _tableId;
+bytes32 constant _tableId = bytes32(abi.encodePacked(bytes16(""), bytes16("PlayerDied")));
+bytes32 constant PlayerDiedTableId = _tableId;
 
-struct VotingPointClaimExecutedData {
+struct PlayerDiedData {
   uint256 timestamp;
   uint32 gameId;
   string player;
 }
 
-library VotingPointClaimExecuted {
+library PlayerDied {
   /** Get the table's key schema */
   function getKeySchema() internal pure returns (Schema) {
     SchemaType[] memory _schema = new SchemaType[](1);
@@ -90,12 +90,12 @@ library VotingPointClaimExecuted {
   }
 
   /** Emit the ephemeral event using the data struct */
-  function emitEphemeral(uint256 id, VotingPointClaimExecutedData memory _table) internal {
+  function emitEphemeral(uint256 id, PlayerDiedData memory _table) internal {
     emitEphemeral(id, _table.timestamp, _table.gameId, _table.player);
   }
 
   /** Emit the ephemeral event using the data struct (using the specified store) */
-  function emitEphemeral(IStore _store, uint256 id, VotingPointClaimExecutedData memory _table) internal {
+  function emitEphemeral(IStore _store, uint256 id, PlayerDiedData memory _table) internal {
     emitEphemeral(_store, id, _table.timestamp, _table.gameId, _table.player);
   }
 

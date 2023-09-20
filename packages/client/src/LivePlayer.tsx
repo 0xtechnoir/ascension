@@ -99,7 +99,6 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
           <p>Health: {health}</p>
           <p>Range: {range}</p>
           <p>Action Points: {ap}</p>
-          <p>Time until next claim: {timeUntilNextClaim}</p>
         </div>
         <ActionButton
           label="Increase Range (Requires 1 AP)"
@@ -107,7 +106,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
         />
         <br />
         <ActionButton 
-          label="Claim Action Point" 
+          label={`Claim Action Point: ${timeUntilNextClaim}` }
           action={() => () => claimActionPoint(gameId!)} 
           buttonColour={timeUntilNextClaim === "Now!" ? "bg-orange-500" : ""}
         />

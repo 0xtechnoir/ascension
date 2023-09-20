@@ -19,7 +19,8 @@ const ActivityLogComponent = () => {
       PlayerSpawned,
       ActionPointClaimExecuted,
       VoteExecuted,
-      VotingPointClaimExecuted
+      VotingPointClaimExecuted,
+      PlayerDied,
     },
   } = useMUD();
 
@@ -28,6 +29,7 @@ const ActivityLogComponent = () => {
   const allSendActionPointLogs = useEntityQuery([HasValue(SendActionPointExecuted, { gameId : gameId })]);
   const allRangeIncreaseLogs = useEntityQuery([HasValue(RangeIncreaseExecuted, { gameId : gameId })]);
   const allPlayerSpawnedLogs = useEntityQuery([HasValue(PlayerSpawned, { gameId : gameId })]);
+  const allPlayerDiedLogs = useEntityQuery([HasValue(PlayerDied, { gameId : gameId })]);
   const allActionPointClaimExecutedLogs = useEntityQuery([HasValue(ActionPointClaimExecuted, { gameId : gameId })]);
   const allVotingPointClaimExecutedLogs = useEntityQuery([Has(VotingPointClaimExecuted)]);
   const allVoteExecutedLogs = useEntityQuery([Has(VoteExecuted)]);
@@ -126,6 +128,20 @@ const ActivityLogComponent = () => {
       return mappedLog;
     });
   };
+  
+  const mapPlayerDiedLogs = () => {
+    return allPlayerDiedLogs.map((entity) => {
+      const rec = getComponentValue(PlayerDied, entity);
+      const player = rec?.player;
+      const ts = rec?.timestamp;
+      const numTs = Number(ts);
+      const mappedLog: LogMessage = {
+        timestamp: numTs,
+        message: `${player} was destroyed`,
+      };
+      return mappedLog;
+    });
+  };
 
   const mapActionPointClaimExecutedLogs = () => {
     return allActionPointClaimExecutedLogs.map((entity) => {
@@ -176,12 +192,14 @@ const ActivityLogComponent = () => {
   const mappedRangeIncreaseLogs = mapRangeIncreaseLogs();
   const mappedStartedLog = mapGameStartedLog();
   const mappedPlayerSpawnedLogs = mapPlayerSpawnedLogs();
+  const mappedPlayerDiedLogs = mapPlayerDiedLogs();
   const mappedActionPointClaimExecutedLogs = mapActionPointClaimExecutedLogs();
   const mappedVoteExecutedLogs = mapVoteExecutedLogs();
   const mappedVotingPointClaimExecutedLogs = mapVotingPointClaimExecutedLogs();
   
   mappedLogs = mappedLogs.concat(
     mappedPlayerSpawnedLogs,
+    mappedPlayerDiedLogs,
     mappedStartedLog,
     mappedMoveLogs,
     mappedAttackLogs,
