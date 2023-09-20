@@ -4,6 +4,7 @@ import { Entity } from "@latticexyz/recs";
 import { useComponentValue } from "@latticexyz/react";
 import { ActionButton } from "./ActionButton";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
+import { useGameContext } from "./GameContext";
 
 type DeadPlayerProps = {
   entity: Entity;
@@ -23,8 +24,8 @@ export const DeadPlayer: React.FC<DeadPlayerProps> = ({
     network: { playerEntity },
   } = useMUD();
 
-  const [timeUntilNextClaim, setTimeUntilNextClaim] =
-  useState<string>("Calculating...");
+  const [timeUntilNextClaim, setTimeUntilNextClaim] = useState<string>("Calculating...");
+  const { gameId } = useGameContext();
 
   const username = useComponentValue(Username, entity)?.value;
   const alive = useComponentValue(Alive, entity)?.value;
@@ -88,13 +89,16 @@ export const DeadPlayer: React.FC<DeadPlayerProps> = ({
               <p>Name: {username} (You 🚀)</p>
               <p>Status: {alive ? `Alive` : `Dead`}</p>
               <p>Votes: {votes} </p>
-              <p>Time until next claim: {timeUntilNextClaim}</p>
               <ActionButton
                 label="Vote"
-                action={() => vote(highlightedPlayer!)}
+                action={() => () => vote(highlightedPlayer!, gameId!)}
               />
               <br />
-              <ActionButton label="Claim Voting Point" action={claimVotingPoint} />
+              <ActionButton 
+                label={`Claim Voting Point: ${timeUntilNextClaim}`} 
+                action={() => () => claimVotingPoint(gameId!)} 
+                buttonColour={timeUntilNextClaim === "Now!" ? "bg-orange-500" : ""}
+              />
               <p>-----------------------------------</p>
               <br />
             </div>

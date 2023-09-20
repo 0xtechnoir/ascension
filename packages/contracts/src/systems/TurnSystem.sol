@@ -205,11 +205,12 @@ contract TurnSystem is System {
     }));  
   }
 
-  function vote(uint256 timestamp, bytes32 _recipient) public {
-    // require(GameIsLive.get(), "Match is not live.");
+  function vote(uint256 timestamp, bytes32 _recipient, uint32 gameId) public {
+    require(GameSession.getIsLive(gameId), "Match hasn't started yet");
     bytes32 player = addressToEntityKey(_msgSender());
     require(!Alive.get(player), "Player must be dead to vote");
     require(Alive.get(_recipient), "Cannot vote for a dead player");
+    require(InGame.get(_recipient) == gameId, "Cannot vote for a player in a different game session");
 
     uint32 currentVotingPoints = VotingPoint.get(player);
     require(currentVotingPoints > 0, "You need a voting point in order to vote");
@@ -222,6 +223,7 @@ contract TurnSystem is System {
     string memory elected = Username.get(_recipient);
     VoteExecuted.emitEphemeral(timestamp, VoteExecutedData({
       timestamp: timestamp,
+      gameId: gameId,
       voter: voter,
       recipient: elected
     }));  

@@ -31,8 +31,8 @@ const ActivityLogComponent = () => {
   const allPlayerSpawnedLogs = useEntityQuery([HasValue(PlayerSpawned, { gameId : gameId })]);
   const allPlayerDiedLogs = useEntityQuery([HasValue(PlayerDied, { gameId : gameId })]);
   const allActionPointClaimExecutedLogs = useEntityQuery([HasValue(ActionPointClaimExecuted, { gameId : gameId })]);
-  const allVotingPointClaimExecutedLogs = useEntityQuery([Has(VotingPointClaimExecuted)]);
-  const allVoteExecutedLogs = useEntityQuery([Has(VoteExecuted)]);
+  const allVotingPointClaimExecutedLogs = useEntityQuery([HasValue(VotingPointClaimExecuted, { gameId : gameId })]);
+  const allVoteExecutedLogs = useEntityQuery([HasValue(VoteExecuted, { gameId : gameId })]);
   const gameStarted = useEntityQuery([HasValue(GameStarted, { gameId : gameId })]);
   let mappedLogs: LogMessage[] = [];
 

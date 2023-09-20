@@ -16,5 +16,5 @@ interface ITurnSystem {
 
   function claimVotingPoint(uint256 timestamp, uint32 _gameId) external;
 
-  function vote(uint256 timestamp, bytes32 _recipient) external;
+  function vote(uint256 timestamp, bytes32 _recipient, uint32 gameId) external;
 }
