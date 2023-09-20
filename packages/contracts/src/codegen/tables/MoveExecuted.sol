@@ -26,8 +26,8 @@ struct MoveExecutedData {
   uint32 fromY;
   uint32 toX;
   uint32 toY;
+  uint32 gameId;
   string player;
-  string gameId;
 }
 
 library MoveExecuted {
@@ -47,7 +47,7 @@ library MoveExecuted {
     _schema[2] = SchemaType.UINT32;
     _schema[3] = SchemaType.UINT32;
     _schema[4] = SchemaType.UINT32;
-    _schema[5] = SchemaType.STRING;
+    _schema[5] = SchemaType.UINT32;
     _schema[6] = SchemaType.STRING;
 
     return SchemaLib.encode(_schema);
@@ -67,8 +67,8 @@ library MoveExecuted {
     fieldNames[2] = "fromY";
     fieldNames[3] = "toX";
     fieldNames[4] = "toY";
-    fieldNames[5] = "player";
-    fieldNames[6] = "gameId";
+    fieldNames[5] = "gameId";
+    fieldNames[6] = "player";
   }
 
   /** Register the table's key schema, value schema, key names and value names */
@@ -89,10 +89,10 @@ library MoveExecuted {
     uint32 fromY,
     uint32 toX,
     uint32 toY,
-    string memory player,
-    string memory gameId
+    uint32 gameId,
+    string memory player
   ) internal {
-    bytes memory _data = encode(timestamp, fromX, fromY, toX, toY, player, gameId);
+    bytes memory _data = encode(timestamp, fromX, fromY, toX, toY, gameId, player);
 
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
@@ -109,10 +109,10 @@ library MoveExecuted {
     uint32 fromY,
     uint32 toX,
     uint32 toY,
-    string memory player,
-    string memory gameId
+    uint32 gameId,
+    string memory player
   ) internal {
-    bytes memory _data = encode(timestamp, fromX, fromY, toX, toY, player, gameId);
+    bytes memory _data = encode(timestamp, fromX, fromY, toX, toY, gameId, player);
 
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
@@ -129,8 +129,8 @@ library MoveExecuted {
       _table.fromY,
       _table.toX,
       _table.toY,
-      _table.player,
-      _table.gameId
+      _table.gameId,
+      _table.player
     );
   }
 
@@ -144,8 +144,8 @@ library MoveExecuted {
       _table.fromY,
       _table.toX,
       _table.toY,
-      _table.player,
-      _table.gameId
+      _table.gameId,
+      _table.player
     );
   }
 
@@ -156,17 +156,16 @@ library MoveExecuted {
     uint32 fromY,
     uint32 toX,
     uint32 toY,
-    string memory player,
-    string memory gameId
+    uint32 gameId,
+    string memory player
   ) internal pure returns (bytes memory) {
     PackedCounter _encodedLengths;
     // Lengths are effectively checked during copy by 2**40 bytes exceeding gas limits
     unchecked {
-      _encodedLengths = PackedCounterLib.pack(bytes(player).length, bytes(gameId).length);
+      _encodedLengths = PackedCounterLib.pack(bytes(player).length);
     }
 
-    return
-      abi.encodePacked(timestamp, fromX, fromY, toX, toY, _encodedLengths.unwrap(), bytes((player)), bytes((gameId)));
+    return abi.encodePacked(timestamp, fromX, fromY, toX, toY, gameId, _encodedLengths.unwrap(), bytes((player)));
   }
 
   /** Encode keys as a bytes32 array using this table's schema */

@@ -1,4 +1,3 @@
-import React from "react";
 import { getComponentValue, Has, HasValue } from "@latticexyz/recs";
 import { useEntityQuery } from "@latticexyz/react";
 import { useMUD } from "./MUDContext";
@@ -34,6 +33,8 @@ const ActivityLogComponent = () => {
   const allVoteExecutedLogs = useEntityQuery([Has(VoteExecuted)]);
   const gameStarted = useEntityQuery([HasValue(GameStarted, { gameId : gameId })]);
   let mappedLogs: LogMessage[] = [];
+
+  console.log("ActivityLogComponent: gameStarted: ", gameStarted);
 
   const mapMoveLogs = () => {
     return allMoveLogs.map((entity) => {

@@ -68,7 +68,7 @@ export function createSystemCalls(
     await waitForTransaction(tx);
   };
 
-  const startMatch = async (gameId: string, playersSpawned: number, startTime: number) => {
+  const startMatch = async (gameId: number, playersSpawned: number, startTime: number) => {
     const bigIntStartTime = BigInt(startTime);
     const tx = await worldContract.write.startMatch([
       gameId,
@@ -78,7 +78,7 @@ export function createSystemCalls(
     const res = await waitForTransaction(tx);
   };
 
-  const moveTo = async (inputX: number, inputY: number, gameId: string) => {
+  const moveTo = async (inputX: number, inputY: number, gameId: number) => {
     if (!playerEntity) {
       throw new Error("no player");
     }
@@ -101,7 +101,7 @@ export function createSystemCalls(
     }
   };
 
-  const moveBy = async (deltaX: number, deltaY: number, gameId: string) => {
+  const moveBy = async (deltaX: number, deltaY: number, gameId: number) => {
     if (!playerEntity) {
       throw new Error("no player");
     }
@@ -114,7 +114,7 @@ export function createSystemCalls(
     await moveTo(playerPosition.x + deltaX, playerPosition.y + deltaY, gameId);
   };
 
-  const spawn = async (username: string, gameID: string) => {
+  const spawn = async (username: string, gameId: number) => {
     if (!playerEntity) {
       throw new Error("no player");
     }
@@ -122,7 +122,7 @@ export function createSystemCalls(
     if (!canSpawn) {
       throw new Error("already spawned");
     }
-    console.log("spawn called with gameID: ", gameID);
+    console.log("spawn called with gameID: ", gameId);
 
     const bigIntTimestamp = BigInt(Date.now());
     const playerId = uuid();
@@ -132,7 +132,7 @@ export function createSystemCalls(
     });
 
     try {
-      const tx = await worldContract.write.spawn([bigIntTimestamp, username, gameID]);
+      const tx = await worldContract.write.spawn([bigIntTimestamp, username, gameId]);
       await waitForTransaction(tx);
     } catch (error) {
       throw error;
@@ -141,7 +141,7 @@ export function createSystemCalls(
     }
   };
 
-  const claimActionPoint = async (gameId: string) => {
+  const claimActionPoint = async (gameId: number) => {
     if (!playerEntity) {
       throw new Error("no player");
     }

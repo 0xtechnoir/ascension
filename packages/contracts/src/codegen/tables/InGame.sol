@@ -32,7 +32,7 @@ library InGame {
   /** Get the table's value schema */
   function getValueSchema() internal pure returns (Schema) {
     SchemaType[] memory _schema = new SchemaType[](1);
-    _schema[0] = SchemaType.STRING;
+    _schema[0] = SchemaType.UINT32;
 
     return SchemaLib.encode(_schema);
   }
@@ -60,163 +60,42 @@ library InGame {
   }
 
   /** Get value */
-  function get(bytes32 key) internal view returns (string memory value) {
+  function get(bytes32 key) internal view returns (uint32 value) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = key;
 
     bytes memory _blob = StoreSwitch.getField(_tableId, _keyTuple, 0, getValueSchema());
-    return (string(_blob));
+    return (uint32(Bytes.slice4(_blob, 0)));
   }
 
   /** Get value (using the specified store) */
-  function get(IStore _store, bytes32 key) internal view returns (string memory value) {
+  function get(IStore _store, bytes32 key) internal view returns (uint32 value) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = key;
 
     bytes memory _blob = _store.getField(_tableId, _keyTuple, 0, getValueSchema());
-    return (string(_blob));
+    return (uint32(Bytes.slice4(_blob, 0)));
   }
 
   /** Set value */
-  function set(bytes32 key, string memory value) internal {
+  function set(bytes32 key, uint32 value) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = key;
 
-    StoreSwitch.setField(_tableId, _keyTuple, 0, bytes((value)), getValueSchema());
+    StoreSwitch.setField(_tableId, _keyTuple, 0, abi.encodePacked((value)), getValueSchema());
   }
 
   /** Set value (using the specified store) */
-  function set(IStore _store, bytes32 key, string memory value) internal {
+  function set(IStore _store, bytes32 key, uint32 value) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = key;
 
-    _store.setField(_tableId, _keyTuple, 0, bytes((value)), getValueSchema());
-  }
-
-  /** Get the length of value */
-  function length(bytes32 key) internal view returns (uint256) {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = key;
-
-    uint256 _byteLength = StoreSwitch.getFieldLength(_tableId, _keyTuple, 0, getValueSchema());
-    unchecked {
-      return _byteLength / 1;
-    }
-  }
-
-  /** Get the length of value (using the specified store) */
-  function length(IStore _store, bytes32 key) internal view returns (uint256) {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = key;
-
-    uint256 _byteLength = _store.getFieldLength(_tableId, _keyTuple, 0, getValueSchema());
-    unchecked {
-      return _byteLength / 1;
-    }
-  }
-
-  /**
-   * Get an item of value
-   * (unchecked, returns invalid data if index overflows)
-   */
-  function getItem(bytes32 key, uint256 _index) internal view returns (string memory) {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = key;
-
-    unchecked {
-      bytes memory _blob = StoreSwitch.getFieldSlice(
-        _tableId,
-        _keyTuple,
-        0,
-        getValueSchema(),
-        _index * 1,
-        (_index + 1) * 1
-      );
-      return (string(_blob));
-    }
-  }
-
-  /**
-   * Get an item of value (using the specified store)
-   * (unchecked, returns invalid data if index overflows)
-   */
-  function getItem(IStore _store, bytes32 key, uint256 _index) internal view returns (string memory) {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = key;
-
-    unchecked {
-      bytes memory _blob = _store.getFieldSlice(_tableId, _keyTuple, 0, getValueSchema(), _index * 1, (_index + 1) * 1);
-      return (string(_blob));
-    }
-  }
-
-  /** Push a slice to value */
-  function push(bytes32 key, string memory _slice) internal {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = key;
-
-    StoreSwitch.pushToField(_tableId, _keyTuple, 0, bytes((_slice)), getValueSchema());
-  }
-
-  /** Push a slice to value (using the specified store) */
-  function push(IStore _store, bytes32 key, string memory _slice) internal {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = key;
-
-    _store.pushToField(_tableId, _keyTuple, 0, bytes((_slice)), getValueSchema());
-  }
-
-  /** Pop a slice from value */
-  function pop(bytes32 key) internal {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = key;
-
-    StoreSwitch.popFromField(_tableId, _keyTuple, 0, 1, getValueSchema());
-  }
-
-  /** Pop a slice from value (using the specified store) */
-  function pop(IStore _store, bytes32 key) internal {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = key;
-
-    _store.popFromField(_tableId, _keyTuple, 0, 1, getValueSchema());
-  }
-
-  /**
-   * Update a slice of value at `_index`
-   * (checked only to prevent modifying other tables; can corrupt own data if index overflows)
-   */
-  function update(bytes32 key, uint256 _index, string memory _slice) internal {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = key;
-
-    unchecked {
-      StoreSwitch.updateInField(_tableId, _keyTuple, 0, _index * 1, bytes((_slice)), getValueSchema());
-    }
-  }
-
-  /**
-   * Update a slice of value (using the specified store) at `_index`
-   * (checked only to prevent modifying other tables; can corrupt own data if index overflows)
-   */
-  function update(IStore _store, bytes32 key, uint256 _index, string memory _slice) internal {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = key;
-
-    unchecked {
-      _store.updateInField(_tableId, _keyTuple, 0, _index * 1, bytes((_slice)), getValueSchema());
-    }
+    _store.setField(_tableId, _keyTuple, 0, abi.encodePacked((value)), getValueSchema());
   }
 
   /** Tightly pack full data using this table's schema */
-  function encode(string memory value) internal pure returns (bytes memory) {
-    PackedCounter _encodedLengths;
-    // Lengths are effectively checked during copy by 2**40 bytes exceeding gas limits
-    unchecked {
-      _encodedLengths = PackedCounterLib.pack(bytes(value).length);
-    }
-
-    return abi.encodePacked(_encodedLengths.unwrap(), bytes((value)));
+  function encode(uint32 value) internal pure returns (bytes memory) {
+    return abi.encodePacked(value);
   }
 
   /** Encode keys as a bytes32 array using this table's schema */

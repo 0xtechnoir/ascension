@@ -3,8 +3,8 @@ import { ErrorModal } from "./ErrorModal";
 
 type GameContextProps = {
   errorMessage: string;
-  gameId: string;
-  setGameId: React.Dispatch<React.SetStateAction<string>>;
+  gameId: number | undefined;
+  setGameId: React.Dispatch<React.SetStateAction<number>>;
   handleError: (message: string) => void;
 };
 type GameProviderProps = { children?: React.ReactNode };
@@ -21,7 +21,7 @@ export const useGameContext = () => {
 
 export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
   const [errorMessage, setErrorMessage] = useState<string>("");
-  const [gameId, setGameId] = useState('');
+  const [gameId, setGameId] = useState<number>(0);
 
   const handleError = (message: string) => {
     setErrorMessage(message);

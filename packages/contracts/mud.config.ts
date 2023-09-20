@@ -12,18 +12,15 @@ export default mudConfig({
         height: "uint32",
       }
     },
-    GameId: {
+    GameSession: {
       keySchema: {
-        id: "uint256",
+        id: "uint32",
       },
       schema: {
         isLive: "bool",
         startTime: "uint256",
+        gameId: "uint32",
       }
-    },
-    GameIsLive: {
-      keySchema: {},
-      schema: "bool",
     },
     ClaimInterval: {
       keySchema: {},
@@ -36,7 +33,7 @@ export default mudConfig({
     Alive: "bool",
     Health: "uint32",
     Range: "uint32",
-    InGame: "string",
+    InGame: "uint32",
     LastActionPointClaim: "uint256",
     LastVotingPointClaim: "uint256",
     ActionPoint: "uint32",
@@ -57,8 +54,8 @@ export default mudConfig({
         timestamp: "uint256",
         x: "uint32",
         y: "uint32", 
+        gameId: "uint32",
         player: "string",
-        gameId: "string",
       }, 
       ephemeral: true,
     },
@@ -72,8 +69,8 @@ export default mudConfig({
         fromY: "uint32",
         toX: "uint32",
         toY: "uint32", 
+        gameId: "uint32",
         player: "string",
-        gameId: "string",
       }, 
       ephemeral: true,
     },
@@ -111,12 +108,12 @@ export default mudConfig({
     },
     ActionPointClaimExecuted : {
       keySchema: {
-        id: "uint256",
+        id: "uint32",
       },
       schema: {
         timestamp: "uint256",
+        gameId: "uint32",
         player: "string",
-        gameId: "string",
       }, 
       ephemeral: true,
     },
@@ -154,11 +151,11 @@ export default mudConfig({
     },
     GameStarted: {
       keySchema: {
-        id: "uint256",
+        id: "uint32",
       },
       schema: {
         timestamp: "uint256",
-        gameId: "string",
+        gameId: "uint32",
       },
       ephemeral: true,
     },

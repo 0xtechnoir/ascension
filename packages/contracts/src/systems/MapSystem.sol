@@ -11,13 +11,13 @@ import {
   Health, 
   Range, 
   ActionPoint, 
-  GameIsLive, 
+  // GameIsLive, 
   Username, 
   Alive, 
   LastActionPointClaim, 
   InGame, 
   InGameTableId,
-  GameId } from "../codegen/Tables.sol";
+  GameSession } from "../codegen/Tables.sol";
 import { addressToEntityKey } from "../addressToEntityKey.sol";
 import { positionToEntityKey } from "../positionToEntityKey.sol";
 import { query, QueryFragment, QueryType } from "@latticexyz/world/src/modules/keysintable/query.sol";
@@ -34,7 +34,7 @@ contract MapSystem is System {
       uint16 y;
   }
   
-  function spawn(uint256 _timestamp, string memory _username, string memory _gameId) public {
+  function spawn(uint256 _timestamp, string memory _username, uint32 _gameId) public {
 
     uint16 x;
     uint16 y;
@@ -49,8 +49,8 @@ contract MapSystem is System {
     points[5] = Point(10, 0);
     points[6] = Point(10, 5);
     points[7] = Point(10, 10);
-      
-    require(!GameIsLive.get(), "Cannot spawn players after match has started");
+    
+    require(!GameSession.getIsLive(_gameId), "Cannot spawn players after match has started");
     // create a player entity using the message senders address as the key
     bytes32 player = addressToEntityKey(address(_msgSender()));
     // we could limit the number of players here as well
@@ -77,6 +77,7 @@ contract MapSystem is System {
     Movable.set(player, true);
     Health.set(player, 3);
     Range.set(player, 2);
+    GameSession.setGameId(_gameId, _gameId);
     InGame.set(player, _gameId);
     ActionPoint.set(player, 0);
     LastActionPointClaim.set(player, 0); 
@@ -89,11 +90,11 @@ contract MapSystem is System {
       gameId: _gameId
     })); 
   }
-  function move(uint256 timestamp, uint32 _x, uint32 _y, string memory _gameId) public {
+  function move(uint256 timestamp, uint32 _x, uint32 _y, uint32 _gameId) public {
 
     bytes32 player = addressToEntityKey(_msgSender());
     
-    require(GameIsLive.get(), "Match is not live");
+    require(GameSession.getIsLive(_gameId), "Match hasn't started yet");
     require(Movable.get(player), "Moving disabled");
     require(Alive.get(player), "You are dead");
     uint32 currentActionPoints = ActionPoint.get(player);
@@ -116,24 +117,24 @@ contract MapSystem is System {
     
     MoveExecuted.emitEphemeral(timestamp, MoveExecutedData({
       timestamp: timestamp,
-      player: username,
       fromX: fromX, 
       fromY: fromY, 
       toX: _x, 
       toY: _y,
-      gameId: _gameId
+      gameId: _gameId,
+      player: username
     }));
 
     ActionPoint.set(player, currentActionPoints - 1);
   }
 
-  function queryPosition(uint32 _x, uint32 _y, string memory _gameId) public view returns (bytes32[][] memory) {
+  function queryPosition(uint32 _x, uint32 _y, uint32 _gameId) public view returns (bytes32[][] memory) {
     QueryFragment[] memory fragments = new QueryFragment[](2);
     fragments[0] = QueryFragment(QueryType.HasValue, InGameTableId, InGame.encode(_gameId));
     fragments[1] = QueryFragment(QueryType.HasValue, PositionTableId, Position.encode(_x, _y));
     return query(fragments);
   }
-  function queryisLive(uint32 _x, uint32 _y, string memory _gameId) public view returns (bytes32[][] memory) {
+  function queryisLive(uint32 _x, uint32 _y, uint32 _gameId) public view returns (bytes32[][] memory) {
     QueryFragment[] memory fragments = new QueryFragment[](2);
     fragments[0] = QueryFragment(QueryType.HasValue, InGameTableId, InGame.encode(_gameId));
     fragments[1] = QueryFragment(QueryType.HasValue, PositionTableId, Position.encode(_x, _y));

@@ -11,7 +11,7 @@ import {
   Range, 
   ActionPoint,
   VotingPoint, 
-  GameIsLive, 
+  // GameIsLive, 
   Alive, 
   Champion, 
   Username, 
@@ -23,7 +23,9 @@ import {
   VotingPointClaimExecuted, 
   VotingPointClaimExecutedData,
   VoteExecuted,
-  VoteExecutedData } from "../codegen/Tables.sol";
+  VoteExecutedData,
+  GameSession,
+  GameSessionTableId } from "../codegen/Tables.sol";
 import { addressToEntityKey } from "../addressToEntityKey.sol";
 import { positionToEntityKey } from "../positionToEntityKey.sol";
 import { getKeysInTable } from "@latticexyz/world/src/modules/keysintable/getKeysInTable.sol";
@@ -37,11 +39,13 @@ import { RangeIncreaseExecuted, RangeIncreaseExecutedData } from "../codegen/Tab
 
 contract TurnSystem is System {
 
-  function startMatch(string memory gameId, uint32 playersSpawned, uint256 startTime) public {
+  function startMatch(uint32 gameId, uint32 playersSpawned, uint256 startTime) public {
     require(playersSpawned > 1, "Not enough players to start match");
-    require(!GameIsLive.get(), "Match has already started");
-    GameIsLive.set(true);
-    GameStarted.emitEphemeral(startTime, GameStartedData({
+    require(!GameSession.getIsLive(gameId), "Match has already started");
+    GameSession.setIsLive(gameId, true);
+    GameSession.setStartTime(gameId, startTime);
+
+    GameStarted.emitEphemeral(gameId, GameStartedData({
       timestamp: startTime,
       gameId: gameId
     }));
@@ -60,7 +64,7 @@ contract TurnSystem is System {
 
   function increaseRange(uint256 timestamp) public {
     bytes32 player = addressToEntityKey(_msgSender());
-    require(GameIsLive.get(), "Match is not live.");
+    // require(GameIsLive.get(), "Match is not live.");
     require(Alive.get(player), "Not possible when dead");
     uint32 currentRange = Range.get(player);
     uint32 currentActionPoints = ActionPoint.get(player);
@@ -77,7 +81,7 @@ contract TurnSystem is System {
 
   function sendActionPoint(uint256 timestamp, bytes32 _recipient) public {
     bytes32 player = addressToEntityKey(_msgSender());
-    require(GameIsLive.get(), "Match is not live.");
+    // require(GameIsLive.get(), "Match is not live.");
     require(Alive.get(player), "Not possible when dead");
     require(Alive.get(_recipient), "Cannot send AP to a dead player");
     uint32 currentActionPoints = ActionPoint.get(player);
@@ -102,7 +106,7 @@ contract TurnSystem is System {
 
   function attackPlayer(uint256 timestamp, bytes32 _target) public {
     bytes32 player = addressToEntityKey(_msgSender());
-    require(GameIsLive.get(), "Match is not live.");
+    // require(GameIsLive.get(), "Match is not live.");
     require(Alive.get(player), "Not possible when dead");
     require(Alive.get(_target), "Cannot attack a dead player");
     uint32 currentActionPoints = ActionPoint.get(player);
@@ -136,13 +140,16 @@ contract TurnSystem is System {
     bytes32[] memory remainingPlayers = getKeysWithValue(AliveTableId, Alive.encode(true));// return all records for alive players
     if (remainingPlayers.length == 1) {
       // Only oneplayer left alive so end game
-      GameIsLive.set(false);
+      // GameIsLive.set(false);
       Champion.set(remainingPlayers[0], true);
     }
   }
 
-  function claimActionPoint(uint256 _timestamp, string memory _gameId) public {
-    require(GameIsLive.get(), "Match is not live.");
+  function claimActionPoint(uint256 _timestamp, uint32 _gameId) public {
+    // require(GameIsLive.get(), "Match is not live.");
+    // QueryFragment[] memory fragments = new QueryFragment[](1);
+    // fragments[0] = QueryFragment(QueryType.HasValue, GameSessionTableId, GameSession.encode(_gameId));
+
     bytes32 player = addressToEntityKey(_msgSender());
     require(Alive.get(player), "Not possible when dead");
 
@@ -158,14 +165,14 @@ contract TurnSystem is System {
     ActionPoint.set(player, currentActionPoints + 1);
 
     string memory username = Username.get(player);
-    ActionPointClaimExecuted.emitEphemeral(_timestamp, ActionPointClaimExecutedData({
+    ActionPointClaimExecuted.emitEphemeral(_gameId, ActionPointClaimExecutedData({
       timestamp: _timestamp,
       player: username,
       gameId: _gameId
     }));  
   }
   function claimVotingPoint(uint256 timestamp) public {
-    require(GameIsLive.get(), "Match is not live.");
+    // require(GameIsLive.get(), "Match is not live.");
     bytes32 player = addressToEntityKey(_msgSender());
     require(!Alive.get(player), "Player must be dead to claim voting point");
 
@@ -188,7 +195,7 @@ contract TurnSystem is System {
   }
 
   function vote(uint256 timestamp, bytes32 _recipient) public {
-    require(GameIsLive.get(), "Match is not live.");
+    // require(GameIsLive.get(), "Match is not live.");
     bytes32 player = addressToEntityKey(_msgSender());
     require(!Alive.get(player), "Player must be dead to vote");
     require(Alive.get(_recipient), "Cannot vote for a dead player");

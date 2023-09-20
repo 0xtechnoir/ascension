@@ -3,7 +3,7 @@ import Modal from '@material-ui/core/Modal';
 import { useGameContext } from "./GameContext";
 import { useMUD } from "./MUDContext";
 import { ErrorWithShortMessage } from "./CustomTypes";
-import { Entity, Has, HasValue, getComponentValue } from "@latticexyz/recs";
+import { getComponentValue } from "@latticexyz/recs";
 
 type SpawnModalProps = {
   showModal: boolean;
@@ -16,12 +16,12 @@ const SpawnModal: React.FC<SpawnModalProps> = ({
   showModal,
   setShowModal,
   setShowSpawnButton,
-  gameID,
 }) => {
 
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [enteredUsername, setEnteredUsername] = useState("");
+    const { gameId } = useGameContext();
 
       // Contexts
     const { handleError } = useGameContext();
@@ -54,7 +54,11 @@ const SpawnModal: React.FC<SpawnModalProps> = ({
             return; // Stop if invalid
           }
         try {
-            await spawn(sanitizedUsername, gameID);
+            console.log("About to call spawn with gameId: ", gameId);
+            if (!gameId) {
+              throw new Error("No game ID found");
+            }
+            await spawn(sanitizedUsername, gameId);
             setShowSpawnButton(false);
             const result = getComponentValue(InGame, playerEntity);
             console.log("Player successfully spawned into game: ", result);

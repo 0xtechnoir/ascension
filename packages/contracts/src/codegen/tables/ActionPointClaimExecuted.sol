@@ -22,15 +22,15 @@ bytes32 constant ActionPointClaimExecutedTableId = _tableId;
 
 struct ActionPointClaimExecutedData {
   uint256 timestamp;
+  uint32 gameId;
   string player;
-  string gameId;
 }
 
 library ActionPointClaimExecuted {
   /** Get the table's key schema */
   function getKeySchema() internal pure returns (Schema) {
     SchemaType[] memory _schema = new SchemaType[](1);
-    _schema[0] = SchemaType.UINT256;
+    _schema[0] = SchemaType.UINT32;
 
     return SchemaLib.encode(_schema);
   }
@@ -39,7 +39,7 @@ library ActionPointClaimExecuted {
   function getValueSchema() internal pure returns (Schema) {
     SchemaType[] memory _schema = new SchemaType[](3);
     _schema[0] = SchemaType.UINT256;
-    _schema[1] = SchemaType.STRING;
+    _schema[1] = SchemaType.UINT32;
     _schema[2] = SchemaType.STRING;
 
     return SchemaLib.encode(_schema);
@@ -55,8 +55,8 @@ library ActionPointClaimExecuted {
   function getFieldNames() internal pure returns (string[] memory fieldNames) {
     fieldNames = new string[](3);
     fieldNames[0] = "timestamp";
-    fieldNames[1] = "player";
-    fieldNames[2] = "gameId";
+    fieldNames[1] = "gameId";
+    fieldNames[2] = "player";
   }
 
   /** Register the table's key schema, value schema, key names and value names */
@@ -70,8 +70,8 @@ library ActionPointClaimExecuted {
   }
 
   /** Emit the ephemeral event using individual values */
-  function emitEphemeral(uint256 id, uint256 timestamp, string memory player, string memory gameId) internal {
-    bytes memory _data = encode(timestamp, player, gameId);
+  function emitEphemeral(uint32 id, uint256 timestamp, uint32 gameId, string memory player) internal {
+    bytes memory _data = encode(timestamp, gameId, player);
 
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
@@ -80,14 +80,8 @@ library ActionPointClaimExecuted {
   }
 
   /** Emit the ephemeral event using individual values (using the specified store) */
-  function emitEphemeral(
-    IStore _store,
-    uint256 id,
-    uint256 timestamp,
-    string memory player,
-    string memory gameId
-  ) internal {
-    bytes memory _data = encode(timestamp, player, gameId);
+  function emitEphemeral(IStore _store, uint32 id, uint256 timestamp, uint32 gameId, string memory player) internal {
+    bytes memory _data = encode(timestamp, gameId, player);
 
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
@@ -96,28 +90,28 @@ library ActionPointClaimExecuted {
   }
 
   /** Emit the ephemeral event using the data struct */
-  function emitEphemeral(uint256 id, ActionPointClaimExecutedData memory _table) internal {
-    emitEphemeral(id, _table.timestamp, _table.player, _table.gameId);
+  function emitEphemeral(uint32 id, ActionPointClaimExecutedData memory _table) internal {
+    emitEphemeral(id, _table.timestamp, _table.gameId, _table.player);
   }
 
   /** Emit the ephemeral event using the data struct (using the specified store) */
-  function emitEphemeral(IStore _store, uint256 id, ActionPointClaimExecutedData memory _table) internal {
-    emitEphemeral(_store, id, _table.timestamp, _table.player, _table.gameId);
+  function emitEphemeral(IStore _store, uint32 id, ActionPointClaimExecutedData memory _table) internal {
+    emitEphemeral(_store, id, _table.timestamp, _table.gameId, _table.player);
   }
 
   /** Tightly pack full data using this table's schema */
-  function encode(uint256 timestamp, string memory player, string memory gameId) internal pure returns (bytes memory) {
+  function encode(uint256 timestamp, uint32 gameId, string memory player) internal pure returns (bytes memory) {
     PackedCounter _encodedLengths;
     // Lengths are effectively checked during copy by 2**40 bytes exceeding gas limits
     unchecked {
-      _encodedLengths = PackedCounterLib.pack(bytes(player).length, bytes(gameId).length);
+      _encodedLengths = PackedCounterLib.pack(bytes(player).length);
     }
 
-    return abi.encodePacked(timestamp, _encodedLengths.unwrap(), bytes((player)), bytes((gameId)));
+    return abi.encodePacked(timestamp, gameId, _encodedLengths.unwrap(), bytes((player)));
   }
 
   /** Encode keys as a bytes32 array using this table's schema */
-  function encodeKeyTuple(uint256 id) internal pure returns (bytes32[] memory) {
+  function encodeKeyTuple(uint32 id) internal pure returns (bytes32[] memory) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
 

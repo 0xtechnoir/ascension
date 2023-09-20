@@ -17,28 +17,30 @@ import { EncodeArray } from "@latticexyz/store/src/tightcoder/EncodeArray.sol";
 import { Schema, SchemaLib } from "@latticexyz/store/src/Schema.sol";
 import { PackedCounter, PackedCounterLib } from "@latticexyz/store/src/PackedCounter.sol";
 
-bytes32 constant _tableId = bytes32(abi.encodePacked(bytes16(""), bytes16("GameId")));
-bytes32 constant GameIdTableId = _tableId;
+bytes32 constant _tableId = bytes32(abi.encodePacked(bytes16(""), bytes16("GameSession")));
+bytes32 constant GameSessionTableId = _tableId;
 
-struct GameIdData {
+struct GameSessionData {
   bool isLive;
   uint256 startTime;
+  uint32 gameId;
 }
 
-library GameId {
+library GameSession {
   /** Get the table's key schema */
   function getKeySchema() internal pure returns (Schema) {
     SchemaType[] memory _schema = new SchemaType[](1);
-    _schema[0] = SchemaType.UINT256;
+    _schema[0] = SchemaType.UINT32;
 
     return SchemaLib.encode(_schema);
   }
 
   /** Get the table's value schema */
   function getValueSchema() internal pure returns (Schema) {
-    SchemaType[] memory _schema = new SchemaType[](2);
+    SchemaType[] memory _schema = new SchemaType[](3);
     _schema[0] = SchemaType.BOOL;
     _schema[1] = SchemaType.UINT256;
+    _schema[2] = SchemaType.UINT32;
 
     return SchemaLib.encode(_schema);
   }
@@ -51,9 +53,10 @@ library GameId {
 
   /** Get the table's field names */
   function getFieldNames() internal pure returns (string[] memory fieldNames) {
-    fieldNames = new string[](2);
+    fieldNames = new string[](3);
     fieldNames[0] = "isLive";
     fieldNames[1] = "startTime";
+    fieldNames[2] = "gameId";
   }
 
   /** Register the table's key schema, value schema, key names and value names */
@@ -67,7 +70,7 @@ library GameId {
   }
 
   /** Get isLive */
-  function getIsLive(uint256 id) internal view returns (bool isLive) {
+  function getIsLive(uint32 id) internal view returns (bool isLive) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
 
@@ -76,7 +79,7 @@ library GameId {
   }
 
   /** Get isLive (using the specified store) */
-  function getIsLive(IStore _store, uint256 id) internal view returns (bool isLive) {
+  function getIsLive(IStore _store, uint32 id) internal view returns (bool isLive) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
 
@@ -85,7 +88,7 @@ library GameId {
   }
 
   /** Set isLive */
-  function setIsLive(uint256 id, bool isLive) internal {
+  function setIsLive(uint32 id, bool isLive) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
 
@@ -93,7 +96,7 @@ library GameId {
   }
 
   /** Set isLive (using the specified store) */
-  function setIsLive(IStore _store, uint256 id, bool isLive) internal {
+  function setIsLive(IStore _store, uint32 id, bool isLive) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
 
@@ -101,7 +104,7 @@ library GameId {
   }
 
   /** Get startTime */
-  function getStartTime(uint256 id) internal view returns (uint256 startTime) {
+  function getStartTime(uint32 id) internal view returns (uint256 startTime) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
 
@@ -110,7 +113,7 @@ library GameId {
   }
 
   /** Get startTime (using the specified store) */
-  function getStartTime(IStore _store, uint256 id) internal view returns (uint256 startTime) {
+  function getStartTime(IStore _store, uint32 id) internal view returns (uint256 startTime) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
 
@@ -119,7 +122,7 @@ library GameId {
   }
 
   /** Set startTime */
-  function setStartTime(uint256 id, uint256 startTime) internal {
+  function setStartTime(uint32 id, uint256 startTime) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
 
@@ -127,15 +130,49 @@ library GameId {
   }
 
   /** Set startTime (using the specified store) */
-  function setStartTime(IStore _store, uint256 id, uint256 startTime) internal {
+  function setStartTime(IStore _store, uint32 id, uint256 startTime) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
 
     _store.setField(_tableId, _keyTuple, 1, abi.encodePacked((startTime)), getValueSchema());
   }
 
+  /** Get gameId */
+  function getGameId(uint32 id) internal view returns (uint32 gameId) {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(id));
+
+    bytes memory _blob = StoreSwitch.getField(_tableId, _keyTuple, 2, getValueSchema());
+    return (uint32(Bytes.slice4(_blob, 0)));
+  }
+
+  /** Get gameId (using the specified store) */
+  function getGameId(IStore _store, uint32 id) internal view returns (uint32 gameId) {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(id));
+
+    bytes memory _blob = _store.getField(_tableId, _keyTuple, 2, getValueSchema());
+    return (uint32(Bytes.slice4(_blob, 0)));
+  }
+
+  /** Set gameId */
+  function setGameId(uint32 id, uint32 gameId) internal {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(id));
+
+    StoreSwitch.setField(_tableId, _keyTuple, 2, abi.encodePacked((gameId)), getValueSchema());
+  }
+
+  /** Set gameId (using the specified store) */
+  function setGameId(IStore _store, uint32 id, uint32 gameId) internal {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(id));
+
+    _store.setField(_tableId, _keyTuple, 2, abi.encodePacked((gameId)), getValueSchema());
+  }
+
   /** Get the full data */
-  function get(uint256 id) internal view returns (GameIdData memory _table) {
+  function get(uint32 id) internal view returns (GameSessionData memory _table) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
 
@@ -144,7 +181,7 @@ library GameId {
   }
 
   /** Get the full data (using the specified store) */
-  function get(IStore _store, uint256 id) internal view returns (GameIdData memory _table) {
+  function get(IStore _store, uint32 id) internal view returns (GameSessionData memory _table) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
 
@@ -153,8 +190,8 @@ library GameId {
   }
 
   /** Set the full data using individual values */
-  function set(uint256 id, bool isLive, uint256 startTime) internal {
-    bytes memory _data = encode(isLive, startTime);
+  function set(uint32 id, bool isLive, uint256 startTime, uint32 gameId) internal {
+    bytes memory _data = encode(isLive, startTime, gameId);
 
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
@@ -163,8 +200,8 @@ library GameId {
   }
 
   /** Set the full data using individual values (using the specified store) */
-  function set(IStore _store, uint256 id, bool isLive, uint256 startTime) internal {
-    bytes memory _data = encode(isLive, startTime);
+  function set(IStore _store, uint32 id, bool isLive, uint256 startTime, uint32 gameId) internal {
+    bytes memory _data = encode(isLive, startTime, gameId);
 
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
@@ -173,29 +210,31 @@ library GameId {
   }
 
   /** Set the full data using the data struct */
-  function set(uint256 id, GameIdData memory _table) internal {
-    set(id, _table.isLive, _table.startTime);
+  function set(uint32 id, GameSessionData memory _table) internal {
+    set(id, _table.isLive, _table.startTime, _table.gameId);
   }
 
   /** Set the full data using the data struct (using the specified store) */
-  function set(IStore _store, uint256 id, GameIdData memory _table) internal {
-    set(_store, id, _table.isLive, _table.startTime);
+  function set(IStore _store, uint32 id, GameSessionData memory _table) internal {
+    set(_store, id, _table.isLive, _table.startTime, _table.gameId);
   }
 
   /** Decode the tightly packed blob using this table's schema */
-  function decode(bytes memory _blob) internal pure returns (GameIdData memory _table) {
+  function decode(bytes memory _blob) internal pure returns (GameSessionData memory _table) {
     _table.isLive = (_toBool(uint8(Bytes.slice1(_blob, 0))));
 
     _table.startTime = (uint256(Bytes.slice32(_blob, 1)));
+
+    _table.gameId = (uint32(Bytes.slice4(_blob, 33)));
   }
 
   /** Tightly pack full data using this table's schema */
-  function encode(bool isLive, uint256 startTime) internal pure returns (bytes memory) {
-    return abi.encodePacked(isLive, startTime);
+  function encode(bool isLive, uint256 startTime, uint32 gameId) internal pure returns (bytes memory) {
+    return abi.encodePacked(isLive, startTime, gameId);
   }
 
   /** Encode keys as a bytes32 array using this table's schema */
-  function encodeKeyTuple(uint256 id) internal pure returns (bytes32[] memory) {
+  function encodeKeyTuple(uint32 id) internal pure returns (bytes32[] memory) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
 
@@ -203,7 +242,7 @@ library GameId {
   }
 
   /* Delete all data for given keys */
-  function deleteRecord(uint256 id) internal {
+  function deleteRecord(uint32 id) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
 
@@ -211,7 +250,7 @@ library GameId {
   }
 
   /* Delete all data for given keys (using the specified store) */
-  function deleteRecord(IStore _store, uint256 id) internal {
+  function deleteRecord(IStore _store, uint32 id) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
 

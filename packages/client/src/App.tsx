@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useComponentValue, useEntityQuery } from "@latticexyz/react";
 import { useMUD } from "./MUDContext";
-import { Entity, Has, HasValue, getComponentValue } from "@latticexyz/recs";
+import { Entity, Has, HasValue, getComponentValue, g } from "@latticexyz/recs";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
 import { GameBoard } from "./GameBoard";
 import { LivePlayersListComponent } from "./LivePlayersListComponent";
@@ -14,7 +14,6 @@ import Lobby from './Lobby';
 
 export const App = () => {
 
-  // const [gameID, setGameID] = useState('');
   const [showGameBoard, setShowGameBoard] = useState(false);
   
   // Custom Types
@@ -26,20 +25,21 @@ export const App = () => {
   }
 
   // Contexts
-  const { handleError, gameId: gameID, setGameId: setGameID } = useGameContext();
+  const { handleError, gameId } = useGameContext();
   const {
     network: { playerEntity },
-    components: { SyncProgress, Player, Position, GameIsLive, Alive, GameId, InGame },
+    components: { SyncProgress, Player, Position, 
+      Alive, GameSession, InGame },
     systemCalls: { startMatch },
   } = useMUD();
   
   // Constants 
-  // const gameIsLive = (useComponentValue(GameIsLive, singletonEntity)?.value) || false;
-  const gameIsLive = useEntityQuery([HasValue(InGame, { value: gameID }), Has(GameIsLive)]);
+  // const gameSession = useEntityQuery([HasValue(GameSession, { gameId: gameId })]);
+  const gameSession = useEntityQuery([Has(GameSession)]);
   const currentGameID = useComponentValue(InGame, playerEntity)?.value || "";
-  const allPlayers = useEntityQuery([HasValue(InGame, { value: gameID }), Has(Player), Has(Position)]);
-  const livePlayers = useEntityQuery([HasValue(InGame, { value: gameID }), Has(Player), HasValue(Alive, { value: true })]);
-  const deadPlayers = useEntityQuery([HasValue(InGame, { value: gameID }), Has(Player), HasValue(Alive, { value: false })]);
+  const allPlayers = useEntityQuery([HasValue(InGame, { value: gameId }), Has(Player), Has(Position)]);
+  const livePlayers = useEntityQuery([HasValue(InGame, { value: gameId }), Has(Player), HasValue(Alive, { value: true })]);
+  const deadPlayers = useEntityQuery([HasValue(InGame, { value: gameId }), Has(Player), HasValue(Alive, { value: false })]);
   const syncProgress = useComponentValue(SyncProgress, singletonEntity, {
     step: SyncStep.INITIALIZE,
     message: "Connecting",
@@ -47,6 +47,14 @@ export const App = () => {
     latestBlockNumber: 0n,
     lastBlockNumberProcessed: 0n,
   });
+
+  let gameIsLive = false;
+  if (gameSession) {
+    console.log("gameSession: ", gameSession);
+    console.log("gameId: ", gameId);
+    gameIsLive = getComponentValue(GameSession, gameSession[0])?.isLive || false;
+    console.log("gameIsLive: ", gameIsLive);
+  }
 
   // Hooks
   const [highlightedPlayer, setHighlightedPlayer] = useState<Entity | null>(null);
@@ -76,7 +84,7 @@ export const App = () => {
     const playersSpawned = allPlayers.length;
     const startTime = Date.now();
     try {
-      await startMatch(gameID, playersSpawned, startTime);
+      await startMatch(gameId, playersSpawned, startTime);
     } catch (error) {
       if (typeof error === "object" && error !== null) {
         const message = (error as ErrorWithShortMessage).shortMessage;
@@ -89,7 +97,7 @@ export const App = () => {
     <div className="items-center justify-center">
       
       {!showGameBoard ? (
-        <Lobby setGameID={setGameID} setShowGameBoard={setShowGameBoard} showGameBoard={showGameBoard} currentGameID={currentGameID} />
+        <Lobby setShowGameBoard={setShowGameBoard} showGameBoard={showGameBoard} currentGameID={currentGameID} />
       ) : syncProgress.step !== SyncStep.LIVE ? (
         <div>
           {syncProgress.message} ({Math.floor(syncProgress.percentage)}%)
@@ -149,7 +157,7 @@ export const App = () => {
               showModal={showModal}
               setShowModal={setShowModal}
               setShowSpawnButton={setShowSpawnButton}
-              gameID={gameID}
+              gameID={gameId}
               />
         </div>
       )}

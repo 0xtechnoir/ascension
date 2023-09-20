@@ -22,14 +22,14 @@ bytes32 constant GameStartedTableId = _tableId;
 
 struct GameStartedData {
   uint256 timestamp;
-  string gameId;
+  uint32 gameId;
 }
 
 library GameStarted {
   /** Get the table's key schema */
   function getKeySchema() internal pure returns (Schema) {
     SchemaType[] memory _schema = new SchemaType[](1);
-    _schema[0] = SchemaType.UINT256;
+    _schema[0] = SchemaType.UINT32;
 
     return SchemaLib.encode(_schema);
   }
@@ -38,7 +38,7 @@ library GameStarted {
   function getValueSchema() internal pure returns (Schema) {
     SchemaType[] memory _schema = new SchemaType[](2);
     _schema[0] = SchemaType.UINT256;
-    _schema[1] = SchemaType.STRING;
+    _schema[1] = SchemaType.UINT32;
 
     return SchemaLib.encode(_schema);
   }
@@ -67,7 +67,7 @@ library GameStarted {
   }
 
   /** Emit the ephemeral event using individual values */
-  function emitEphemeral(uint256 id, uint256 timestamp, string memory gameId) internal {
+  function emitEphemeral(uint32 id, uint256 timestamp, uint32 gameId) internal {
     bytes memory _data = encode(timestamp, gameId);
 
     bytes32[] memory _keyTuple = new bytes32[](1);
@@ -77,7 +77,7 @@ library GameStarted {
   }
 
   /** Emit the ephemeral event using individual values (using the specified store) */
-  function emitEphemeral(IStore _store, uint256 id, uint256 timestamp, string memory gameId) internal {
+  function emitEphemeral(IStore _store, uint32 id, uint256 timestamp, uint32 gameId) internal {
     bytes memory _data = encode(timestamp, gameId);
 
     bytes32[] memory _keyTuple = new bytes32[](1);
@@ -87,28 +87,22 @@ library GameStarted {
   }
 
   /** Emit the ephemeral event using the data struct */
-  function emitEphemeral(uint256 id, GameStartedData memory _table) internal {
+  function emitEphemeral(uint32 id, GameStartedData memory _table) internal {
     emitEphemeral(id, _table.timestamp, _table.gameId);
   }
 
   /** Emit the ephemeral event using the data struct (using the specified store) */
-  function emitEphemeral(IStore _store, uint256 id, GameStartedData memory _table) internal {
+  function emitEphemeral(IStore _store, uint32 id, GameStartedData memory _table) internal {
     emitEphemeral(_store, id, _table.timestamp, _table.gameId);
   }
 
   /** Tightly pack full data using this table's schema */
-  function encode(uint256 timestamp, string memory gameId) internal pure returns (bytes memory) {
-    PackedCounter _encodedLengths;
-    // Lengths are effectively checked during copy by 2**40 bytes exceeding gas limits
-    unchecked {
-      _encodedLengths = PackedCounterLib.pack(bytes(gameId).length);
-    }
-
-    return abi.encodePacked(timestamp, _encodedLengths.unwrap(), bytes((gameId)));
+  function encode(uint256 timestamp, uint32 gameId) internal pure returns (bytes memory) {
+    return abi.encodePacked(timestamp, gameId);
   }
 
   /** Encode keys as a bytes32 array using this table's schema */
-  function encodeKeyTuple(uint256 id) internal pure returns (bytes32[] memory) {
+  function encodeKeyTuple(uint32 id) internal pure returns (bytes32[] memory) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
 

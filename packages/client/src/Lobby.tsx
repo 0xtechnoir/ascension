@@ -1,41 +1,52 @@
 import React, { useState } from "react";
-import { uuid } from "@latticexyz/utils";
+import { useGameContext } from "./GameContext";
+import { useEntityQuery } from "@latticexyz/react";
+import { getComponentValue, Has, HasValue } from "@latticexyz/recs";
 import { useMUD } from "./MUDContext";
 
 interface LobbyProps {
-  setGameID: React.Dispatch<React.SetStateAction<string>>;
   setShowGameBoard: React.Dispatch<React.SetStateAction<boolean>>;
   showGameBoard: boolean;
-  currentGameID: string;
+  currentGameID: number;
 }
 
-const Lobby: React.FC<LobbyProps> = ({ setGameID, setShowGameBoard, showGameBoard, currentGameID }) => {
+const Lobby: React.FC<LobbyProps> = ({ setShowGameBoard, currentGameID }) => {
 
-    const {
-        network: { playerEntity },
-        components: { SyncProgress, Player, Position, GameIsLive, Alive, GameId, InGame },
-        systemCalls: { spawn, startMatch },
-        } = useMUD();
+    const { setGameId } = useGameContext();
+    const { components: { GameSession } } = useMUD();
 
-    const [inputGameID, setInputGameID] = useState('');
+    const [inputGameID, setInputGameID] = useState<number>(0);
+    
+    const allGameSessions = useEntityQuery([Has(GameSession)]);
+    const allGameIds = allGameSessions.map((entity) => {
+      const rec = getComponentValue(GameSession, entity);
+      return rec?.gameId;
+    });
+    console.log("allGameIds: ", allGameIds);
 
     const handleCreateGame = () => {
-        const gameID = uuid();
-        setGameID(gameID);
-        setShowGameBoard(true);
-        console.log("GameID: ", gameID);
+      // generate a unique 9-digit gameId
+      let gameId
+      while(true) {
+        gameId = Math.floor(100000000 + Math.random() * 900000000);
+        if (!allGameIds.includes(gameId)) {
+          break;
+        }
+      }     
+      setGameId(gameId);
+      setShowGameBoard(true);
+      console.log("handleCreateGame GameId created: ", gameId);
     }
-
-    const handleJoinGame = (eventOrGameID?: React.MouseEvent<HTMLButtonElement, MouseEvent> | string) => {
-        let gameIDToJoin: string;
-        if (typeof eventOrGameID === 'string') {
+    const handleJoinGame = (eventOrGameID?: React.MouseEvent<HTMLButtonElement, MouseEvent> | number) => {
+        let gameIDToJoin: number;
+        if (typeof eventOrGameID === 'number') {
           gameIDToJoin = eventOrGameID;
         } else {
           gameIDToJoin = inputGameID;
         }
         
         if (gameIDToJoin) {
-          setGameID(gameIDToJoin);
+          setGameId(gameIDToJoin);
           setShowGameBoard(true);
         }
     };
@@ -58,7 +69,7 @@ const Lobby: React.FC<LobbyProps> = ({ setGameID, setShowGameBoard, showGameBoar
                         className="text-black"
                         placeholder="Enter Game ID"
                         value={inputGameID}
-                        onChange={(e) => setInputGameID(e.target.value)}
+                        onChange={(e) => setInputGameID(Number(e.target.value))}
                         />
                         <button onClick={() => handleJoinGame(inputGameID)}>Join Game</button>
                     </div>
