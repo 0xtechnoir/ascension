@@ -3,40 +3,23 @@ module.exports = {
     content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
     theme: {
       extend: {
-        animation: {
-          battle: "battle 2s linear 1",
-        },
-        keyframes: {
-          battle: {
-            "0%": {
-              width: "200%",
-              height: "200%",
-              backgroundColor: "transparent",
-            },
-            "8%": {
-              backgroundColor: "white",
-            },
-            "16%": {
-              backgroundColor: "transparent",
-            },
-            "24%": {
-              width: "200%",
-              height: "200%",
-              transform: "rotate(0deg)",
-              backgroundColor: "white",
-            },
-            "32%": {
-              backgroundColor: "transparent",
-            },
-            "100%": {
-              width: 0,
-              height: 0,
-              transform: "rotate(360deg)",
-            },
-          },
-        },
+        backgroundImage: theme => ({
+          'space-bg': "url('/public/assets/space-bg.png')",
+        }),
       },
     },
-    plugins: [],
+    plugins: [
+      function ({ addComponents }) {
+        const buttons = {
+          '.btn-sci-fi': {
+            '@apply mr-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-4 py-2 rounded-md transform transition-transform duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500': {},
+            '&:hover': {
+              '@apply scale-110': {},
+            },
+          },
+        }
+        addComponents(buttons)
+      },
+    ],
   };
   

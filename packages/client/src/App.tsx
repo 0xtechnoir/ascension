@@ -99,72 +99,76 @@ export const App = () => {
   };
 
   return (
-    <div className="items-center justify-center">
-      
-      {!showGameBoard ? (
-        <Lobby setShowGameBoard={setShowGameBoard} showGameBoard={showGameBoard} currentGameID={currentGameID} />
-      ) : syncProgress.step !== SyncStep.LIVE ? (
-        <div>
-          {syncProgress.message} ({Math.floor(syncProgress.percentage)}%)
-        </div>
-      ) : (
-        <div className={`flex ${showModal ? 'blur-md' : ''}`}>
-            <>
-              <div className="h-15 flex-grow felx-col overflow-scroll">
-                <LivePlayersListComponent
-                  players={livePlayers}
-                  highlightedPlayer={highlightedPlayer}
-                  setHighlightedPlayer={setHighlightedPlayer}
-                />
-              </div>
-              <div className="w-2/4">
-                
-                {showSpawnButton &&(
-                  <button onClick={handleSpawnClick}>Spawn</button>
-                  )}
+    <div className="flex flex-col items-center justify-center min-h-screen bg-space-bg">
+      <div className="w-4/5 h-4/5">
 
-                <button
-                  onClick={start}
-                  className={`text-white ${gameIsLive ? 'bg-green-500' : 'bg-blue-500'}`}
-                  disabled={gameStarted}
-                  >
-                {gameIsLive ? "Match Started" : "Start Match"}
-                </button>
-                <GameBoard
-                  players={allPlayers}
-                  highlightedPlayer={highlightedPlayer}
-                  setHighlightedPlayer={setHighlightedPlayer}
-                  setGameStarted={setGameStarted}
+        {!showGameBoard ? (
+          <Lobby setShowGameBoard={setShowGameBoard} showGameBoard={showGameBoard} currentGameID={currentGameID} />
+        ) : syncProgress.step !== SyncStep.LIVE ? (
+          <div>
+            {syncProgress.message} ({Math.floor(syncProgress.percentage)}%)
+          </div>
+        ) : (
+          <div className={`flex ${showModal ? 'blur-md' : ''}`}>
+              <>
+                <div className="h-15 flex-grow felx-col overflow-scroll">
+                  <LivePlayersListComponent
+                    players={livePlayers}
+                    highlightedPlayer={highlightedPlayer}
+                    setHighlightedPlayer={setHighlightedPlayer}
                   />
-                  {currentGameID ? 
-                    <>
-                      <p>Game ID: {currentGameID}</p>
-                      <p>Share this with other players so they can join your game</p>
-                      <p>When you have enough players (min 2), hit "Start Match"</p>
-                    </>
-                    :
-                    <p>Spawn to get a sharable game ID</p>
-                  }
-                <br />
-                <ActivityLogComponent />
-              </div>
-              <div className="w-1/4">
-                <div className="h-15 overflow-scroll">
-                <DeadPlayersListComponent
-                  players={deadPlayers}
-                  highlightedPlayer={highlightedPlayer}
-                  setHighlightedPlayer={setHighlightedPlayer}
-                  />
-                </div> 
-              </div>
-            </>      
-            <SpawnModal
-              showModal={showModal}
-              setShowModal={setShowModal}
-              setShowSpawnButton={setShowSpawnButton}
-              />
-        </div>
-      )}
+                </div>
+                <div className="w-2/4">
+                  
+                  {showSpawnButton &&(
+                    <button onClick={handleSpawnClick}>Spawn</button>
+                    )}
+
+                  <button
+                    onClick={start}
+                    className={`text-white ${gameIsLive ? 'bg-green-500' : 'bg-blue-500'}`}
+                    disabled={gameStarted}
+                    >
+                  {gameIsLive ? "Match Started" : "Start Match"}
+                  </button>
+                  <GameBoard
+                    players={allPlayers}
+                    highlightedPlayer={highlightedPlayer}
+                    setHighlightedPlayer={setHighlightedPlayer}
+                    setGameStarted={setGameStarted}
+                    />
+                    {currentGameID ? 
+                      <>
+                        <p>Game ID: {currentGameID}</p>
+                        <p>Share this with other players so they can join your game</p>
+                        <p>When you have enough players (min 2), hit "Start Match"</p>
+                      </>
+                      :
+                      <p>Spawn to get a sharable game ID</p>
+                    }
+                  <br />
+                  <ActivityLogComponent />
+                </div>
+                <div className="w-1/4">
+                  <div className="h-15 overflow-scroll">
+                  <DeadPlayersListComponent
+                    players={deadPlayers}
+                    highlightedPlayer={highlightedPlayer}
+                    setHighlightedPlayer={setHighlightedPlayer}
+                    />
+                  </div> 
+                </div>
+              </>      
+              <SpawnModal
+                showModal={showModal}
+                setShowModal={setShowModal}
+                setShowSpawnButton={setShowSpawnButton}
+                />
+          </div>
+        )}
+
+      </div>
+      
       {showGameBoard && <button onClick={() => setShowGameBoard(false)}>Back to Lobby</button>}
     </div>
   );
