@@ -106,7 +106,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   const { width, height } = mapConfig;
 
   return (
-    <div>
+    <div className="h-full border border-gray-500 rounded-md">
       <GameMap
         width={width}
         height={height}

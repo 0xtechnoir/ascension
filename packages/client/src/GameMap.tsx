@@ -85,7 +85,7 @@ export const GameMap = ({
             <div
               key={`${x},${y}`}
               className={twMerge(
-                "w-8 h-8 flex items-center justify-center border border-gray-500",
+                "w-12 h-12 flex items-center justify-center border border-gray-500",
                 onTileClick ? "cursor-pointer hover:ring" : null,
                 isAdjacentToPlayer ? "bg-slate-600" : null,
                 isHovered ? "bg-blue-500" : null, // Add styling for hovered tile

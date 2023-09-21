@@ -99,9 +99,11 @@ const SpawnModal: React.FC<SpawnModalProps> = ({
         {error ? (
           <div className="text-red-500">
             {error}
+            <br />
+            <br />
             <button 
               onClick={dismissError} 
-              className="text-blue-500 hover:text-blue-700 underline ml-2"
+              className="btn-sci-fi"
             >
               Try Again
             </button>
@@ -121,9 +123,11 @@ const SpawnModal: React.FC<SpawnModalProps> = ({
               }}
               className="border rounded p-2 w-full"
             />
+            <br />
+            <br />
             <button
               onClick={onSubmit}
-              className="mt-4 bg-blue-500 text-white h-10 px-6 rounded-md hover:bg-blue-600"
+              className="btn-sci-fi"
             >
               Submit
             </button>

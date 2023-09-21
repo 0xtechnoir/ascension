@@ -61,7 +61,11 @@ const Lobby: React.FC<LobbyProps> = ({ setShowGameBoard, currentGameID }) => {
         {currentGameID ? (
           <>
             <p>{`You are already in game: ${currentGameID}`}</p>
-            <button onClick={() => handleJoinGame(currentGameID)}>
+            <br />
+            <button 
+              className="btn-sci-fi"
+              onClick={() => handleJoinGame(currentGameID)}
+            >
               Join This Game
             </button>
           </>

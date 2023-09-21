@@ -6,13 +6,13 @@ import { ActionButton } from "./ActionButton";
 import { useGameContext } from "./GameContext";
 import { Entity, Has, HasValue, getComponentValue } from "@latticexyz/recs";
 
-type LivePlayerProps = {
+type PlayerProps = {
   entity: Entity;
   setHighlightedPlayer: (player: Entity | null) => void;
   highlightedPlayer: Entity | null;
 };
 
-export const LivePlayer: React.FC<LivePlayerProps> = ({
+export const Player: React.FC<PlayerProps> = ({
   entity,
   setHighlightedPlayer,
   highlightedPlayer,
@@ -28,7 +28,7 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
       ClaimInterval,
       GameSession,
     },
-    systemCalls: { sendActionPoint, attack, increaseRange, claimActionPoint },
+    systemCalls: { sendActionPoint, attack, increaseRange, claimActionPoint, vote, claimVotingPoint },
     network: { playerEntity },
   } = useMUD();
 
@@ -100,44 +100,63 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
       <>
         <div
           key={entity}
-          className={`cursor-pointer ${
+          className={`p-2 cursor-pointer border border-gray-400 rounded-md m-1 ${
             entity === playerEntity
-              ? "bg-green-600"
+              ? "bg-green-900"
               : entity === highlightedPlayer
-              ? "bg-gray-600"
+              ? "bg-gray-900"
               : ""
           }`}
           onClick={() => setHighlightedPlayer(entity)}
         >
-          <p>Name: {username} (You 🚀)</p>
+          <p>Name: {username} (You {alive ? "🚀": "💀"})</p>
           <p>Status: {alive ? `Alive` : `Dead`}</p>
-          <p>Health: {health}</p>
-          <p>Range: {range}</p>
-          <p>Action Points: {ap}</p>
-        </div>
+          {alive ? (
+            <>
+              <p>Health: {health}</p>
+              <p>Range: {range}</p>
+              <p>Action Points: {ap}</p>
+            </>
+          ) : (
+            <p>Voting Points: {ap}</p>
+          )}
         {gameIsLive && (
-          <>
+          alive ? (
+            <>
+              <ActionButton
+                label="Boost Range"
+                action={() => () => increaseRange(gameId!)}
+                buttonStyle="btn-sci-fi"
+              />
+              <ActionButton 
+                label={`Claim 1 AP: ${timeUntilNextClaim}` }
+                action={() => () => claimActionPoint(gameId!)} 
+                buttonStyle={timeUntilNextClaim === "Now!" ? "btn-cta" : "btn-sci-fi"}
+              />
+            </>
+          ) : (
+            <>
             <ActionButton
-              label="Increase Range (Requires 1 AP)"
-              action={() => () => increaseRange(gameId!)}
-            />
-            <br />
-            <ActionButton 
-              label={`Claim Action Point: ${timeUntilNextClaim}` }
-              action={() => () => claimActionPoint(gameId!)} 
-              buttonColour={timeUntilNextClaim === "Now!" ? "bg-orange-500" : ""}
-            />
-          </>
+                label="Vote"
+                action={() => () => vote(highlightedPlayer!, gameId!)}
+                buttonStyle="btn-sci-fi"
+              />
+              <ActionButton 
+                label={`Claim VP: ${timeUntilNextClaim}`} 
+                action={() => () => claimVotingPoint(gameId!)} 
+                buttonStyle={timeUntilNextClaim === "Now!" ? "btn-cta" : "btn-sci-fi"}
+              />
+            </>
+          )
         )}
-        <p>-----------------------------------</p>
-        <br />
+        </div>
       </>
     );
   } else {
     return (
       <div
         key={entity}
-        className={`cursor-pointer ${
+        className={`p-2 cursor-pointer border border-gray-400 rounded-md m-1 ${
           !alive
             ? "bg-red-900"
             : entity === highlightedPlayer
@@ -155,19 +174,18 @@ export const LivePlayer: React.FC<LivePlayerProps> = ({
         {gameIsLive && (
           <>
             <ActionButton
-              label="Donate Action Point"
+              label="Send AP"
               action={() => () => sendActionPoint(highlightedPlayer!, gameId!)}
+              buttonStyle="btn-sci-fi"
             />
             <ActionButton
-              label="Attack Player"
+              label="Attack"
               action={() => () => attack(highlightedPlayer!, gameId!)}
+              buttonStyle="btn-sci-fi"
             />
           </> 
         )}
         </div>
-        <br />
-        <p>-----------------------------------</p>
-        <br />
       </div>
     );
   }

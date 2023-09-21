@@ -1,16 +1,16 @@
 import React from "react";
 import { Entity } from "@latticexyz/recs";
-import { LivePlayer } from "./LivePlayer";
+import { Player } from "./Player";
 import { useMUD } from "./MUDContext";
 
-type LivePlayersListComponentProps = {
+type PlayersListProps = {
   players: Entity[];
   highlightedPlayer: Entity | null;
   setHighlightedPlayer: (player: Entity | null) => void;
 };
 
-export const LivePlayersListComponent: React.FC<
-  LivePlayersListComponentProps
+export const PlayersList: React.FC<
+  PlayersListProps
 > = ({ players, highlightedPlayer, setHighlightedPlayer }) => {
   const {
     network: { playerEntity },
@@ -24,16 +24,13 @@ export const LivePlayersListComponent: React.FC<
   });
 
   return (
-    <div className="flex flex-col items-start border border-gray-300 p-3 rounded-md my-1">
-      <h1>Live Players: 🛸</h1>
-      <p>Click to highlight on map</p>
-      <p>-----------------------------------</p>
-      <br />
-
+    <div className="h-full items-start border border-gray-500 p-3 rounded-md">
+      <h1 className="text-2xl font-bold text-white mb-4">Players: 🛸</h1>
+      <i>Click a player to highlight them on the map</i>
       {sortedPlayers.map((player) => {
         const entity = player;
         return (
-          <LivePlayer
+          <Player
             key={entity}
             entity={entity}
             setHighlightedPlayer={setHighlightedPlayer}

@@ -4,10 +4,9 @@ import { useMUD } from "./MUDContext";
 import { Entity, Has, HasValue, getComponentValue } from "@latticexyz/recs";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
 import { GameBoard } from "./GameBoard";
-import { LivePlayersListComponent } from "./LivePlayersListComponent";
+import { PlayersList } from "./PlayersList";
 import { ErrorWithShortMessage } from "./CustomTypes";
 import ActivityLogComponent from "./ActivityLogComponent";
-import { DeadPlayersListComponent } from "./DeadPlayersListComponent";
 import { useGameContext } from "./GameContext";
 import SpawnModal from './SpawnModal';
 import Lobby from './Lobby';
@@ -35,9 +34,7 @@ export const App = () => {
 
   const gameSessions = useEntityQuery([Has(GameSession)]);
   const currentGameID = useComponentValue(InGame, playerEntity)?.value;
-  const allPlayers = useEntityQuery([HasValue(InGame, { value: gameId }), Has(Player), Has(Position)]);
-  const livePlayers = useEntityQuery([HasValue(InGame, { value: gameId }), Has(Player), HasValue(Alive, { value: true })]);
-  const deadPlayers = useEntityQuery([HasValue(InGame, { value: gameId }), Has(Player), HasValue(Alive, { value: false })]);
+  const allPlayers = useEntityQuery([HasValue(InGame, { value: gameId! }), Has(Player), Has(Position)]);
   const syncProgress = useComponentValue(SyncProgress, singletonEntity, {
     step: SyncStep.INITIALIZE,
     message: "Connecting",
@@ -100,8 +97,7 @@ export const App = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-space-bg">
-      <div className="w-4/5 h-4/5">
-
+      <div className="w-4/5 h-full">
         {!showGameBoard ? (
           <Lobby setShowGameBoard={setShowGameBoard} showGameBoard={showGameBoard} currentGameID={currentGameID} />
         ) : syncProgress.step !== SyncStep.LIVE ? (
@@ -109,67 +105,69 @@ export const App = () => {
             {syncProgress.message} ({Math.floor(syncProgress.percentage)}%)
           </div>
         ) : (
-          <div className={`flex ${showModal ? 'blur-md' : ''}`}>
-              <>
-                <div className="h-15 flex-grow felx-col overflow-scroll">
-                  <LivePlayersListComponent
-                    players={livePlayers}
-                    highlightedPlayer={highlightedPlayer}
-                    setHighlightedPlayer={setHighlightedPlayer}
-                  />
-                </div>
-                <div className="w-2/4">
-                  
-                  {showSpawnButton &&(
-                    <button onClick={handleSpawnClick}>Spawn</button>
-                    )}
-
-                  <button
-                    onClick={start}
-                    className={`text-white ${gameIsLive ? 'bg-green-500' : 'bg-blue-500'}`}
-                    disabled={gameStarted}
-                    >
-                  {gameIsLive ? "Match Started" : "Start Match"}
-                  </button>
-                  <GameBoard
-                    players={allPlayers}
-                    highlightedPlayer={highlightedPlayer}
-                    setHighlightedPlayer={setHighlightedPlayer}
-                    setGameStarted={setGameStarted}
-                    />
-                    {currentGameID ? 
-                      <>
-                        <p>Game ID: {currentGameID}</p>
-                        <p>Share this with other players so they can join your game</p>
-                        <p>When you have enough players (min 2), hit "Start Match"</p>
-                      </>
-                      :
-                      <p>Spawn to get a sharable game ID</p>
-                    }
-                  <br />
-                  <ActivityLogComponent />
-                </div>
-                <div className="w-1/4">
-                  <div className="h-15 overflow-scroll">
-                  <DeadPlayersListComponent
-                    players={deadPlayers}
-                    highlightedPlayer={highlightedPlayer}
-                    setHighlightedPlayer={setHighlightedPlayer}
-                    />
-                  </div> 
-                </div>
-              </>      
-              <SpawnModal
-                showModal={showModal}
-                setShowModal={setShowModal}
-                setShowSpawnButton={setShowSpawnButton}
+          <div className={`flex flex-col ${showModal ? 'blur-md' : ''} w-full h-full`}>
+            <div className="w-full h-full flex items-start border border-gray-500 p-3 rounded-md bg-slate-900">
+              {showSpawnButton && (
+                <button 
+                  className="btn-sci-fi"
+                  onClick={handleSpawnClick}>Spawn
+                </button>
+              )}
+              <button
+                onClick={start}
+                className={`text-white  ${gameIsLive ? 'btn-active' : 'btn-sci-fi'}`}
+                disabled={gameStarted}
+              >
+              {gameIsLive ? "Match Started" : "Start Match"}
+              </button>
+              {showGameBoard && 
+                <button 
+                  className="btn-sci-fi"  
+                  onClick={() => setShowGameBoard(false)}>Back to Lobby
+                </button>
+              }
+              <br />
+              {currentGameID ? 
+                  <>
+                    {/* <p>{`Game ID: ${currentGameID} (Share this with other players so they can join your game)`}</p> */}
+                    <p>
+                      Game ID: <strong className="text-orange-500 bg-gray-800 p-1 rounded-md">{currentGameID}</strong> 
+                      (Share this with other players so they can join your game)
+                    </p>
+                  </>
+                  :
+                  <p>Spawn to get a sharable game ID</p>
+                }
+            </div>
+            <div className="flex h-full">
+              <div className="w-1/3 max-h-[34rem] overflow-y-auto bg-slate-900 m-4">
+                <PlayersList
+                  players={allPlayers}
+                  highlightedPlayer={highlightedPlayer}
+                  setHighlightedPlayer={setHighlightedPlayer}
                 />
+              </div>
+              <div className="w-1/3 h-full flex flex-col items-center m-4">
+                <GameBoard
+                  players={allPlayers}
+                  highlightedPlayer={highlightedPlayer}
+                  setHighlightedPlayer={setHighlightedPlayer}
+                  setGameStarted={setGameStarted}
+                />
+                <br />
+              </div>
+              <div className="w-1/3 max-h-[34rem] overflow-y-auto bg-slate-900 m-4">
+                <ActivityLogComponent />
+                </div>
+            </div>
+            <SpawnModal
+              showModal={showModal}
+              setShowModal={setShowModal}
+              setShowSpawnButton={setShowSpawnButton}
+            />
           </div>
         )}
-
       </div>
-      
-      {showGameBoard && <button onClick={() => setShowGameBoard(false)}>Back to Lobby</button>}
     </div>
   );
 };

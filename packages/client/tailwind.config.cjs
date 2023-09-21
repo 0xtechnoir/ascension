@@ -4,7 +4,7 @@ module.exports = {
     theme: {
       extend: {
         backgroundImage: theme => ({
-          'space-bg': "url('/public/assets/space-bg.png')",
+          'space-bg': "url('/assets/space-bg.png')",
         }),
       },
     },
@@ -17,6 +17,15 @@ module.exports = {
               '@apply scale-110': {},
             },
           },
+          '.btn-active': {
+            '@apply mr-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-2 rounded-md': {},
+          },          
+          '.btn-cta': {
+            '@apply mr-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-2 rounded-md transform transition-transform duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500': {},
+            '&:hover': {
+              '@apply scale-110': {},
+            },
+          },          
         }
         addComponents(buttons)
       },

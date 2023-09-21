@@ -1,4 +1,4 @@
-import { getComponentValue, Has, HasValue } from "@latticexyz/recs";
+import { getComponentValue, HasValue } from "@latticexyz/recs";
 import { useEntityQuery } from "@latticexyz/react";
 import { useMUD } from "./MUDContext";
 import { LogMessage } from "./CustomTypes";
@@ -24,16 +24,16 @@ const ActivityLogComponent = () => {
     },
   } = useMUD();
 
-  const allMoveLogs = useEntityQuery([HasValue(MoveExecuted, { gameId : gameId })]);
-  const allAttackLogs = useEntityQuery([HasValue(AttackExecuted, { gameId : gameId })]);
-  const allSendActionPointLogs = useEntityQuery([HasValue(SendActionPointExecuted, { gameId : gameId })]);
-  const allRangeIncreaseLogs = useEntityQuery([HasValue(RangeIncreaseExecuted, { gameId : gameId })]);
-  const allPlayerSpawnedLogs = useEntityQuery([HasValue(PlayerSpawned, { gameId : gameId })]);
-  const allPlayerDiedLogs = useEntityQuery([HasValue(PlayerDied, { gameId : gameId })]);
-  const allActionPointClaimExecutedLogs = useEntityQuery([HasValue(ActionPointClaimExecuted, { gameId : gameId })]);
-  const allVotingPointClaimExecutedLogs = useEntityQuery([HasValue(VotingPointClaimExecuted, { gameId : gameId })]);
-  const allVoteExecutedLogs = useEntityQuery([HasValue(VoteExecuted, { gameId : gameId })]);
-  const gameStarted = useEntityQuery([HasValue(GameStarted, { gameId : gameId })]);
+  const allMoveLogs = useEntityQuery([HasValue(MoveExecuted, { gameId: gameId ?? undefined })]);
+  const allAttackLogs = useEntityQuery([HasValue(AttackExecuted, { gameId: gameId ?? undefined })]);
+  const allSendActionPointLogs = useEntityQuery([HasValue(SendActionPointExecuted, { gameId: gameId ?? undefined })]);
+  const allRangeIncreaseLogs = useEntityQuery([HasValue(RangeIncreaseExecuted, { gameId: gameId ?? undefined })]);
+  const allPlayerSpawnedLogs = useEntityQuery([HasValue(PlayerSpawned, { gameId: gameId ?? undefined })]);
+  const allPlayerDiedLogs = useEntityQuery([HasValue(PlayerDied, { gameId: gameId ?? undefined })]);
+  const allActionPointClaimExecutedLogs = useEntityQuery([HasValue(ActionPointClaimExecuted, { gameId: gameId ?? undefined })]);
+  const allVotingPointClaimExecutedLogs = useEntityQuery([HasValue(VotingPointClaimExecuted, { gameId: gameId ?? undefined })]);
+  const allVoteExecutedLogs = useEntityQuery([HasValue(VoteExecuted, { gameId: gameId ?? undefined })]);
+  const gameStarted = useEntityQuery([HasValue(GameStarted, { gameId: gameId ?? undefined })]);
   let mappedLogs: LogMessage[] = [];
 
   console.log("ActivityLogComponent: gameStarted: ", gameStarted);
@@ -211,18 +211,17 @@ const ActivityLogComponent = () => {
   );
 
   return (
-    <div
-      className="activity-log"
-      style={{ maxHeight: "200px", overflowY: "auto" }}
-    >
-      <h3>Ships Log:</h3>
-      <ul>
+    <div className="h-full items-start border border-gray-500 p-3 rounded-md custom-scrollbar bg-slate-900">
+      <h1 className="text-2xl font-bold text-white mb-4">Ships Log:</h1>
+      <ul className="list-decimal text-white">
         {mappedLogs
           .sort((a, b) => b.timestamp - a.timestamp)
           .map((logObj, index) => (
-            <li key={index}>
-              {`${formatDate(logObj.timestamp)} : ${logObj.message}`}
-            </li>
+            <ul className="mb-1">
+              <span className="text-gray-400">{`${formatDate(logObj.timestamp)}`}</span>
+              <span className="text-orange-400"> : </span>
+              <span className="text-white">{logObj.message}</span>
+            </ul>
           ))}
       </ul>
     </div>
