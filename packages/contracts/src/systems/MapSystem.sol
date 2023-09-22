@@ -26,6 +26,7 @@ import { getKeysWithValue } from "@latticexyz/world/src/modules/keyswithvalue/ge
 import { console } from "forge-std/console.sol";
 import { MoveExecuted, MoveExecutedData } from "../codegen/Tables.sol";
 import { PlayerSpawned, PlayerSpawnedData } from "../codegen/Tables.sol";
+import { PlayerLeftGame, PlayerLeftGameData } from "../codegen/Tables.sol";
 
 contract MapSystem is System {
 
@@ -54,7 +55,11 @@ contract MapSystem is System {
     // create a player entity using the message senders address as the key
     bytes32 player = addressToEntityKey(address(_msgSender()));
     // we could limit the number of players here as well
-    require(!Player.get(player), "already spawned");
+
+    QueryFragment[] memory inGameFragments = new QueryFragment[](1);
+    inGameFragments[0] = QueryFragment(QueryType.Has, InGameTableId, new bytes(0));
+    bytes32[][] memory InGameResult = query(inGameFragments);
+    require(InGameResult.length == 0, "Player is already in a game");
 
     // loop through the points array and find a point that is not already occupied
     for (uint i = 0; i < points.length; i++) {
@@ -90,6 +95,19 @@ contract MapSystem is System {
       gameId: _gameId
     })); 
   }
+  
+  function leaveGame(uint256 _timestamp, uint32 _gameId) public {
+    bytes32 player = addressToEntityKey(address(_msgSender()));
+    require(InGame.get(player) == _gameId, "Player is not in this game");
+    string memory username = Username.get(player);
+    InGame.deleteRecord(player);
+    PlayerLeftGame.emitEphemeral(_timestamp, PlayerLeftGameData({
+      timestamp: _timestamp,
+      player: username,
+      gameId: _gameId
+    })); 
+  }
+
   function move(uint256 timestamp, uint32 _x, uint32 _y, uint32 _gameId) public {
 
     bytes32 player = addressToEntityKey(_msgSender());

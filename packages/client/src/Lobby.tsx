@@ -56,7 +56,7 @@ const Lobby: React.FC<LobbyProps> = ({ setShowGameBoard, currentGameID }) => {
 
   return (
     <div className="flex items-center justify-center min-h-screen">
-      <div className="bg-white p-8 rounded shadow-md w-120 text-black">
+      <div className="p-8 rounded shadow-md w-120 text-white bg-slate-900 border border-gray-500">
         <h1 className="text-3xl font-bold mb-4">Welcome to Ascension</h1>
         {currentGameID ? (
           <>

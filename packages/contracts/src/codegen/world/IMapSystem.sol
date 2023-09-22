@@ -6,6 +6,8 @@ pragma solidity >=0.8.0;
 interface IMapSystem {
   function spawn(uint256 _timestamp, string memory _username, uint32 _gameId) external;
 
+  function leaveGame(uint256 _timestamp, uint32 _gameId) external;
+
   function move(uint256 timestamp, uint32 _x, uint32 _y, uint32 _gameId) external;
 
   function queryPosition(uint32 _x, uint32 _y, uint32 _gameId) external view returns (bytes32[][] memory);

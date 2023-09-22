@@ -3,17 +3,16 @@ import Modal from '@material-ui/core/Modal';
 import { useGameContext } from "./GameContext";
 import { useMUD } from "./MUDContext";
 import { ErrorWithShortMessage } from "./CustomTypes";
-import { getComponentValue } from "@latticexyz/recs";
 
 type SpawnModalProps = {
-  showModal: boolean;
-  setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
+  showSpawnModal: boolean;
+  setShowSpawnModal: React.Dispatch<React.SetStateAction<boolean>>;
   setShowSpawnButton: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const SpawnModal: React.FC<SpawnModalProps> = ({
-  showModal,
-  setShowModal,
+  showSpawnModal: showSpawnModal,
+  setShowSpawnModal: setShowSpawnModal,
   setShowSpawnButton,
 }) => {
 
@@ -25,8 +24,6 @@ const SpawnModal: React.FC<SpawnModalProps> = ({
       // Contexts
     const { handleError } = useGameContext();
     const {
-        network: { playerEntity },
-        components: { InGame },
         systemCalls: { spawn },
     } = useMUD();
 
@@ -59,8 +56,6 @@ const SpawnModal: React.FC<SpawnModalProps> = ({
             }
             await spawn(sanitizedUsername, gameId);
             setShowSpawnButton(false);
-            const result = getComponentValue(InGame, playerEntity);
-            console.log("Player successfully spawned into game: ", result);
           } catch (error) {
             console.log("handleModalSubmit error: ", error);
             if (typeof error === "object" && error !== null) {
@@ -69,7 +64,7 @@ const SpawnModal: React.FC<SpawnModalProps> = ({
             }
           } finally {
             setIsLoading(false);
-            setShowModal(false);
+            setShowSpawnModal(false);
           }
       };
 
@@ -77,20 +72,20 @@ const SpawnModal: React.FC<SpawnModalProps> = ({
         setError("");
       };
     
-      const handleCloseModal = () => {
-        setShowModal(false);
+      const handleCloseSpawnModal = () => {
+        setShowSpawnModal(false);
         dismissError();
       };
 
   return (
     <Modal
-      onClose={handleCloseModal}
-      open={showModal}
+      onClose={handleCloseSpawnModal}
+      open={showSpawnModal}
       className="flex items-center justify-center"
     >
       <div className="bg-white rounded-lg p-8 shadow-lg w-96 text-black relative">
         <button 
-          onClick={handleCloseModal} 
+          onClick={handleCloseSpawnModal} 
           className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 bg-white rounded-full p-1"
         >
           X

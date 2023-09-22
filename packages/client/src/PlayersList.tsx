@@ -24,7 +24,7 @@ export const PlayersList: React.FC<
   });
 
   return (
-    <div className="h-full items-start border border-gray-500 p-3 rounded-md">
+    <div className="h-full items-start p-3 rounded-md">
       <h1 className="text-2xl font-bold text-white mb-4">Players: 🛸</h1>
       <i>Click a player to highlight them on the map</i>
       {sortedPlayers.map((player) => {

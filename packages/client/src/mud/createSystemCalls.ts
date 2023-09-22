@@ -123,12 +123,6 @@ export function createSystemCalls(
     if (!playerEntity) {
       throw new Error("no player");
     }
-    const canSpawn = getComponentValue(Player, playerEntity)?.value !== true;
-    if (!canSpawn) {
-      throw new Error("already spawned");
-    }
-    console.log("spawn called with gameID: ", gameId);
-
     const bigIntTimestamp = BigInt(Date.now());
     const playerId = uuid();
     Player.addOverride(playerId, {
@@ -143,6 +137,19 @@ export function createSystemCalls(
       throw error;
     } finally {
       Player.removeOverride(playerId);
+    }
+  };
+  
+  const leaveGame = async (gameId: number) => {
+    if (!playerEntity) {
+      throw new Error("no player");
+    }
+    const bigIntTimestamp = BigInt(Date.now());
+    try {
+      const tx = await worldContract.write.leaveGame([bigIntTimestamp, gameId]);
+      await waitForTransaction(tx);
+    } catch (error) {
+      throw error;
     }
   };
 
@@ -179,5 +186,6 @@ export function createSystemCalls(
     vote,
     claimActionPoint,
     claimVotingPoint,
+    leaveGame,
   };
 }

@@ -132,6 +132,7 @@ contract TurnSystem is System {
       Movable.set(_target, false);
       Range.set(_target, 0);
       Alive.set(_target, false);
+      VotingPoint.set(_target, 0);
       PlayerDied.emitEphemeral(timestamp, PlayerDiedData({
         timestamp: timestamp,
         gameId: gameId,

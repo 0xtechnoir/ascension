@@ -4,7 +4,7 @@ import { useComponentValue, useEntityQuery } from "@latticexyz/react";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
 import { ActionButton } from "./ActionButton";
 import { useGameContext } from "./GameContext";
-import { Entity, Has, HasValue, getComponentValue } from "@latticexyz/recs";
+import { Entity, Has, getComponentValue } from "@latticexyz/recs";
 
 type PlayerProps = {
   entity: Entity;
@@ -22,9 +22,11 @@ export const Player: React.FC<PlayerProps> = ({
       Health,
       Range,
       ActionPoint,
+      VotingPoint,
       Username,
       Alive,
       LastActionPointClaim,
+      LastVotingPointClaim,
       ClaimInterval,
       GameSession,
     },
@@ -32,16 +34,14 @@ export const Player: React.FC<PlayerProps> = ({
     network: { playerEntity },
   } = useMUD();
 
-  const [timeUntilNextClaim, setTimeUntilNextClaim] =
-    useState<string>("Calculating...");
-
   const { gameId } = useGameContext();
-
   const username = useComponentValue(Username, entity)?.value;
   const health = useComponentValue(Health, entity)?.value;
   const range = useComponentValue(Range, entity)?.value;
   const ap = useComponentValue(ActionPoint, entity)?.value;
+  const vp = useComponentValue(VotingPoint, entity)?.value;
   const alive = useComponentValue(Alive, entity)?.value;
+  const playerIsAlive = useComponentValue(Alive, playerEntity)?.value;
 
   // is the game live yet? 
   const gameSessions = useEntityQuery([Has(GameSession)]);
@@ -62,38 +62,49 @@ export const Player: React.FC<PlayerProps> = ({
     entity
   )?.value;
 
+  const lastVotingPointClaim = useComponentValue(
+    LastVotingPointClaim,
+    entity
+  )?.value;
+
   const claimInterval = useComponentValue(
     ClaimInterval,
     singletonEntity
   )?.value;
 
-  useEffect(() => {
-    const lastClaim = new Date(Number(lastActionPointClaim));
-    const interval = Number(claimInterval);
-    const nextClaimDate = new Date(lastClaim.getTime() + interval);
+  const [timeUntilNextAPClaim, setTimeUntilNextAPClaim] = useState<string>("Calculating...");
+  const [timeUntilNextVPClaim, setTimeUntilNextVPClaim] = useState<string>("Calculating...");
 
-    // Function to update the time left for the next claim
-    const updateTimer = () => {
+  useEffect(() => {
+    const updateTimer = (lastClaimTimestamp: bigint, setTimeFunc: React.Dispatch<React.SetStateAction<string>>) => {
+      const lastClaim = new Date(Number(lastClaimTimestamp));
+      const interval = Number(claimInterval);
+      const nextClaimDate = new Date(lastClaim.getTime() + interval);
+      
       const now = new Date();
       const timeLeft = nextClaimDate.getTime() - now.getTime();
-
+      
       if (timeLeft > 0) {
         const seconds = Math.floor((timeLeft / 1000) % 60);
         const minutes = Math.floor((timeLeft / (1000 * 60)) % 60);
         const hours = Math.floor((timeLeft / (1000 * 60 * 60)) % 24);
-        setTimeUntilNextClaim(`${hours}h ${minutes}m ${seconds}s`);
+        setTimeFunc(`${hours}h ${minutes}m ${seconds}s`);
       } else {
-        setTimeUntilNextClaim("Now!");
+        setTimeFunc("Now!");
       }
     };
-
+  
+    const intervalId = setInterval(() => {
+      updateTimer(lastActionPointClaim!, setTimeUntilNextAPClaim);
+      updateTimer(lastVotingPointClaim!, setTimeUntilNextVPClaim);
+    }, 1000);
+  
     // Update the timer immediately
-    updateTimer();
-    // Update the timer every second
-    const intervalId = setInterval(updateTimer, 1000);
-    // Clear the interval when the component is unmounted
+    updateTimer(lastActionPointClaim!, setTimeUntilNextAPClaim);
+    updateTimer(lastVotingPointClaim!, setTimeUntilNextVPClaim);
+  
     return () => clearInterval(intervalId);
-  }, [lastActionPointClaim, claimInterval]);
+  }, [lastActionPointClaim, lastVotingPointClaim, claimInterval]);
 
   if (entity === playerEntity) {
     return (
@@ -118,10 +129,10 @@ export const Player: React.FC<PlayerProps> = ({
               <p>Action Points: {ap}</p>
             </>
           ) : (
-            <p>Voting Points: {ap}</p>
+            <p>Voting Points: {vp}</p>
           )}
         {gameIsLive && (
-          alive ? (
+          playerIsAlive ? (
             <>
               <ActionButton
                 label="Boost Range"
@@ -129,22 +140,17 @@ export const Player: React.FC<PlayerProps> = ({
                 buttonStyle="btn-sci-fi"
               />
               <ActionButton 
-                label={`Claim 1 AP: ${timeUntilNextClaim}` }
+                label={`Claim AP: ${timeUntilNextAPClaim}`}
                 action={() => () => claimActionPoint(gameId!)} 
-                buttonStyle={timeUntilNextClaim === "Now!" ? "btn-cta" : "btn-sci-fi"}
+                buttonStyle={timeUntilNextAPClaim === "Now!" ? "btn-cta" : "btn-sci-fi"}
               />
             </>
           ) : (
             <>
-            <ActionButton
-                label="Vote"
-                action={() => () => vote(highlightedPlayer!, gameId!)}
-                buttonStyle="btn-sci-fi"
-              />
               <ActionButton 
-                label={`Claim VP: ${timeUntilNextClaim}`} 
+                label={`Claim VP: ${timeUntilNextVPClaim}`} 
                 action={() => () => claimVotingPoint(gameId!)} 
-                buttonStyle={timeUntilNextClaim === "Now!" ? "btn-cta" : "btn-sci-fi"}
+                buttonStyle={timeUntilNextVPClaim === "Now!" ? "btn-cta" : "btn-sci-fi"}
               />
             </>
           )
@@ -173,17 +179,28 @@ export const Player: React.FC<PlayerProps> = ({
         <div className="flex">
         {gameIsLive && (
           <>
-            <ActionButton
-              label="Send AP"
-              action={() => () => sendActionPoint(highlightedPlayer!, gameId!)}
-              buttonStyle="btn-sci-fi"
-            />
-            <ActionButton
-              label="Attack"
-              action={() => () => attack(highlightedPlayer!, gameId!)}
-              buttonStyle="btn-sci-fi"
-            />
-          </> 
+            {playerIsAlive && alive && (
+              <>
+                <ActionButton
+                  label="Send AP"
+                  action={() => () => sendActionPoint(entity, gameId!)}
+                  buttonStyle="btn-sci-fi"
+                />
+                <ActionButton
+                  label="Attack"
+                  action={() => () => attack(entity, gameId!)}
+                  buttonStyle="btn-sci-fi"
+                />
+              </>
+            )}
+            {!playerIsAlive && alive && (
+              <ActionButton
+                label="Vote"
+                action={() => () => vote(entity, gameId!)}
+                buttonStyle="btn-sci-fi"
+              />
+            )}
+          </>
         )}
         </div>
       </div>
