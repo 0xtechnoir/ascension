@@ -20,10 +20,11 @@
     "@ethersproject/abi": "^5.7.0",
     "@ethersproject/bytes": "^5.7.0",
     "@ethersproject/providers": "^5.7.2",
-    "@latticexyz/config": "2.0.0-next.8",
-    "@latticexyz/schema-type": "2.0.0-next.8",
-    "@latticexyz/store": "2.0.0-next.8",
-    "@latticexyz/world": "2.0.0-next.8",
+    "@latticexyz/config": "2.0.0-next.10",
+    "@latticexyz/schema-type": "2.0.0-next.9",
+    "@latticexyz/store": "2.0.0-next.10",
+    "@latticexyz/world": "2.0.0-next.10",
+    "@latticexyz/world-modules": "2.0.0-next.10",
     "ethers": "^5.7.2"
   },
   "devDependencies": {

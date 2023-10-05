@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.0;
+pragma solidity >=0.8.21;
 import { System } from "@latticexyz/world/src/System.sol";
 import { 
   MapConfig, 
@@ -29,15 +29,16 @@ import {
   InGame } from "../codegen/Tables.sol";
 import { addressToEntityKey } from "../addressToEntityKey.sol";
 import { positionToEntityKey } from "../positionToEntityKey.sol";
-import { getKeysInTable } from "@latticexyz/world/src/modules/keysintable/getKeysInTable.sol";
-import { query, QueryFragment, QueryType } from "@latticexyz/world/src/modules/keysintable/query.sol";
+import { getKeysInTable } from "@latticexyz/world-modules/src/modules/keysintable/getKeysInTable.sol";
+import { query, QueryFragment, QueryType } from "@latticexyz/world-modules/src/modules/keysintable/query.sol";
 import { PlayerTableId, Position, PositionTableId, AliveTableId } from "../codegen/Tables.sol";
-import { getKeysWithValue } from "@latticexyz/world/src/modules/keyswithvalue/getKeysWithValue.sol";
+import { getKeysWithValue } from "@latticexyz/world-modules/src/modules/keyswithvalue/getKeysWithValue.sol";
 import { GameStarted, GameStartedData } from "../codegen/Tables.sol";
 import { AttackExecuted, AttackExecutedData } from "../codegen/Tables.sol";
 import { SendActionPointExecuted, SendActionPointExecutedData } from "../codegen/Tables.sol";
 import { RangeIncreaseExecuted, RangeIncreaseExecutedData } from "../codegen/Tables.sol";
 import { PlayerDied, PlayerDiedData } from "../codegen/Tables.sol";
+import { PackedCounter } from "@latticexyz/store/src/PackedCounter.sol";
 
 contract TurnSystem is System {
 
@@ -47,10 +48,15 @@ contract TurnSystem is System {
     GameSession.setIsLive(gameId, true);
     GameSession.setStartTime(gameId, startTime);
 
-    GameStarted.emitEphemeral(gameId, GameStartedData({
+      GameStarted.set(gameId, GameStartedData({
       timestamp: startTime,
       gameId: gameId
     }));
+
+    // GameStarted.emitEphemeral(gameId, GameStartedData({
+    //   timestamp: startTime,
+    //   gameId: gameId
+    // }));
   }
 
   function assignActionPointsToAllLivePlayers() private {
@@ -75,11 +81,18 @@ contract TurnSystem is System {
     ActionPoint.set(player, currentActionPoints - 1);
 
     string memory sender = Username.get(player);
-    RangeIncreaseExecuted.emitEphemeral(timestamp, RangeIncreaseExecutedData({
+
+    RangeIncreaseExecuted.set(timestamp, RangeIncreaseExecutedData({
       timestamp: timestamp,
       gameId: gameId,
       player: sender
     })); 
+   
+    // RangeIncreaseExecuted.emitEphemeral(timestamp, RangeIncreaseExecutedData({
+    //   timestamp: timestamp,
+    //   gameId: gameId,
+    //   player: sender
+    // })); 
   }
 
   function sendActionPoint(uint256 timestamp, bytes32 _recipient, uint32 gameId) public {
@@ -101,12 +114,21 @@ contract TurnSystem is System {
 
     string memory sender = Username.get(player);
     string memory reciever = Username.get(_recipient);
-    SendActionPointExecuted.emitEphemeral(timestamp, SendActionPointExecutedData({
+    
+    SendActionPointExecuted.set(timestamp, SendActionPointExecutedData({
       timestamp: timestamp,
       gameId: gameId,
       sender: sender,
       reciever: reciever
     })); 
+    
+    
+    // SendActionPointExecuted.emitEphemeral(timestamp, SendActionPointExecutedData({
+    //   timestamp: timestamp,
+    //   gameId: gameId,
+    //   sender: sender,
+    //   reciever: reciever
+    // })); 
   }
 
   function attackPlayer(uint256 timestamp, bytes32 _target, uint32 gameId) public {
@@ -133,24 +155,42 @@ contract TurnSystem is System {
       Range.set(_target, 0);
       Alive.set(_target, false);
       VotingPoint.set(_target, 0);
-      PlayerDied.emitEphemeral(timestamp, PlayerDiedData({
+      
+      PlayerDied.set(timestamp, PlayerDiedData({
         timestamp: timestamp,
         gameId: gameId,
         player: Username.get(_target)
       }));
+      
+      
+      // PlayerDied.emitEphemeral(timestamp, PlayerDiedData({
+      //   timestamp: timestamp,
+      //   gameId: gameId,
+      //   player: Username.get(_target)
+      // }));
     }
 
     string memory attacker = Username.get(player);
     string memory target = Username.get(_target);
 
-    AttackExecuted.emitEphemeral(timestamp, AttackExecutedData({
+    AttackExecuted.set(timestamp, AttackExecutedData({
       timestamp: timestamp,
       gameId: gameId,
       attacker: attacker,
       target: target
     }));  
+
+    // AttackExecuted.emitEphemeral(timestamp, AttackExecutedData({
+    //   timestamp: timestamp,
+    //   gameId: gameId,
+    //   attacker: attacker,
+    //   target: target
+    // }));  
     
-    bytes32[] memory remainingPlayers = getKeysWithValue(AliveTableId, Alive.encode(true));// return all records for alive players
+    (bytes memory staticData, PackedCounter encodedLengths, bytes memory dynamicData) = Alive.encode(true);
+    bytes32[] memory remainingPlayers = getKeysWithValue(AliveTableId, staticData, encodedLengths, dynamicData);
+
+    // bytes32[] memory remainingPlayers = getKeysWithValue(AliveTableId, Alive.encode(true));// return all records for alive players
     if (remainingPlayers.length == 1) {
       // Only oneplayer left alive so end game
       // GameIsLive.set(false);
@@ -176,11 +216,18 @@ contract TurnSystem is System {
     ActionPoint.set(player, currentActionPoints + 1);
 
     string memory username = Username.get(player);
-    ActionPointClaimExecuted.emitEphemeral(_gameId, ActionPointClaimExecutedData({
+
+    ActionPointClaimExecuted.set(_gameId, ActionPointClaimExecutedData({
       timestamp: _timestamp,
       player: username,
       gameId: _gameId
     }));  
+
+    // ActionPointClaimExecuted.emitEphemeral(_gameId, ActionPointClaimExecutedData({
+    //   timestamp: _timestamp,
+    //   player: username,
+    //   gameId: _gameId
+    // }));  
   }
   function claimVotingPoint(uint256 timestamp, uint32 _gameId) public {
     require(GameSession.getIsLive(_gameId), "Match hasn't started yet");
@@ -199,11 +246,18 @@ contract TurnSystem is System {
     VotingPoint.set(player, currentVotingPoints + 1);
 
     string memory username = Username.get(player);
-    VotingPointClaimExecuted.emitEphemeral(timestamp, VotingPointClaimExecutedData({
+
+    VotingPointClaimExecuted.set(timestamp, VotingPointClaimExecutedData({
       timestamp: timestamp,
       gameId: _gameId,
       player: username
     }));  
+
+    // VotingPointClaimExecuted.emitEphemeral(timestamp, VotingPointClaimExecutedData({
+    //   timestamp: timestamp,
+    //   gameId: _gameId,
+    //   player: username
+    // }));  
   }
 
   function vote(uint256 timestamp, bytes32 _recipient, uint32 gameId) public {
@@ -222,12 +276,20 @@ contract TurnSystem is System {
 
     string memory voter = Username.get(player);
     string memory elected = Username.get(_recipient);
-    VoteExecuted.emitEphemeral(timestamp, VoteExecutedData({
+
+    VoteExecuted.set(timestamp, VoteExecutedData({
       timestamp: timestamp,
       gameId: gameId,
       voter: voter,
       recipient: elected
     }));  
+
+    // VoteExecuted.emitEphemeral(timestamp, VoteExecutedData({
+    //   timestamp: timestamp,
+    //   gameId: gameId,
+    //   voter: voter,
+    //   recipient: elected
+    // }));  
   }
 
   function distance(uint32 fromX, uint32 fromY, uint32 toX, uint32 toY) internal pure returns (uint32) {

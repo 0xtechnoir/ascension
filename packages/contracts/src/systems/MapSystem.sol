@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.0;
+pragma solidity >=0.8.21;
 import { System } from "@latticexyz/world/src/System.sol";
 import { 
   MapConfig, 
@@ -20,13 +20,14 @@ import {
   GameSession } from "../codegen/Tables.sol";
 import { addressToEntityKey } from "../addressToEntityKey.sol";
 import { positionToEntityKey } from "../positionToEntityKey.sol";
-import { query, QueryFragment, QueryType } from "@latticexyz/world/src/modules/keysintable/query.sol";
-import { getKeysInTable } from "@latticexyz/world/src/modules/keysintable/getKeysInTable.sol";
-import { getKeysWithValue } from "@latticexyz/world/src/modules/keyswithvalue/getKeysWithValue.sol";
+import { query, QueryFragment, QueryType } from "@latticexyz/world-modules/src/modules/keysintable/query.sol";
+import { getKeysInTable } from "@latticexyz/world-modules/src/modules/keysintable/getKeysInTable.sol";
+import { getKeysWithValue } from "@latticexyz/world-modules/src/modules/keyswithvalue/getKeysWithValue.sol";
 import { console } from "forge-std/console.sol";
 import { MoveExecuted, MoveExecutedData } from "../codegen/Tables.sol";
 import { PlayerSpawned, PlayerSpawnedData } from "../codegen/Tables.sol";
 import { PlayerLeftGame, PlayerLeftGameData } from "../codegen/Tables.sol";
+import { PackedCounter } from "@latticexyz/store/src/PackedCounter.sol";
 
 contract MapSystem is System {
 
@@ -64,8 +65,10 @@ contract MapSystem is System {
     // loop through the points array and find a point that is not already occupied
     for (uint i = 0; i < points.length; i++) {
       QueryFragment[] memory fragments = new QueryFragment[](2);
-      fragments[0] = QueryFragment(QueryType.HasValue, InGameTableId, InGame.encode(_gameId));
-      fragments[1] = QueryFragment(QueryType.HasValue, PositionTableId, Position.encode(points[i].x, points[i].y));
+      (bytes memory inGameStaticData, PackedCounter inGameEncodedLengths, bytes memory inGameDynamicData) = InGame.encode(_gameId);
+      fragments[0] = QueryFragment(QueryType.HasValue, InGameTableId, inGameDynamicData);
+      (bytes memory positionStaticData, PackedCounter positionEncodedLengths, bytes memory positionDynamicData) = Position.encode(points[i].x, points[i].y);
+      fragments[1] = QueryFragment(QueryType.HasValue, PositionTableId, positionDynamicData);
       bytes32[][] memory keyTuples = query(fragments);
       if (keyTuples.length == 0) {
           x = points[i].x;
@@ -87,13 +90,21 @@ contract MapSystem is System {
     ActionPoint.set(player, 0);
     LastActionPointClaim.set(player, 0); 
 
-    PlayerSpawned.emitEphemeral(_timestamp, PlayerSpawnedData({
+    PlayerSpawned.set(_timestamp, PlayerSpawnedData({
       timestamp: _timestamp,
       x: x, 
       y: y, 
       player: _username,
       gameId: _gameId
     })); 
+
+    // PlayerSpawned.emitEphemeral(_timestamp, PlayerSpawnedData({
+    //   timestamp: _timestamp,
+    //   x: x, 
+    //   y: y, 
+    //   player: _username,
+    //   gameId: _gameId
+    // })); 
   }
   
   function leaveGame(uint256 _timestamp, uint32 _gameId) public {
@@ -101,11 +112,18 @@ contract MapSystem is System {
     require(InGame.get(player) == _gameId, "Player is not in this game");
     string memory username = Username.get(player);
     InGame.deleteRecord(player);
-    PlayerLeftGame.emitEphemeral(_timestamp, PlayerLeftGameData({
+
+     PlayerLeftGame.set(_timestamp, PlayerLeftGameData({
       timestamp: _timestamp,
       player: username,
       gameId: _gameId
     })); 
+
+    // PlayerLeftGame.emitEphemeral(_timestamp, PlayerLeftGameData({
+    //   timestamp: _timestamp,
+    //   player: username,
+    //   gameId: _gameId
+    // })); 
   }
 
   function move(uint256 timestamp, uint32 _x, uint32 _y, uint32 _gameId) public {
@@ -132,8 +150,8 @@ contract MapSystem is System {
 
     string memory username = Username.get(player);
     Position.set(player, _x, _y);
-    
-    MoveExecuted.emitEphemeral(timestamp, MoveExecutedData({
+
+     MoveExecuted.set(timestamp, MoveExecutedData({
       timestamp: timestamp,
       fromX: fromX, 
       fromY: fromY, 
@@ -143,19 +161,29 @@ contract MapSystem is System {
       player: username
     }));
 
+    // MoveExecuted.emitEphemeral(timestamp, MoveExecutedData({
+    //   timestamp: timestamp,
+    //   fromX: fromX, 
+    //   fromY: fromY, 
+    //   toX: _x, 
+    //   toY: _y,
+    //   gameId: _gameId,
+    //   player: username
+    // }));
+
     ActionPoint.set(player, currentActionPoints - 1);
   }
 
   function queryPosition(uint32 _x, uint32 _y, uint32 _gameId) public view returns (bytes32[][] memory) {
     QueryFragment[] memory fragments = new QueryFragment[](2);
-    fragments[0] = QueryFragment(QueryType.HasValue, InGameTableId, InGame.encode(_gameId));
-    fragments[1] = QueryFragment(QueryType.HasValue, PositionTableId, Position.encode(_x, _y));
+    fragments[0] = QueryFragment(QueryType.HasValue, InGameTableId, abi.encode(_gameId));
+    fragments[1] = QueryFragment(QueryType.HasValue, PositionTableId, abi.encode(_x, _y));
     return query(fragments);
   }
   function queryisLive(uint32 _x, uint32 _y, uint32 _gameId) public view returns (bytes32[][] memory) {
     QueryFragment[] memory fragments = new QueryFragment[](2);
-    fragments[0] = QueryFragment(QueryType.HasValue, InGameTableId, InGame.encode(_gameId));
-    fragments[1] = QueryFragment(QueryType.HasValue, PositionTableId, Position.encode(_x, _y));
+    fragments[0] = QueryFragment(QueryType.HasValue, InGameTableId, abi.encode(_gameId));
+    fragments[1] = QueryFragment(QueryType.HasValue, PositionTableId, abi.encode(_x, _y));
     return query(fragments);
   }
 

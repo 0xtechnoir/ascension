@@ -7,7 +7,7 @@ export default mudConfig({
     MapConfig: {
       keySchema: {},
       dataStruct: false,
-      schema: {
+      valueSchema: {
         width: "uint32",
         height: "uint32",
       }
@@ -16,7 +16,7 @@ export default mudConfig({
       keySchema: {
         id: "uint32",
       },
-      schema: {
+      valueSchema: {
         isLive: "bool",
         startTime: "uint256",
         gameId: "uint32",
@@ -24,7 +24,7 @@ export default mudConfig({
     },
     ClaimInterval: {
       keySchema: {},
-      schema: "uint32",
+      valueSchema: "uint32",
     },
     Username: "string",
     Champion: "bool",
@@ -40,52 +40,52 @@ export default mudConfig({
     VotingPoint: "uint32",
     Position: {
       dataStruct: false,
-      schema: {
+      valueSchema: {
         x: "uint32",
         y: "uint32",
       }
     },
-    // Ephemeral tables ====================================
+    // Offchain tables (events) ====================================
     PlayerSpawned : {
       keySchema: {
         id: "uint256",
       },
-      schema: {
+      valueSchema: {
         timestamp: "uint256",
         x: "uint32",
         y: "uint32", 
         gameId: "uint32",
         player: "string",
       }, 
-      ephemeral: true,
+      offchainOnly: true,
     },
     PlayerLeftGame : {
       keySchema: {
         id: "uint256",
       },
-      schema: {
+      valueSchema: {
         timestamp: "uint256",
         gameId: "uint32",
         player: "string",
       }, 
-      ephemeral: true,
+      offchainOnly: true,
     },
     PlayerDied : {
       keySchema: {
         id: "uint256",
       },
-      schema: {
+      valueSchema: {
         timestamp: "uint256",
         gameId: "uint32",
         player: "string",
       }, 
-      ephemeral: true,
+      offchainOnly: true,
     },
     MoveExecuted : {
       keySchema: {
         id: "uint256",
       },
-      schema: {
+      valueSchema: {
         timestamp: "uint256",
         fromX: "uint32",
         fromY: "uint32",
@@ -94,103 +94,103 @@ export default mudConfig({
         gameId: "uint32",
         player: "string",
       }, 
-      ephemeral: true,
+      offchainOnly: true,
     },
     AttackExecuted : {
       keySchema: {
         id: "uint256",
       },
-      schema: {
+      valueSchema: {
         timestamp: "uint256",
         gameId: "uint32",
         attacker: "string",
         target: "string",
       }, 
-      ephemeral: true,
+      offchainOnly: true,
     },
     SendActionPointExecuted : {
       keySchema: {
         id: "uint256",
       },
-      schema: {
+      valueSchema: {
         timestamp: "uint256",
         gameId: "uint32",
         sender: "string",
         reciever: "string",
       }, 
-      ephemeral: true,
+      offchainOnly: true,
     },
     RangeIncreaseExecuted : {
       keySchema: {
         id: "uint256",
       },
-      schema: {
+      valueSchema: {
         timestamp: "uint256",
         gameId: "uint32",
         player: "string",
       }, 
-      ephemeral: true,
+      offchainOnly: true,
     },
     ActionPointClaimExecuted : {
       keySchema: {
         id: "uint32",
       },
-      schema: {
+      valueSchema: {
         timestamp: "uint256",
         gameId: "uint32",
         player: "string",
       }, 
-      ephemeral: true,
+      offchainOnly: true,
     },
     ClaimExecuted : {
       keySchema: {
         id: "uint256",
       },
-      schema: {
+      valueSchema: {
         timestamp: "uint256",
         player: "string",
         gameId: "string",
       }, 
-      ephemeral: true,
+      offchainOnly: true,
     },
     VotingPointClaimExecuted : {
       keySchema: {
         id: "uint256",
       },
-      schema: {
+      valueSchema: {
         timestamp: "uint256",
         gameId: "uint32",
         player: "string",
       }, 
-      ephemeral: true,
+      offchainOnly: true,
     },
     VoteExecuted : {
       keySchema: {
         id: "uint256",
       },
-      schema: {
+      valueSchema: {
         timestamp: "uint256",
         gameId: "uint32",
         voter: "string",
         recipient: "string",
       }, 
-      ephemeral: true,
+      offchainOnly: true,
     },
     GameStarted: {
       keySchema: {
         id: "uint32",
       },
-      schema: {
+      valueSchema: {
         timestamp: "uint256",
         gameId: "uint32",
       },
-      ephemeral: true,
+      offchainOnly: true,
     },
     GameEnded: {
-      schema: {
+      valueSchema: {
         timestamp: "uint256",
       },
-      ephemeral: true,
+      offchainOnly: true,
     },
   },
   modules: [
