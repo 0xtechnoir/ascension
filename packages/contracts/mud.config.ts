@@ -45,6 +45,16 @@ export default mudConfig({
         y: "uint32",
       }
     },
+    PlayerAtPosition: {
+      keySchema: {
+        gameId: 'uint32', // or whatever type you use
+        x: 'uint32',
+        y: 'uint32',
+      },
+      valueSchema: {
+        playerEntity: 'bytes32',
+      }
+    },
     // Offchain tables (events) ====================================
     PlayerSpawned : {
       keySchema: {

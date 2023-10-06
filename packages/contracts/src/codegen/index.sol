@@ -19,6 +19,7 @@ import { LastVotingPointClaim, LastVotingPointClaimTableId } from "./tables/Last
 import { ActionPoint, ActionPointTableId } from "./tables/ActionPoint.sol";
 import { VotingPoint, VotingPointTableId } from "./tables/VotingPoint.sol";
 import { Position, PositionTableId } from "./tables/Position.sol";
+import { PlayerAtPosition, PlayerAtPositionTableId } from "./tables/PlayerAtPosition.sol";
 import { PlayerSpawned, PlayerSpawnedData, PlayerSpawnedTableId } from "./tables/PlayerSpawned.sol";
 import { PlayerLeftGame, PlayerLeftGameData, PlayerLeftGameTableId } from "./tables/PlayerLeftGame.sol";
 import { PlayerDied, PlayerDiedData, PlayerDiedTableId } from "./tables/PlayerDied.sol";

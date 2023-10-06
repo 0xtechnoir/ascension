@@ -1,5 +1,10 @@
 # Ascension
 
+## Regenerate tables
+```
+pnpm build:mud
+```
+
 ## Deploying 
 ### 1. Pick your network
 In .env in the client, set VITE_CHAIN_ID to one of the following:

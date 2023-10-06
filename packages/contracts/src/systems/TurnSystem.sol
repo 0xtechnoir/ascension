@@ -52,11 +52,6 @@ contract TurnSystem is System {
       timestamp: startTime,
       gameId: gameId
     }));
-
-    // GameStarted.emitEphemeral(gameId, GameStartedData({
-    //   timestamp: startTime,
-    //   gameId: gameId
-    // }));
   }
 
   function assignActionPointsToAllLivePlayers() private {
@@ -87,12 +82,6 @@ contract TurnSystem is System {
       gameId: gameId,
       player: sender
     })); 
-   
-    // RangeIncreaseExecuted.emitEphemeral(timestamp, RangeIncreaseExecutedData({
-    //   timestamp: timestamp,
-    //   gameId: gameId,
-    //   player: sender
-    // })); 
   }
 
   function sendActionPoint(uint256 timestamp, bytes32 _recipient, uint32 gameId) public {
@@ -121,14 +110,6 @@ contract TurnSystem is System {
       sender: sender,
       reciever: reciever
     })); 
-    
-    
-    // SendActionPointExecuted.emitEphemeral(timestamp, SendActionPointExecutedData({
-    //   timestamp: timestamp,
-    //   gameId: gameId,
-    //   sender: sender,
-    //   reciever: reciever
-    // })); 
   }
 
   function attackPlayer(uint256 timestamp, bytes32 _target, uint32 gameId) public {
@@ -161,13 +142,6 @@ contract TurnSystem is System {
         gameId: gameId,
         player: Username.get(_target)
       }));
-      
-      
-      // PlayerDied.emitEphemeral(timestamp, PlayerDiedData({
-      //   timestamp: timestamp,
-      //   gameId: gameId,
-      //   player: Username.get(_target)
-      // }));
     }
 
     string memory attacker = Username.get(player);
@@ -179,18 +153,9 @@ contract TurnSystem is System {
       attacker: attacker,
       target: target
     }));  
-
-    // AttackExecuted.emitEphemeral(timestamp, AttackExecutedData({
-    //   timestamp: timestamp,
-    //   gameId: gameId,
-    //   attacker: attacker,
-    //   target: target
-    // }));  
     
     (bytes memory staticData, PackedCounter encodedLengths, bytes memory dynamicData) = Alive.encode(true);
     bytes32[] memory remainingPlayers = getKeysWithValue(AliveTableId, staticData, encodedLengths, dynamicData);
-
-    // bytes32[] memory remainingPlayers = getKeysWithValue(AliveTableId, Alive.encode(true));// return all records for alive players
     if (remainingPlayers.length == 1) {
       // Only oneplayer left alive so end game
       // GameIsLive.set(false);
@@ -222,12 +187,6 @@ contract TurnSystem is System {
       player: username,
       gameId: _gameId
     }));  
-
-    // ActionPointClaimExecuted.emitEphemeral(_gameId, ActionPointClaimExecutedData({
-    //   timestamp: _timestamp,
-    //   player: username,
-    //   gameId: _gameId
-    // }));  
   }
   function claimVotingPoint(uint256 timestamp, uint32 _gameId) public {
     require(GameSession.getIsLive(_gameId), "Match hasn't started yet");
@@ -252,12 +211,6 @@ contract TurnSystem is System {
       gameId: _gameId,
       player: username
     }));  
-
-    // VotingPointClaimExecuted.emitEphemeral(timestamp, VotingPointClaimExecutedData({
-    //   timestamp: timestamp,
-    //   gameId: _gameId,
-    //   player: username
-    // }));  
   }
 
   function vote(uint256 timestamp, bytes32 _recipient, uint32 gameId) public {
@@ -283,13 +236,6 @@ contract TurnSystem is System {
       voter: voter,
       recipient: elected
     }));  
-
-    // VoteExecuted.emitEphemeral(timestamp, VoteExecutedData({
-    //   timestamp: timestamp,
-    //   gameId: gameId,
-    //   voter: voter,
-    //   recipient: elected
-    // }));  
   }
 
   function distance(uint32 fromX, uint32 fromY, uint32 toX, uint32 toY) internal pure returns (uint32) {

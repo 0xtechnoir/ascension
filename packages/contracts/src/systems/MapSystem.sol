@@ -17,7 +17,8 @@ import {
   LastActionPointClaim, 
   InGame, 
   InGameTableId,
-  GameSession } from "../codegen/Tables.sol";
+  GameSession,
+  PlayerAtPosition } from "../codegen/index.sol";
 import { addressToEntityKey } from "../addressToEntityKey.sol";
 import { positionToEntityKey } from "../positionToEntityKey.sol";
 import { query, QueryFragment, QueryType } from "@latticexyz/world-modules/src/modules/keysintable/query.sol";
@@ -64,24 +65,22 @@ contract MapSystem is System {
 
     // loop through the points array and find a point that is not already occupied
     for (uint i = 0; i < points.length; i++) {
-      QueryFragment[] memory fragments = new QueryFragment[](2);
-      (bytes memory inGameStaticData, PackedCounter inGameEncodedLengths, bytes memory inGameDynamicData) = InGame.encode(_gameId);
-      fragments[0] = QueryFragment(QueryType.HasValue, InGameTableId, inGameDynamicData);
-      (bytes memory positionStaticData, PackedCounter positionEncodedLengths, bytes memory positionDynamicData) = Position.encode(points[i].x, points[i].y);
-      fragments[1] = QueryFragment(QueryType.HasValue, PositionTableId, positionDynamicData);
-      bytes32[][] memory keyTuples = query(fragments);
-      if (keyTuples.length == 0) {
-          x = points[i].x;
-          y = points[i].y;
-          break;
+      bytes32 playerAtPosition = PlayerAtPosition.get(points[i].x, points[i].y, _gameId);
+      // if player has a value then the position is already occupied
+      if (playerAtPosition != bytes32(0)) {
+        continue;
       }
+      x = points[i].x;
+      y = points[i].y;
+      break;
     }
 
     // set the players attributes
     Alive.set(player, true);
     Player.set(player, true);
     Username.set(player, _username);
-    Position.set(player, x, y);
+    Position.set(player, x, y);  // TODO - PlayerAtPosition might make this redundent
+    PlayerAtPosition.set(x, y, _gameId, player);
     Movable.set(player, true);
     Health.set(player, 3);
     Range.set(player, 2);
@@ -97,14 +96,6 @@ contract MapSystem is System {
       player: _username,
       gameId: _gameId
     })); 
-
-    // PlayerSpawned.emitEphemeral(_timestamp, PlayerSpawnedData({
-    //   timestamp: _timestamp,
-    //   x: x, 
-    //   y: y, 
-    //   player: _username,
-    //   gameId: _gameId
-    // })); 
   }
   
   function leaveGame(uint256 _timestamp, uint32 _gameId) public {
@@ -118,12 +109,6 @@ contract MapSystem is System {
       player: username,
       gameId: _gameId
     })); 
-
-    // PlayerLeftGame.emitEphemeral(_timestamp, PlayerLeftGameData({
-    //   timestamp: _timestamp,
-    //   player: username,
-    //   gameId: _gameId
-    // })); 
   }
 
   function move(uint256 timestamp, uint32 _x, uint32 _y, uint32 _gameId) public {
@@ -138,18 +123,20 @@ contract MapSystem is System {
 
     // retrieve the players current position
     (uint32 fromX, uint32 fromY) = Position.get(player);
+
     require(distance(fromX, fromY, _x, _y) == 1, "You can only move to adjacent spaces");
 
     // Constrain position to map size, wrapping around if necessary
     (uint32 width, uint32 height ) = MapConfig.get();
     _x = (_x + width) % width;
     _y = (_y + height) % height;
-    
-    bytes32[][] memory keyTuples = queryPosition(_x, _y, _gameId);
-    require(keyTuples.length == 0, "There is already a player at the given position in the same game");
+
+    bytes32 playerAtPosition = PlayerAtPosition.get(_x, _y, _gameId);
+    require(playerAtPosition == bytes32(0), "There is already a player at the given position in the same game");
 
     string memory username = Username.get(player);
-    Position.set(player, _x, _y);
+    Position.set(player, _x, _y); // TODO - PlayerAtPosition might make this redundent
+    PlayerAtPosition.set(_x, _y, _gameId, player);
 
      MoveExecuted.set(timestamp, MoveExecutedData({
       timestamp: timestamp,
@@ -160,16 +147,6 @@ contract MapSystem is System {
       gameId: _gameId,
       player: username
     }));
-
-    // MoveExecuted.emitEphemeral(timestamp, MoveExecutedData({
-    //   timestamp: timestamp,
-    //   fromX: fromX, 
-    //   fromY: fromY, 
-    //   toX: _x, 
-    //   toY: _y,
-    //   gameId: _gameId,
-    //   player: username
-    // }));
 
     ActionPoint.set(player, currentActionPoints - 1);
   }
