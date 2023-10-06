@@ -197,8 +197,23 @@ export default mudConfig({
       offchainOnly: true,
     },
     GameEnded: {
+      keySchema: {
+        id: "uint32",
+      },
       valueSchema: {
         timestamp: "uint256",
+        gameId: "uint32",
+      },
+      offchainOnly: true,
+    },
+    PlayerWon: {
+      keySchema: {
+        id: "uint32",
+      },
+      valueSchema: {
+        timestamp: "uint256",
+        gameId: "uint32",
+        player: "string",
       },
       offchainOnly: true,
     },

@@ -108,7 +108,7 @@ contract MapSystem is System {
       timestamp: _timestamp,
       player: username,
       gameId: _gameId
-    })); 
+    }));
   }
 
   function move(uint256 timestamp, uint32 _x, uint32 _y, uint32 _gameId) public {

@@ -32,4 +32,5 @@ import { ClaimExecuted, ClaimExecutedData, ClaimExecutedTableId } from "./tables
 import { VotingPointClaimExecuted, VotingPointClaimExecutedData, VotingPointClaimExecutedTableId } from "./tables/VotingPointClaimExecuted.sol";
 import { VoteExecuted, VoteExecutedData, VoteExecutedTableId } from "./tables/VoteExecuted.sol";
 import { GameStarted, GameStartedData, GameStartedTableId } from "./tables/GameStarted.sol";
-import { GameEnded, GameEndedTableId } from "./tables/GameEnded.sol";
+import { GameEnded, GameEndedData, GameEndedTableId } from "./tables/GameEnded.sol";
+import { PlayerWon, PlayerWonData, PlayerWonTableId } from "./tables/PlayerWon.sol";

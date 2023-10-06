@@ -16,12 +16,14 @@ const ActivityLogComponent = () => {
       SendActionPointExecuted,
       RangeIncreaseExecuted,
       GameStarted,
+      GameEnded,
       PlayerSpawned,
       ActionPointClaimExecuted,
       VoteExecuted,
       VotingPointClaimExecuted,
       PlayerDied,
-      PlayerLeftGame
+      PlayerLeftGame,
+      PlayerWon
     },
   } = useMUD();
 
@@ -36,9 +38,9 @@ const ActivityLogComponent = () => {
   const allVotingPointClaimExecutedLogs = useEntityQuery([HasValue(VotingPointClaimExecuted, { gameId: gameId ?? undefined })]);
   const allVoteExecutedLogs = useEntityQuery([HasValue(VoteExecuted, { gameId: gameId ?? undefined })]);
   const gameStarted = useEntityQuery([HasValue(GameStarted, { gameId: gameId ?? undefined })]);
+  const gameEnded = useEntityQuery([HasValue(GameEnded, { gameId: gameId ?? undefined })]);
+  const playerWon = useEntityQuery([HasValue(PlayerWon, { gameId: gameId ?? undefined })]);
   let mappedLogs: LogMessage[] = [];
-
-  console.log("ActivityLogComponent: gameStarted: ", gameStarted);
 
   const mapMoveLogs = () => {
     return allMoveLogs.map((entity) => {
@@ -110,6 +112,19 @@ const ActivityLogComponent = () => {
       const mappedLog: LogMessage = {
         timestamp: numTs,
         message: `Game Started`,
+      };
+      return mappedLog;
+    });
+  };
+  
+  const mapGameEndedLog = () => {
+    return gameEnded.map((entity) => {
+      const rec = getComponentValue(GameEnded, entity);
+      const ts = rec?.timestamp;
+      const numTs = Number(ts);
+      const mappedLog: LogMessage = {
+        timestamp: numTs,
+        message: `Game Ended`,
       };
       return mappedLog;
     });
@@ -202,30 +217,48 @@ const ActivityLogComponent = () => {
     });
   };
 
+  const mapPlayerWonLogs = () => {
+    return playerWon.map((entity) => {
+      const rec = getComponentValue(PlayerWon, entity);
+      const player = rec?.player;
+      const ts = rec?.timestamp;
+      const numTs = Number(ts);
+      const mappedLog: LogMessage = {
+        timestamp: numTs,
+        message: `${player} won the game`,
+      };
+      return mappedLog;
+    });
+  };
+
   const mappedMoveLogs = mapMoveLogs();
   const mappedAttackLogs = mapAttackLogs();
   const mappedSendActionPointLogs = mapSendActionPointLogs();
   const mappedRangeIncreaseLogs = mapRangeIncreaseLogs();
-  const mappedStartedLog = mapGameStartedLog();
+  const mappedGameStartedLog = mapGameStartedLog();
+  const mappedGameEndedLog = mapGameEndedLog();
   const mappedPlayerSpawnedLogs = mapPlayerSpawnedLogs();
   const mappedPlayerLeftGameLogs = mapPlayerLeftGameLogs();
   const mappedPlayerDiedLogs = mapPlayerDiedLogs();
   const mappedActionPointClaimExecutedLogs = mapActionPointClaimExecutedLogs();
   const mappedVoteExecutedLogs = mapVoteExecutedLogs();
   const mappedVotingPointClaimExecutedLogs = mapVotingPointClaimExecutedLogs();
+  const mappedPlayerWonLogs = mapPlayerWonLogs();
   
   mappedLogs = mappedLogs.concat(
     mappedPlayerSpawnedLogs,
     mappedPlayerLeftGameLogs,
     mappedPlayerDiedLogs,
-    mappedStartedLog,
+    mappedGameStartedLog,
+    mappedGameEndedLog,
     mappedMoveLogs,
     mappedAttackLogs,
     mappedSendActionPointLogs,
     mappedRangeIncreaseLogs,
     mappedActionPointClaimExecutedLogs,
     mappedVoteExecutedLogs,
-    mappedVotingPointClaimExecutedLogs
+    mappedVotingPointClaimExecutedLogs,
+    mappedPlayerWonLogs
   );
 
   return (

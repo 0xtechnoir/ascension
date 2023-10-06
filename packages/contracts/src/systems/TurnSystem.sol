@@ -26,7 +26,8 @@ import {
   VoteExecutedData,
   GameSession,
   GameSessionTableId,
-  InGame } from "../codegen/Tables.sol";
+  InGame,
+  InGameTableId } from "../codegen/Tables.sol";
 import { addressToEntityKey } from "../addressToEntityKey.sol";
 import { positionToEntityKey } from "../positionToEntityKey.sol";
 import { getKeysInTable } from "@latticexyz/world-modules/src/modules/keysintable/getKeysInTable.sol";
@@ -39,6 +40,8 @@ import { SendActionPointExecuted, SendActionPointExecutedData } from "../codegen
 import { RangeIncreaseExecuted, RangeIncreaseExecutedData } from "../codegen/Tables.sol";
 import { PlayerDied, PlayerDiedData } from "../codegen/Tables.sol";
 import { PackedCounter } from "@latticexyz/store/src/PackedCounter.sol";
+import { GameEnded, GameEndedData } from "../codegen/index.sol";
+import { PlayerWon, PlayerWonData } from "../codegen/index.sol";
 
 contract TurnSystem is System {
 
@@ -120,28 +123,14 @@ contract TurnSystem is System {
     require(InGame.get(_target) == gameId, "Cannot attack a player in a different game session");
     uint32 currentActionPoints = ActionPoint.get(player);
     require(currentActionPoints > 0, "You need an action point in order to attack");
-    
-    // Check if target is within range
-    (uint32 target_x, uint32 target_y) = Position.get(_target);
-    (uint32 player_x, uint32 player_y) = Position.get(player);
-    uint32 playerRange = Range.get(player);
-    require(distance(player_x, player_y, target_x, target_y) <= playerRange, "Target is out of range");
+    require(isTargetInRange(player, _target), "Target is out of range");
 
     Health.set(_target, Health.get(_target) - 1);
     ActionPoint.set(player, currentActionPoints - 1);
 
     // Check if target is dead
     if (Health.get(_target) == 0) {
-      Movable.set(_target, false);
-      Range.set(_target, 0);
-      Alive.set(_target, false);
-      VotingPoint.set(_target, 0);
-      
-      PlayerDied.set(timestamp, PlayerDiedData({
-        timestamp: timestamp,
-        gameId: gameId,
-        player: Username.get(_target)
-      }));
+      killPlayer(timestamp, _target, gameId);
     }
 
     string memory attacker = Username.get(player);
@@ -152,15 +141,55 @@ contract TurnSystem is System {
       gameId: gameId,
       attacker: attacker,
       target: target
-    }));  
-    
+    }));
+ 
     (bytes memory staticData, PackedCounter encodedLengths, bytes memory dynamicData) = Alive.encode(true);
     bytes32[] memory remainingPlayers = getKeysWithValue(AliveTableId, staticData, encodedLengths, dynamicData);
     if (remainingPlayers.length == 1) {
-      // Only oneplayer left alive so end game
-      // GameIsLive.set(false);
-      Champion.set(remainingPlayers[0], true);
+      endGame(timestamp, remainingPlayers[0], gameId);
     }
+  }
+
+  function isTargetInRange(bytes32 player, bytes32 _target) private view returns (bool) {
+    (uint32 target_x, uint32 target_y) = Position.get(_target);
+    (uint32 player_x, uint32 player_y) = Position.get(player);
+    uint32 playerRange = Range.get(player);
+    return distance(player_x, player_y, target_x, target_y) <= playerRange;
+  }
+
+  function killPlayer(uint256 timestamp, bytes32 player, uint32 gameId) private {
+    Alive.set(player, false);
+    Movable.set(player, false);
+    Range.set(player, 0);
+    VotingPoint.set(player, 0);
+    ActionPoint.set(player, 0);
+    PlayerDied.set(timestamp, PlayerDiedData({
+        timestamp: timestamp,
+        gameId: gameId,
+        player: Username.get(player)
+    }));
+  }
+
+  function endGame(uint256 timestamp, bytes32 winningPlayer, uint32 gameId) private {
+    // emit events
+    PlayerWon.set(gameId, PlayerWonData({
+      timestamp: timestamp,
+      gameId: gameId,
+      player: Username.get(winningPlayer)
+    }));
+    GameEnded.set(gameId, GameEndedData({
+      timestamp: timestamp,
+      gameId: gameId
+    }));
+  
+    // remove all players from current game session
+    (bytes memory staticData, PackedCounter encodedLengths, bytes memory dynamicData) = InGame.encode(gameId);
+    bytes32[] memory playerInSession = getKeysWithValue(InGameTableId, staticData, encodedLengths, dynamicData);
+    for (uint8 i; i < playerInSession.length; i++) {
+      InGame.deleteRecord(playerInSession[i]);
+    }
+
+    // mint NFT to winning players wallet
   }
 
   function claimActionPoint(uint256 _timestamp, uint32 _gameId) public {

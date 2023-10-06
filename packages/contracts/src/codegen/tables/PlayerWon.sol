@@ -21,20 +21,21 @@ import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
 import { RESOURCE_TABLE, RESOURCE_OFFCHAIN_TABLE } from "@latticexyz/store/src/storeResourceTypes.sol";
 
 ResourceId constant _tableId = ResourceId.wrap(
-  bytes32(abi.encodePacked(RESOURCE_OFFCHAIN_TABLE, bytes14(""), bytes16("GameEnded")))
+  bytes32(abi.encodePacked(RESOURCE_OFFCHAIN_TABLE, bytes14(""), bytes16("PlayerWon")))
 );
-ResourceId constant GameEndedTableId = _tableId;
+ResourceId constant PlayerWonTableId = _tableId;
 
 FieldLayout constant _fieldLayout = FieldLayout.wrap(
-  0x0024020020040000000000000000000000000000000000000000000000000000
+  0x0024020120040000000000000000000000000000000000000000000000000000
 );
 
-struct GameEndedData {
+struct PlayerWonData {
   uint256 timestamp;
   uint32 gameId;
+  string player;
 }
 
-library GameEnded {
+library PlayerWon {
   /**
    * @notice Get the table values' field layout.
    * @return _fieldLayout The field layout for the table.
@@ -59,9 +60,10 @@ library GameEnded {
    * @return _valueSchema The value schema for the table.
    */
   function getValueSchema() internal pure returns (Schema) {
-    SchemaType[] memory _valueSchema = new SchemaType[](2);
+    SchemaType[] memory _valueSchema = new SchemaType[](3);
     _valueSchema[0] = SchemaType.UINT256;
     _valueSchema[1] = SchemaType.UINT32;
+    _valueSchema[2] = SchemaType.STRING;
 
     return SchemaLib.encode(_valueSchema);
   }
@@ -80,9 +82,10 @@ library GameEnded {
    * @return fieldNames An array of strings with the names of value fields.
    */
   function getFieldNames() internal pure returns (string[] memory fieldNames) {
-    fieldNames = new string[](2);
+    fieldNames = new string[](3);
     fieldNames[0] = "timestamp";
     fieldNames[1] = "gameId";
+    fieldNames[2] = "player";
   }
 
   /**
@@ -169,11 +172,11 @@ library GameEnded {
   /**
    * @notice Set the full data using individual values.
    */
-  function set(uint32 id, uint256 timestamp, uint32 gameId) internal {
+  function set(uint32 id, uint256 timestamp, uint32 gameId, string memory player) internal {
     bytes memory _staticData = encodeStatic(timestamp, gameId);
 
-    PackedCounter _encodedLengths;
-    bytes memory _dynamicData;
+    PackedCounter _encodedLengths = encodeLengths(player);
+    bytes memory _dynamicData = encodeDynamic(player);
 
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
@@ -184,11 +187,11 @@ library GameEnded {
   /**
    * @notice Set the full data using individual values.
    */
-  function _set(uint32 id, uint256 timestamp, uint32 gameId) internal {
+  function _set(uint32 id, uint256 timestamp, uint32 gameId, string memory player) internal {
     bytes memory _staticData = encodeStatic(timestamp, gameId);
 
-    PackedCounter _encodedLengths;
-    bytes memory _dynamicData;
+    PackedCounter _encodedLengths = encodeLengths(player);
+    bytes memory _dynamicData = encodeDynamic(player);
 
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
@@ -199,11 +202,11 @@ library GameEnded {
   /**
    * @notice Set the full data using individual values (using the specified store).
    */
-  function set(IStore _store, uint32 id, uint256 timestamp, uint32 gameId) internal {
+  function set(IStore _store, uint32 id, uint256 timestamp, uint32 gameId, string memory player) internal {
     bytes memory _staticData = encodeStatic(timestamp, gameId);
 
-    PackedCounter _encodedLengths;
-    bytes memory _dynamicData;
+    PackedCounter _encodedLengths = encodeLengths(player);
+    bytes memory _dynamicData = encodeDynamic(player);
 
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
@@ -214,11 +217,11 @@ library GameEnded {
   /**
    * @notice Set the full data using the data struct.
    */
-  function set(uint32 id, GameEndedData memory _table) internal {
+  function set(uint32 id, PlayerWonData memory _table) internal {
     bytes memory _staticData = encodeStatic(_table.timestamp, _table.gameId);
 
-    PackedCounter _encodedLengths;
-    bytes memory _dynamicData;
+    PackedCounter _encodedLengths = encodeLengths(_table.player);
+    bytes memory _dynamicData = encodeDynamic(_table.player);
 
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
@@ -229,11 +232,11 @@ library GameEnded {
   /**
    * @notice Set the full data using the data struct.
    */
-  function _set(uint32 id, GameEndedData memory _table) internal {
+  function _set(uint32 id, PlayerWonData memory _table) internal {
     bytes memory _staticData = encodeStatic(_table.timestamp, _table.gameId);
 
-    PackedCounter _encodedLengths;
-    bytes memory _dynamicData;
+    PackedCounter _encodedLengths = encodeLengths(_table.player);
+    bytes memory _dynamicData = encodeDynamic(_table.player);
 
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
@@ -244,11 +247,11 @@ library GameEnded {
   /**
    * @notice Set the full data using the data struct (using the specified store).
    */
-  function set(IStore _store, uint32 id, GameEndedData memory _table) internal {
+  function set(IStore _store, uint32 id, PlayerWonData memory _table) internal {
     bytes memory _staticData = encodeStatic(_table.timestamp, _table.gameId);
 
-    PackedCounter _encodedLengths;
-    bytes memory _dynamicData;
+    PackedCounter _encodedLengths = encodeLengths(_table.player);
+    bytes memory _dynamicData = encodeDynamic(_table.player);
 
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(id));
@@ -266,17 +269,34 @@ library GameEnded {
   }
 
   /**
+   * @notice Decode the tightly packed blob of dynamic data using the encoded lengths.
+   */
+  function decodeDynamic(
+    PackedCounter _encodedLengths,
+    bytes memory _blob
+  ) internal pure returns (string memory player) {
+    uint256 _start;
+    uint256 _end;
+    unchecked {
+      _end = _encodedLengths.atIndex(0);
+    }
+    player = (string(SliceLib.getSubslice(_blob, _start, _end).toBytes()));
+  }
+
+  /**
    * @notice Decode the tightly packed blobs using this table's field layout.
    * @param _staticData Tightly packed static fields.
-   *
-   *
+   * @param _encodedLengths Encoded lengths of dynamic fields.
+   * @param _dynamicData Tightly packed dynamic fields.
    */
   function decode(
     bytes memory _staticData,
-    PackedCounter,
-    bytes memory
-  ) internal pure returns (GameEndedData memory _table) {
+    PackedCounter _encodedLengths,
+    bytes memory _dynamicData
+  ) internal pure returns (PlayerWonData memory _table) {
     (_table.timestamp, _table.gameId) = decodeStatic(_staticData);
+
+    (_table.player) = decodeDynamic(_encodedLengths, _dynamicData);
   }
 
   /**
@@ -318,16 +338,39 @@ library GameEnded {
   }
 
   /**
+   * @notice Tightly pack dynamic data lengths using this table's schema.
+   * @return _encodedLengths The lengths of the dynamic fields (packed into a single bytes32 value).
+   */
+  function encodeLengths(string memory player) internal pure returns (PackedCounter _encodedLengths) {
+    // Lengths are effectively checked during copy by 2**40 bytes exceeding gas limits
+    unchecked {
+      _encodedLengths = PackedCounterLib.pack(bytes(player).length);
+    }
+  }
+
+  /**
+   * @notice Tightly pack dynamic (variable length) data using this table's schema.
+   * @return The dynamic data, encoded into a sequence of bytes.
+   */
+  function encodeDynamic(string memory player) internal pure returns (bytes memory) {
+    return abi.encodePacked(bytes((player)));
+  }
+
+  /**
    * @notice Encode all of a record's fields.
    * @return The static (fixed length) data, encoded into a sequence of bytes.
    * @return The lengths of the dynamic fields (packed into a single bytes32 value).
    * @return The dyanmic (variable length) data, encoded into a sequence of bytes.
    */
-  function encode(uint256 timestamp, uint32 gameId) internal pure returns (bytes memory, PackedCounter, bytes memory) {
+  function encode(
+    uint256 timestamp,
+    uint32 gameId,
+    string memory player
+  ) internal pure returns (bytes memory, PackedCounter, bytes memory) {
     bytes memory _staticData = encodeStatic(timestamp, gameId);
 
-    PackedCounter _encodedLengths;
-    bytes memory _dynamicData;
+    PackedCounter _encodedLengths = encodeLengths(player);
+    bytes memory _dynamicData = encodeDynamic(player);
 
     return (_staticData, _encodedLengths, _dynamicData);
   }

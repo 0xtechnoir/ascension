@@ -1,6 +1,7 @@
 # Ascension
 
 ## Regenerate tables
+From inside the contracts package
 ```
 pnpm build:mud
 ```
