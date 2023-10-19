@@ -21,7 +21,7 @@ const SpawnModal: React.FC<LeaveGameModalProps> = ({
     const { gameId } = useGameContext();
 
       // Contexts
-    const { handleError } = useGameContext();
+    const { displayMessage } = useGameContext();
     const {
         systemCalls: { leaveGame },
     } = useMUD();
@@ -35,8 +35,8 @@ const SpawnModal: React.FC<LeaveGameModalProps> = ({
             setShowLeaveGameButton(false);
           } catch (error) {
             if (typeof error === "object" && error !== null) {
-              const message = (error as ErrorWithShortMessage).shortMessage;
-              handleError(message);
+              const message = (error as ErrorWithShortMessage).cause.data.args[0];
+              displayMessage(message);
             }
           } finally {
             setShowLeaveGameModal(false);
@@ -67,7 +67,7 @@ const SpawnModal: React.FC<LeaveGameModalProps> = ({
           onClick={onSubmit}
           className="btn-sci-fi"
         >
-          Submit
+          Leave
         </button>
         <button
           onClick={handleCloseLeaveGameModal}

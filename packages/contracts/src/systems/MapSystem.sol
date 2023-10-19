@@ -24,7 +24,6 @@ import { positionToEntityKey } from "../positionToEntityKey.sol";
 import { query, QueryFragment, QueryType } from "@latticexyz/world-modules/src/modules/keysintable/query.sol";
 import { getKeysInTable } from "@latticexyz/world-modules/src/modules/keysintable/getKeysInTable.sol";
 import { getKeysWithValue } from "@latticexyz/world-modules/src/modules/keyswithvalue/getKeysWithValue.sol";
-import { console } from "forge-std/console.sol";
 import { MoveExecuted, MoveExecutedData } from "../codegen/Tables.sol";
 import { PlayerSpawned, PlayerSpawnedData } from "../codegen/Tables.sol";
 import { PlayerLeftGame, PlayerLeftGameData } from "../codegen/Tables.sol";

@@ -26,7 +26,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
 }) => {
   const [showUsernameInput, setShowUsernameInput] = useState(false);
 
-  const { handleError } = useGameContext();
+  const { displayMessage } = useGameContext();
   const {
     components: {
       MapConfig,
@@ -79,7 +79,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   useEffect(() => {
     if (moveMessage) {
       // When setting the error message, add the new message to the existing array instead of replacing it.
-      handleError(moveMessage);
+      displayMessage(moveMessage);
       clearMoveMessage();
     }
   }, [moveMessage]);

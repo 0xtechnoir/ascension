@@ -1,5 +1,9 @@
 export interface ErrorWithShortMessage {
-  shortMessage: string;
+  cause: {
+    data : {
+      args: string[]
+    }
+  }
 }
 
 export interface LogMessage {

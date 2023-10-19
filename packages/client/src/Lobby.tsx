@@ -11,7 +11,7 @@ interface LobbyProps {
 }
 
 const Lobby: React.FC<LobbyProps> = ({ setShowGameBoard, currentGameID }) => {
-  const { setGameId, handleError } = useGameContext();
+  const { setGameId, displayMessage } = useGameContext();
   const {
     components: { GameSession },
   } = useMUD();
@@ -36,7 +36,6 @@ const Lobby: React.FC<LobbyProps> = ({ setShowGameBoard, currentGameID }) => {
     }
     setGameId(gameId);
     setShowGameBoard(true);
-    console.log("handleCreateGame GameId created: ", gameId);
   };
   const handleJoinGame = (
     eventOrGameID?: React.MouseEvent<HTMLButtonElement, MouseEvent> | number
@@ -88,7 +87,7 @@ const Lobby: React.FC<LobbyProps> = ({ setShowGameBoard, currentGameID }) => {
                 onClick={() =>
                   inputGameID
                     ? handleJoinGame(inputGameID)
-                    : handleError("Please enter a game ID")
+                    : displayMessage("Please enter a game ID")
                 }
               >
                 Join Game

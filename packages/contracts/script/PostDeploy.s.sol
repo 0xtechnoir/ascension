@@ -10,7 +10,6 @@ contract PostDeploy is Script {
   function run(address worldAddress) external {
 
     IWorld world = IWorld(worldAddress);
-
     // Load the private key from the `PRIVATE_KEY` environment variable (in .env)
     uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
 

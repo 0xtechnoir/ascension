@@ -22,7 +22,7 @@ const SpawnModal: React.FC<SpawnModalProps> = ({
     const { gameId } = useGameContext();
 
       // Contexts
-    const { handleError } = useGameContext();
+    const { displayMessage } = useGameContext();
     const {
         systemCalls: { spawn },
     } = useMUD();
@@ -50,7 +50,6 @@ const SpawnModal: React.FC<SpawnModalProps> = ({
             return; // Stop if invalid
           }
         try {
-            console.log("About to call spawn with gameId: ", gameId);
             if (!gameId) {
               throw new Error("No game ID found");
             }
@@ -59,8 +58,8 @@ const SpawnModal: React.FC<SpawnModalProps> = ({
           } catch (error) {
             console.log("handleModalSubmit error: ", error);
             if (typeof error === "object" && error !== null) {
-              const message = (error as ErrorWithShortMessage).shortMessage;
-              handleError(message);
+              const message = (error as ErrorWithShortMessage).cause.data.args[0];
+              displayMessage(message);
             }
           } finally {
             setIsLoading(false);

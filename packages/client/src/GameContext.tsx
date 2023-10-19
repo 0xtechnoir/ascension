@@ -1,11 +1,15 @@
 import React, { createContext, useContext, useState } from "react";
-import { ErrorModal } from "./ErrorModal";
+import { MessageModal } from "./MessageModal";
 
 type GameContextProps = {
-  errorMessage: string;
+  message: string;
   gameId: number | null;
+  gameIsWon: boolean;
+  showGameBoard: boolean;
   setGameId: React.Dispatch<React.SetStateAction<number | null>>;
-  handleError: (message: string) => void;
+  setGameIsWon: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowGameBoard: React.Dispatch<React.SetStateAction<boolean>>;
+  displayMessage: (message: string) => void;
 };
 type GameProviderProps = { children?: React.ReactNode };
 
@@ -20,29 +24,38 @@ export const useGameContext = () => {
 };
 
 export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
-  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [message, setMessage] = useState<string>("");
   const [gameId, setGameId] = useState<number | null>(null);
+  const [gameIsWon, setGameIsWon] = useState<boolean>(false);
+  const [showGameBoard, setShowGameBoard] = useState(false);
 
-  const handleError = (message: string) => {
-    setErrorMessage(message);
+  const displayMessage = (message: string) => {
+    setMessage(message);
   };
 
-  const closeErrorModal = () => {
-    setErrorMessage("");
+  const closeMessageModal = () => {
+    setMessage("");
+    if (gameIsWon) {
+      setShowGameBoard(false);
+    }
   };
 
   const values = {
-    errorMessage,
+    message,
     gameId: gameId,
+    gameIsWon: gameIsWon,
+    showGameBoard: showGameBoard,
     setGameId: setGameId,
-    handleError,
+    setGameIsWon: setGameIsWon,
+    setShowGameBoard: setShowGameBoard,
+    displayMessage,
   };
 
   return (
     <GameContext.Provider value={values}>
       {children}
-      {errorMessage && (
-        <ErrorModal message={errorMessage} onClose={closeErrorModal} />
+      {message && (
+        <MessageModal message={message} onClose={closeMessageModal} />
       )}
     </GameContext.Provider>
   );

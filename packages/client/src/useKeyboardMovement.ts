@@ -33,7 +33,7 @@ export const useKeyboardMovement = () => {
       } catch (error) {
         console.log("catch block triggerd. Error: ", error);
         if (typeof error === "object" && error !== null) {
-          const message = (error as ErrorWithShortMessage).shortMessage;
+          const message = (error as ErrorWithShortMessage).cause.data.args[0];
           setMoveMessage(message);
         } else {
           console.error(error);

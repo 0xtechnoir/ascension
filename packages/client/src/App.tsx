@@ -13,8 +13,6 @@ import LeaveGameModal from './LeaveGameModal';
 import Lobby from './Lobby';
 
 export const App = () => {
-
-  const [showGameBoard, setShowGameBoard] = useState(false);
   
   // Custom Types
   enum SyncStep {
@@ -25,7 +23,7 @@ export const App = () => {
   }
 
   // Contexts
-  const { handleError, gameId } = useGameContext();
+  const { displayMessage, gameId, showGameBoard, setShowGameBoard } = useGameContext();
   const {
     network: { playerEntity },
     components: { SyncProgress, Player, Position, GameSession, InGame },
@@ -72,14 +70,10 @@ export const App = () => {
   useEffect(() => {
     // Hide spawn button if player is already spawned
     const playerEntityExists = getComponentValue(Player, playerEntity)?.value == true;
-    console.log("playerEntityExists: ", playerEntityExists);
-    console.log("currentGameID: ", currentGameID);
     if (playerEntityExists && currentGameID) {
-      console.log("cannot spawn")
       setShowSpawnButton(false);
       setShowLeaveGameButton(true);
     } else {
-      console.log("can spawn");
       setShowSpawnButton(true);
       setShowLeaveGameButton(false);
     }
@@ -103,11 +97,12 @@ export const App = () => {
       await startMatch(gameId, playersSpawned, startTime);
     } catch (error) {
       if (typeof error === "object" && error !== null) {
-        const message = (error as ErrorWithShortMessage).shortMessage;
-        handleError(message);
+        const message = (error as ErrorWithShortMessage).cause.data.args[0];
+        displayMessage(message);
       }
     }
   };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-space-bg">
       <div className="w-4/5 h-full">

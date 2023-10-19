@@ -12,7 +12,7 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
   action,
   buttonStyle = '',
 }) => {
-  const { handleError, gameId } = useGameContext();
+  const { displayMessage, gameId } = useGameContext();
   return (
     <button
       className={buttonStyle}
@@ -20,7 +20,7 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
       onClick={async () => {
         
         if(!gameId) {
-          handleError("No game ID found. Have you joined a game?");
+          displayMessage("No game ID found. Have you joined a game?");
           return;
         }
 
@@ -29,8 +29,8 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
           await actionToExecute();
         } catch (error) {
           if (typeof error === "object" && error !== null) {
-            const message = (error as ErrorWithShortMessage).shortMessage;
-            handleError(message);
+            const message = (error as ErrorWithShortMessage).cause.data.args[0];
+            displayMessage(message);
           }
         }
       }}

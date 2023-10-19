@@ -97,6 +97,20 @@ contract MapSystemTest is MudTest {
         return address(uint160(uint256(entityKey)));
     }
 
+    function testPrintplayerDetails() public {
+      console.log("Player address: ");
+      console.log(msg.sender);
+      console.log("++++++++++++++++++++++++++++++++++++++++++++++");
+
+      console.log("Player entity: ");
+      console.logBytes32(addressToEntityKey(msg.sender));
+      console.log("++++++++++++++++++++++++++++++++++++++++++++++");
+
+      console.log("Player address: ");
+      console.log(entityKeyToAddress(addressToEntityKey(msg.sender)));
+      console.log("++++++++++++++++++++++++++++++++++++++++++++++");
+    }
+
     function testDeletePlayerAtPosition() public {
       address creator = world.creator();
       vm.startPrank(creator);

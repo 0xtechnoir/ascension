@@ -46,7 +46,7 @@ import { PlayerWon, PlayerWonData } from "../codegen/index.sol";
 contract TurnSystem is System {
 
   function startMatch(uint32 gameId, uint32 playersSpawned, uint256 startTime) public {
-    require(playersSpawned > 1, "Not enough players to start match");
+    require(playersSpawned > 1, "Not enough players to start match. Minimum 2 players required");
     require(!GameSession.getIsLive(gameId), "Match has already started");
     GameSession.setIsLive(gameId, true);
     GameSession.setStartTime(gameId, startTime);
@@ -188,8 +188,6 @@ contract TurnSystem is System {
     for (uint8 i; i < playerInSession.length; i++) {
       InGame.deleteRecord(playerInSession[i]);
     }
-
-    // mint NFT to winning players wallet
   }
 
   function claimActionPoint(uint256 _timestamp, uint32 _gameId) public {
