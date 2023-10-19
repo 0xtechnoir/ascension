@@ -75,6 +75,9 @@ contract TurnSystem is System {
     uint32 currentRange = Range.get(player);
     uint32 currentActionPoints = ActionPoint.get(player);
     require(currentActionPoints > 0, "You need an action point in order to increase your range");
+    
+    // player range should max out at 5
+    require(currentRange < 5, "Range is already maxed out");
     Range.set(player, currentRange + 1);
     ActionPoint.set(player, currentActionPoints - 1);
 
