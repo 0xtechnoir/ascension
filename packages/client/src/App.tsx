@@ -8,12 +8,12 @@ import { PlayersList } from "./PlayersList";
 import { ErrorWithShortMessage } from "./CustomTypes";
 import ActivityLogComponent from "./ActivityLogComponent";
 import { useGameContext } from "./GameContext";
-import SpawnModal from './SpawnModal';
-import LeaveGameModal from './LeaveGameModal';
-import Lobby from './Lobby';
+import SpawnModal from "./SpawnModal";
+import LeaveGameModal from "./LeaveGameModal";
+import RulesModal from "./RulesModal";
+import Lobby from "./Lobby";
 
 export const App = () => {
-  
   // Custom Types
   enum SyncStep {
     INITIALIZE = "initialize",
@@ -23,7 +23,8 @@ export const App = () => {
   }
 
   // Contexts
-  const { displayMessage, gameId, showGameBoard, setShowGameBoard } = useGameContext();
+  const { displayMessage, gameId, showGameBoard, setShowGameBoard } =
+    useGameContext();
   const {
     network: { playerEntity },
     components: { SyncProgress, Player, Position, GameSession, InGame },
@@ -32,7 +33,11 @@ export const App = () => {
 
   const gameSessions = useEntityQuery([Has(GameSession)]);
   const currentGameID = useComponentValue(InGame, playerEntity)?.value;
-  const allPlayers = useEntityQuery([HasValue(InGame, { value: gameId! }), Has(Player), Has(Position)]);
+  const allPlayers = useEntityQuery([
+    HasValue(InGame, { value: gameId! }),
+    Has(Player),
+    Has(Position),
+  ]);
   const syncProgress = useComponentValue(SyncProgress, singletonEntity, {
     step: SyncStep.INITIALIZE,
     message: "Connecting",
@@ -54,12 +59,15 @@ export const App = () => {
   }
 
   // Hooks
-  const [highlightedPlayer, setHighlightedPlayer] = useState<Entity | null>(null);
+  const [highlightedPlayer, setHighlightedPlayer] = useState<Entity | null>(
+    null
+  );
   const [gameStarted, setGameStarted] = useState(false);
   const [showSpawnButton, setShowSpawnButton] = useState(true);
   const [showLeaveGameButton, setShowLeaveGameButton] = useState(true);
   const [showSpawnModal, setShowSpawnModal] = useState(false);
   const [showLeaveGameModal, setShowLeaveGameModal] = useState(false);
+  const [showRulesModal, setShowRulesModal] = useState(false);
 
   useEffect(() => {
     if (gameIsLive) {
@@ -69,7 +77,8 @@ export const App = () => {
 
   useEffect(() => {
     // Hide spawn button if player is already spawned
-    const playerEntityExists = getComponentValue(Player, playerEntity)?.value == true;
+    const playerEntityExists =
+      getComponentValue(Player, playerEntity)?.value == true;
     if (playerEntityExists && currentGameID) {
       setShowSpawnButton(false);
       setShowLeaveGameButton(true);
@@ -82,9 +91,9 @@ export const App = () => {
   const handleSpawnClick = () => {
     setShowSpawnModal(true);
   };
-  
+
   const handleLeaveGameClick = () => {
-    setShowLeaveGameModal(true);    
+    setShowLeaveGameModal(true);
   };
 
   const start = async () => {
@@ -107,49 +116,68 @@ export const App = () => {
     <div className="flex flex-col items-center justify-center min-h-screen bg-space-bg">
       <div className="w-4/5 h-full">
         {!showGameBoard ? (
-          <Lobby setShowGameBoard={setShowGameBoard} showGameBoard={showGameBoard} currentGameID={currentGameID} />
+          <Lobby
+            setShowGameBoard={setShowGameBoard}
+            showGameBoard={showGameBoard}
+            currentGameID={currentGameID}
+          />
         ) : syncProgress.step !== SyncStep.LIVE ? (
           <div>
             {syncProgress.message} ({Math.floor(syncProgress.percentage)}%)
           </div>
         ) : (
-          <div className={`flex flex-col ${showSpawnModal ? 'blur-md' : ''} w-full h-full`}>
+          <div
+            className={`flex flex-col ${
+              showSpawnModal ? "blur-md" : ""
+            } w-full h-full`}
+          >
             <div className="w-full h-full flex items-start border border-gray-500 p-3 rounded-md bg-slate-900">
-              {showSpawnButton ?
-                <button 
-                  className="btn-sci-fi"
-                  onClick={handleSpawnClick}>Spawn
+              {showSpawnButton ? (
+                <button className="btn-sci-fi" onClick={handleSpawnClick}>
+                  Spawn
                 </button>
-                :
+              ) : (
                 <button
                   onClick={start}
-                  className={`text-white  ${gameIsLive ? 'btn-active' : 'btn-sci-fi'}`}
+                  className={`text-white  ${
+                    gameIsLive ? "btn-active" : "btn-sci-fi"
+                  }`}
                   disabled={gameStarted}
                 >
                   {gameIsLive ? "Match Started" : "Start Match"}
                 </button>
-              }
-              {showLeaveGameButton &&
-                <button 
-                  className="btn-sci-fi"
-                  onClick={handleLeaveGameClick}>Leave Game
+              )}
+              {showLeaveGameButton && (
+                <button className="btn-sci-fi" onClick={handleLeaveGameClick}>
+                  Leave Game
                 </button>
-              }
-              <button 
-                className="btn-sci-fi"  
-                onClick={() => setShowGameBoard(false)}>Back to Lobby
+              )}
+              <button
+                className="btn-sci-fi"
+                onClick={() => setShowGameBoard(false)}
+              >
+                Back to Lobby
+              </button>
+              <button
+                className="btn-sci-fi"
+                onClick={() => setShowRulesModal(true)}
+              >
+                Rules
               </button>
               <br />
-              {currentGameID ? 
-                  <>
-                    <p>
-                      Game ID: <strong className="text-orange-500 bg-gray-800 p-1 rounded-md">{currentGameID}</strong> 
-                      (Share this with other players so they can join your game)
-                    </p>
-                  </>
-                  :
-                  <p>Spawn to get a sharable game ID</p>
-                }
+              {currentGameID ? (
+                <>
+                  <p>
+                    Game ID:{" "}
+                    <strong className="text-orange-500 bg-gray-800 p-1 rounded-md">
+                      {currentGameID}
+                    </strong>
+                    (Share this with other players so they can join your game)
+                  </p>
+                </>
+              ) : (
+                <p>Spawn to get a sharable game ID</p>
+              )}
             </div>
             <div className="flex h-full">
               <div className="w-1/3 max-h-[34rem] overflow-y-auto bg-slate-900 m-4 border border-gray-500">
@@ -182,6 +210,10 @@ export const App = () => {
               setShowLeaveGameModal={setShowLeaveGameModal}
               setShowLeaveGameButton={setShowLeaveGameButton}
               setShowGameBoard={setShowGameBoard}
+            />
+            <RulesModal
+              showRulesModal={showRulesModal}
+              setShowRulesModal={setShowRulesModal}
             />
           </div>
         )}

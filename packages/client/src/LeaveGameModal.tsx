@@ -11,7 +11,7 @@ type LeaveGameModalProps = {
   setShowGameBoard: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-const SpawnModal: React.FC<LeaveGameModalProps> = ({
+const LeaveGameModal: React.FC<LeaveGameModalProps> = ({
   showLeaveGameModal: showLeaveGameModal,
   setShowLeaveGameModal: setShowLeaveGameModal,
   setShowLeaveGameButton: setShowLeaveGameButton,
@@ -80,4 +80,4 @@ const SpawnModal: React.FC<LeaveGameModalProps> = ({
   );
 };
 
-export default SpawnModal;
+export default LeaveGameModal;
