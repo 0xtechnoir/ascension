@@ -65,7 +65,7 @@ contract MapSystem is System {
 
     // loop through the points array and find a point that is not already occupied
     for (uint i = 0; i < points.length; i++) {
-      bytes32 playerAtPosition = PlayerAtPosition.get(points[i].x, points[i].y, _gameId);
+      bytes32 playerAtPosition = PlayerAtPosition.get(_gameId, points[i].x, points[i].y);
       // if player has a value then the position is already occupied
       if (playerAtPosition != bytes32(0)) {
         continue;
@@ -80,7 +80,7 @@ contract MapSystem is System {
     Player.set(player, true);
     Username.set(player, _username);
     Position.set(player, x, y);  // TODO - PlayerAtPosition might make this redundent
-    PlayerAtPosition.set(x, y, _gameId, player);
+    PlayerAtPosition.set(_gameId, x, y, player);
     Movable.set(player, true);
     Health.set(player, 3);
     Range.set(player, 2);
@@ -131,12 +131,14 @@ contract MapSystem is System {
     _x = (_x + width) % width;
     _y = (_y + height) % height;
 
-    bytes32 playerAtPosition = PlayerAtPosition.get(_x, _y, _gameId);
+    PlayerAtPosition.deleteRecord(_gameId, fromX, fromY);
+    
+    bytes32 playerAtPosition = PlayerAtPosition.get(_gameId, _x, _y);
     require(playerAtPosition == bytes32(0), "There is already a player at the given position in the same game");
 
     string memory username = Username.get(player);
     Position.set(player, _x, _y); // TODO - PlayerAtPosition might make this redundent
-    PlayerAtPosition.set(_x, _y, _gameId, player);
+    PlayerAtPosition.set(_gameId, _x, _y, player);
 
      MoveExecuted.set(timestamp, MoveExecutedData({
       timestamp: timestamp,

@@ -47,7 +47,7 @@ export default mudConfig({
     },
     PlayerAtPosition: {
       keySchema: {
-        gameId: 'uint32', // or whatever type you use
+        gameId: 'uint32', 
         x: 'uint32',
         y: 'uint32',
       },

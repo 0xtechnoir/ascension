@@ -114,4 +114,35 @@ export const GameMap = ({
       )}
     </div>
   );
+
+  // return (
+  //   <div className="grid">
+  //     {/* Horizontal numbers (Column numbers) */}
+  //     <div className="grid-row">
+  //       {Array.from({ length: width }).map((_, columnIndex) => (
+  //         <div key={columnIndex} className="grid-cell">
+  //           {columnIndex + 1}
+  //         </div>
+  //       ))}
+  //     </div>
+  //     {/* Actual game map grid */}
+  //     {Array.from({ length: height }).map((_, rowIndex) => (
+  //       <div key={rowIndex} className="grid-row">
+  //         {/* Vertical number (Row number) */}
+  //         <div className="grid-cell">{rowIndex + 1}</div>
+  //         {/* Tiles for this row */}
+  //         {Array.from({ length: width }).map((_, columnIndex) => (
+  //           <div
+  //             key={columnIndex}
+  //             className="grid-cell"
+  //             onClick={() => onTileClick && onTileClick(columnIndex, rowIndex)}
+  //           >
+  //             {/* Your existing tile rendering logic here */}
+  //           </div>
+  //         ))}
+  //       </div>
+  //     ))}
+  //   </div>
+  // );
 };
+
