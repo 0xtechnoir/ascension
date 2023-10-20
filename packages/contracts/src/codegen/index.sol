@@ -14,6 +14,7 @@ import { Alive, AliveTableId } from "./tables/Alive.sol";
 import { Health, HealthTableId } from "./tables/Health.sol";
 import { Range, RangeTableId } from "./tables/Range.sol";
 import { InGame, InGameTableId } from "./tables/InGame.sol";
+import { PlayerInGame, PlayerInGameTableId } from "./tables/PlayerInGame.sol";
 import { LastActionPointClaim, LastActionPointClaimTableId } from "./tables/LastActionPointClaim.sol";
 import { LastVotingPointClaim, LastVotingPointClaimTableId } from "./tables/LastVotingPointClaim.sol";
 import { ActionPoint, ActionPointTableId } from "./tables/ActionPoint.sol";

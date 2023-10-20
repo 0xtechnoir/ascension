@@ -25,6 +25,7 @@ const SpawnModal: React.FC<SpawnModalProps> = ({
     const { displayMessage } = useGameContext();
     const {
         systemCalls: { spawn },
+        components: { GameSession },
     } = useMUD();
 
     const sanitizeInput = (input: string) => {

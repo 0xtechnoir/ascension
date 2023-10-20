@@ -18,7 +18,8 @@ import {
   InGame, 
   InGameTableId,
   GameSession,
-  PlayerAtPosition } from "../codegen/index.sol";
+  PlayerAtPosition,
+  PlayerInGame } from "../codegen/index.sol";
 import { addressToEntityKey } from "../addressToEntityKey.sol";
 import { positionToEntityKey } from "../positionToEntityKey.sol";
 import { query, QueryFragment, QueryType } from "@latticexyz/world-modules/src/modules/keysintable/query.sol";
@@ -52,15 +53,10 @@ contract MapSystem is System {
     points[6] = Point(10, 5);
     points[7] = Point(10, 10);
     
-    require(!GameSession.getIsLive(_gameId), "Cannot spawn players after match has started");
-    // create a player entity using the message senders address as the key
     bytes32 player = addressToEntityKey(address(_msgSender()));
-    // we could limit the number of players here as well
-
-    QueryFragment[] memory inGameFragments = new QueryFragment[](1);
-    inGameFragments[0] = QueryFragment(QueryType.Has, InGameTableId, new bytes(0));
-    bytes32[][] memory InGameResult = query(inGameFragments);
-    require(InGameResult.length == 0, "Player is already in a game");
+    require(!GameSession.getIsLive(_gameId), "Cannot spawn players after match has started");  
+    require(!PlayerInGame.getValue(player), "Player is already in a game");
+    require(GameSession.getPlayers(_gameId) < 8, "Max players reached");
 
     // loop through the points array and find a point that is not already occupied
     for (uint i = 0; i < points.length; i++) {
@@ -74,6 +70,11 @@ contract MapSystem is System {
       break;
     }
 
+    // Game Session attributes
+
+    GameSession.setGameId(_gameId, _gameId);
+    GameSession.setPlayers(_gameId, GameSession.getPlayers(_gameId) + 1);
+    
     // set the players attributes
     Alive.set(player, true);
     Player.set(player, true);
@@ -83,9 +84,8 @@ contract MapSystem is System {
     Movable.set(player, true);
     Health.set(player, 3);
     Range.set(player, 2);
-    GameSession.setGameId(_gameId, _gameId);
     InGame.set(player, _gameId);
-    ActionPoint.set(player, 0);
+    ActionPoint.set(player, 3);
     LastActionPointClaim.set(player, 0); 
 
     PlayerSpawned.set(_timestamp, PlayerSpawnedData({
@@ -102,6 +102,11 @@ contract MapSystem is System {
     require(InGame.get(player) == _gameId, "Player is not in this game");
     string memory username = Username.get(player);
     InGame.deleteRecord(player);
+    PlayerInGame.deleteRecord(player);
+
+    if (GameSession.getPlayers(_gameId) > 0) {
+      GameSession.setPlayers(_gameId, GameSession.getPlayers(_gameId) - 1);
+    }
 
      PlayerLeftGame.set(_timestamp, PlayerLeftGameData({
       timestamp: _timestamp,

@@ -20,6 +20,7 @@ export default mudConfig({
         isLive: "bool",
         startTime: "uint256",
         gameId: "uint32",
+        players: "uint8",
       }
     },
     ClaimInterval: {
@@ -33,7 +34,8 @@ export default mudConfig({
     Alive: "bool",
     Health: "uint32",
     Range: "uint32",
-    InGame: "uint32",
+    InGame: "uint32", //associate a playerId with a gameId
+    PlayerInGame: "bool", //mark a player as in game (any game)
     LastActionPointClaim: "uint256",
     LastVotingPointClaim: "uint256",
     ActionPoint: "uint32",
