@@ -5,6 +5,7 @@ export default mudConfig({
   enums: {},
   tables: {
     MapConfig: {
+      storeArgument: true,
       keySchema: {},
       dataStruct: false,
       valueSchema: {
@@ -24,6 +25,7 @@ export default mudConfig({
       }
     },
     ClaimInterval: {
+      storeArgument: true,
       keySchema: {},
       valueSchema: "uint32",
     },

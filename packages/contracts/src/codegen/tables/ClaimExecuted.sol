@@ -103,13 +103,6 @@ library ClaimExecuted {
   }
 
   /**
-   * @notice Register the table with its config (using the specified store).
-   */
-  function register(IStore _store) internal {
-    _store.registerTable(_tableId, _fieldLayout, getKeySchema(), getValueSchema(), getKeyNames(), getFieldNames());
-  }
-
-  /**
    * @notice Set timestamp.
    */
   function setTimestamp(uint256 id, uint256 timestamp) internal {
@@ -127,16 +120,6 @@ library ClaimExecuted {
     _keyTuple[0] = bytes32(uint256(id));
 
     StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((timestamp)), _fieldLayout);
-  }
-
-  /**
-   * @notice Set timestamp (using the specified store).
-   */
-  function setTimestamp(IStore _store, uint256 id, uint256 timestamp) internal {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = bytes32(uint256(id));
-
-    _store.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((timestamp)), _fieldLayout);
   }
 
   /**
@@ -170,21 +153,6 @@ library ClaimExecuted {
   }
 
   /**
-   * @notice Set the full data using individual values (using the specified store).
-   */
-  function set(IStore _store, uint256 id, uint256 timestamp, string memory player, string memory gameId) internal {
-    bytes memory _staticData = encodeStatic(timestamp);
-
-    PackedCounter _encodedLengths = encodeLengths(player, gameId);
-    bytes memory _dynamicData = encodeDynamic(player, gameId);
-
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = bytes32(uint256(id));
-
-    _store.setRecord(_tableId, _keyTuple, _staticData, _encodedLengths, _dynamicData);
-  }
-
-  /**
    * @notice Set the full data using the data struct.
    */
   function set(uint256 id, ClaimExecutedData memory _table) internal {
@@ -212,21 +180,6 @@ library ClaimExecuted {
     _keyTuple[0] = bytes32(uint256(id));
 
     StoreCore.setRecord(_tableId, _keyTuple, _staticData, _encodedLengths, _dynamicData, _fieldLayout);
-  }
-
-  /**
-   * @notice Set the full data using the data struct (using the specified store).
-   */
-  function set(IStore _store, uint256 id, ClaimExecutedData memory _table) internal {
-    bytes memory _staticData = encodeStatic(_table.timestamp);
-
-    PackedCounter _encodedLengths = encodeLengths(_table.player, _table.gameId);
-    bytes memory _dynamicData = encodeDynamic(_table.player, _table.gameId);
-
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = bytes32(uint256(id));
-
-    _store.setRecord(_tableId, _keyTuple, _staticData, _encodedLengths, _dynamicData);
   }
 
   /**
@@ -291,16 +244,6 @@ library ClaimExecuted {
     _keyTuple[0] = bytes32(uint256(id));
 
     StoreCore.deleteRecord(_tableId, _keyTuple, _fieldLayout);
-  }
-
-  /**
-   * @notice Delete all data for given keys (using the specified store).
-   */
-  function deleteRecord(IStore _store, uint256 id) internal {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = bytes32(uint256(id));
-
-    _store.deleteRecord(_tableId, _keyTuple);
   }
 
   /**

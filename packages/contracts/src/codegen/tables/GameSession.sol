@@ -106,13 +106,6 @@ library GameSession {
   }
 
   /**
-   * @notice Register the table with its config (using the specified store).
-   */
-  function register(IStore _store) internal {
-    _store.registerTable(_tableId, _fieldLayout, getKeySchema(), getValueSchema(), getKeyNames(), getFieldNames());
-  }
-
-  /**
    * @notice Get isLive.
    */
   function getIsLive(uint32 id) internal view returns (bool isLive) {
@@ -135,17 +128,6 @@ library GameSession {
   }
 
   /**
-   * @notice Get isLive (using the specified store).
-   */
-  function getIsLive(IStore _store, uint32 id) internal view returns (bool isLive) {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = bytes32(uint256(id));
-
-    bytes32 _blob = _store.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
-    return (_toBool(uint8(bytes1(_blob))));
-  }
-
-  /**
    * @notice Set isLive.
    */
   function setIsLive(uint32 id, bool isLive) internal {
@@ -163,16 +145,6 @@ library GameSession {
     _keyTuple[0] = bytes32(uint256(id));
 
     StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((isLive)), _fieldLayout);
-  }
-
-  /**
-   * @notice Set isLive (using the specified store).
-   */
-  function setIsLive(IStore _store, uint32 id, bool isLive) internal {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = bytes32(uint256(id));
-
-    _store.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((isLive)), _fieldLayout);
   }
 
   /**
@@ -198,17 +170,6 @@ library GameSession {
   }
 
   /**
-   * @notice Get startTime (using the specified store).
-   */
-  function getStartTime(IStore _store, uint32 id) internal view returns (uint256 startTime) {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = bytes32(uint256(id));
-
-    bytes32 _blob = _store.getStaticField(_tableId, _keyTuple, 1, _fieldLayout);
-    return (uint256(bytes32(_blob)));
-  }
-
-  /**
    * @notice Set startTime.
    */
   function setStartTime(uint32 id, uint256 startTime) internal {
@@ -226,16 +187,6 @@ library GameSession {
     _keyTuple[0] = bytes32(uint256(id));
 
     StoreCore.setStaticField(_tableId, _keyTuple, 1, abi.encodePacked((startTime)), _fieldLayout);
-  }
-
-  /**
-   * @notice Set startTime (using the specified store).
-   */
-  function setStartTime(IStore _store, uint32 id, uint256 startTime) internal {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = bytes32(uint256(id));
-
-    _store.setStaticField(_tableId, _keyTuple, 1, abi.encodePacked((startTime)), _fieldLayout);
   }
 
   /**
@@ -261,17 +212,6 @@ library GameSession {
   }
 
   /**
-   * @notice Get gameId (using the specified store).
-   */
-  function getGameId(IStore _store, uint32 id) internal view returns (uint32 gameId) {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = bytes32(uint256(id));
-
-    bytes32 _blob = _store.getStaticField(_tableId, _keyTuple, 2, _fieldLayout);
-    return (uint32(bytes4(_blob)));
-  }
-
-  /**
    * @notice Set gameId.
    */
   function setGameId(uint32 id, uint32 gameId) internal {
@@ -289,16 +229,6 @@ library GameSession {
     _keyTuple[0] = bytes32(uint256(id));
 
     StoreCore.setStaticField(_tableId, _keyTuple, 2, abi.encodePacked((gameId)), _fieldLayout);
-  }
-
-  /**
-   * @notice Set gameId (using the specified store).
-   */
-  function setGameId(IStore _store, uint32 id, uint32 gameId) internal {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = bytes32(uint256(id));
-
-    _store.setStaticField(_tableId, _keyTuple, 2, abi.encodePacked((gameId)), _fieldLayout);
   }
 
   /**
@@ -324,17 +254,6 @@ library GameSession {
   }
 
   /**
-   * @notice Get players (using the specified store).
-   */
-  function getPlayers(IStore _store, uint32 id) internal view returns (uint8 players) {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = bytes32(uint256(id));
-
-    bytes32 _blob = _store.getStaticField(_tableId, _keyTuple, 3, _fieldLayout);
-    return (uint8(bytes1(_blob)));
-  }
-
-  /**
    * @notice Set players.
    */
   function setPlayers(uint32 id, uint8 players) internal {
@@ -352,16 +271,6 @@ library GameSession {
     _keyTuple[0] = bytes32(uint256(id));
 
     StoreCore.setStaticField(_tableId, _keyTuple, 3, abi.encodePacked((players)), _fieldLayout);
-  }
-
-  /**
-   * @notice Set players (using the specified store).
-   */
-  function setPlayers(IStore _store, uint32 id, uint8 players) internal {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = bytes32(uint256(id));
-
-    _store.setStaticField(_tableId, _keyTuple, 3, abi.encodePacked((players)), _fieldLayout);
   }
 
   /**
@@ -387,21 +296,6 @@ library GameSession {
     _keyTuple[0] = bytes32(uint256(id));
 
     (bytes memory _staticData, PackedCounter _encodedLengths, bytes memory _dynamicData) = StoreCore.getRecord(
-      _tableId,
-      _keyTuple,
-      _fieldLayout
-    );
-    return decode(_staticData, _encodedLengths, _dynamicData);
-  }
-
-  /**
-   * @notice Get the full data (using the specified store).
-   */
-  function get(IStore _store, uint32 id) internal view returns (GameSessionData memory _table) {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = bytes32(uint256(id));
-
-    (bytes memory _staticData, PackedCounter _encodedLengths, bytes memory _dynamicData) = _store.getRecord(
       _tableId,
       _keyTuple,
       _fieldLayout
@@ -440,21 +334,6 @@ library GameSession {
   }
 
   /**
-   * @notice Set the full data using individual values (using the specified store).
-   */
-  function set(IStore _store, uint32 id, bool isLive, uint256 startTime, uint32 gameId, uint8 players) internal {
-    bytes memory _staticData = encodeStatic(isLive, startTime, gameId, players);
-
-    PackedCounter _encodedLengths;
-    bytes memory _dynamicData;
-
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = bytes32(uint256(id));
-
-    _store.setRecord(_tableId, _keyTuple, _staticData, _encodedLengths, _dynamicData);
-  }
-
-  /**
    * @notice Set the full data using the data struct.
    */
   function set(uint32 id, GameSessionData memory _table) internal {
@@ -482,21 +361,6 @@ library GameSession {
     _keyTuple[0] = bytes32(uint256(id));
 
     StoreCore.setRecord(_tableId, _keyTuple, _staticData, _encodedLengths, _dynamicData, _fieldLayout);
-  }
-
-  /**
-   * @notice Set the full data using the data struct (using the specified store).
-   */
-  function set(IStore _store, uint32 id, GameSessionData memory _table) internal {
-    bytes memory _staticData = encodeStatic(_table.isLive, _table.startTime, _table.gameId, _table.players);
-
-    PackedCounter _encodedLengths;
-    bytes memory _dynamicData;
-
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = bytes32(uint256(id));
-
-    _store.setRecord(_tableId, _keyTuple, _staticData, _encodedLengths, _dynamicData);
   }
 
   /**
@@ -546,16 +410,6 @@ library GameSession {
     _keyTuple[0] = bytes32(uint256(id));
 
     StoreCore.deleteRecord(_tableId, _keyTuple, _fieldLayout);
-  }
-
-  /**
-   * @notice Delete all data for given keys (using the specified store).
-   */
-  function deleteRecord(IStore _store, uint32 id) internal {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = bytes32(uint256(id));
-
-    _store.deleteRecord(_tableId, _keyTuple);
   }
 
   /**

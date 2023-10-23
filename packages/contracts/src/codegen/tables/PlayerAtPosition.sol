@@ -97,13 +97,6 @@ library PlayerAtPosition {
   }
 
   /**
-   * @notice Register the table with its config (using the specified store).
-   */
-  function register(IStore _store) internal {
-    _store.registerTable(_tableId, _fieldLayout, getKeySchema(), getValueSchema(), getKeyNames(), getFieldNames());
-  }
-
-  /**
    * @notice Get playerEntity.
    */
   function getPlayerEntity(uint32 gameId, uint32 x, uint32 y) internal view returns (bytes32 playerEntity) {
@@ -126,24 +119,6 @@ library PlayerAtPosition {
     _keyTuple[2] = bytes32(uint256(y));
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
-    return (bytes32(_blob));
-  }
-
-  /**
-   * @notice Get playerEntity (using the specified store).
-   */
-  function getPlayerEntity(
-    IStore _store,
-    uint32 gameId,
-    uint32 x,
-    uint32 y
-  ) internal view returns (bytes32 playerEntity) {
-    bytes32[] memory _keyTuple = new bytes32[](3);
-    _keyTuple[0] = bytes32(uint256(gameId));
-    _keyTuple[1] = bytes32(uint256(x));
-    _keyTuple[2] = bytes32(uint256(y));
-
-    bytes32 _blob = _store.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
     return (bytes32(_blob));
   }
 
@@ -174,19 +149,6 @@ library PlayerAtPosition {
   }
 
   /**
-   * @notice Get playerEntity (using the specified store).
-   */
-  function get(IStore _store, uint32 gameId, uint32 x, uint32 y) internal view returns (bytes32 playerEntity) {
-    bytes32[] memory _keyTuple = new bytes32[](3);
-    _keyTuple[0] = bytes32(uint256(gameId));
-    _keyTuple[1] = bytes32(uint256(x));
-    _keyTuple[2] = bytes32(uint256(y));
-
-    bytes32 _blob = _store.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
-    return (bytes32(_blob));
-  }
-
-  /**
    * @notice Set playerEntity.
    */
   function setPlayerEntity(uint32 gameId, uint32 x, uint32 y, bytes32 playerEntity) internal {
@@ -208,18 +170,6 @@ library PlayerAtPosition {
     _keyTuple[2] = bytes32(uint256(y));
 
     StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((playerEntity)), _fieldLayout);
-  }
-
-  /**
-   * @notice Set playerEntity (using the specified store).
-   */
-  function setPlayerEntity(IStore _store, uint32 gameId, uint32 x, uint32 y, bytes32 playerEntity) internal {
-    bytes32[] memory _keyTuple = new bytes32[](3);
-    _keyTuple[0] = bytes32(uint256(gameId));
-    _keyTuple[1] = bytes32(uint256(x));
-    _keyTuple[2] = bytes32(uint256(y));
-
-    _store.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((playerEntity)), _fieldLayout);
   }
 
   /**
@@ -247,18 +197,6 @@ library PlayerAtPosition {
   }
 
   /**
-   * @notice Set playerEntity (using the specified store).
-   */
-  function set(IStore _store, uint32 gameId, uint32 x, uint32 y, bytes32 playerEntity) internal {
-    bytes32[] memory _keyTuple = new bytes32[](3);
-    _keyTuple[0] = bytes32(uint256(gameId));
-    _keyTuple[1] = bytes32(uint256(x));
-    _keyTuple[2] = bytes32(uint256(y));
-
-    _store.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((playerEntity)), _fieldLayout);
-  }
-
-  /**
    * @notice Delete all data for given keys.
    */
   function deleteRecord(uint32 gameId, uint32 x, uint32 y) internal {
@@ -280,18 +218,6 @@ library PlayerAtPosition {
     _keyTuple[2] = bytes32(uint256(y));
 
     StoreCore.deleteRecord(_tableId, _keyTuple, _fieldLayout);
-  }
-
-  /**
-   * @notice Delete all data for given keys (using the specified store).
-   */
-  function deleteRecord(IStore _store, uint32 gameId, uint32 x, uint32 y) internal {
-    bytes32[] memory _keyTuple = new bytes32[](3);
-    _keyTuple[0] = bytes32(uint256(gameId));
-    _keyTuple[1] = bytes32(uint256(x));
-    _keyTuple[2] = bytes32(uint256(y));
-
-    _store.deleteRecord(_tableId, _keyTuple);
   }
 
   /**

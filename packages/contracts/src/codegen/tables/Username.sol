@@ -93,13 +93,6 @@ library Username {
   }
 
   /**
-   * @notice Register the table with its config (using the specified store).
-   */
-  function register(IStore _store) internal {
-    _store.registerTable(_tableId, _fieldLayout, getKeySchema(), getValueSchema(), getKeyNames(), getFieldNames());
-  }
-
-  /**
    * @notice Get value.
    */
   function getValue(bytes32 key) internal view returns (string memory value) {
@@ -118,17 +111,6 @@ library Username {
     _keyTuple[0] = key;
 
     bytes memory _blob = StoreCore.getDynamicField(_tableId, _keyTuple, 0);
-    return (string(_blob));
-  }
-
-  /**
-   * @notice Get value (using the specified store).
-   */
-  function getValue(IStore _store, bytes32 key) internal view returns (string memory value) {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = key;
-
-    bytes memory _blob = _store.getDynamicField(_tableId, _keyTuple, 0);
     return (string(_blob));
   }
 
@@ -155,17 +137,6 @@ library Username {
   }
 
   /**
-   * @notice Get value (using the specified store).
-   */
-  function get(IStore _store, bytes32 key) internal view returns (string memory value) {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = key;
-
-    bytes memory _blob = _store.getDynamicField(_tableId, _keyTuple, 0);
-    return (string(_blob));
-  }
-
-  /**
    * @notice Set value.
    */
   function setValue(bytes32 key, string memory value) internal {
@@ -186,16 +157,6 @@ library Username {
   }
 
   /**
-   * @notice Set value (using the specified store).
-   */
-  function setValue(IStore _store, bytes32 key, string memory value) internal {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = key;
-
-    _store.setDynamicField(_tableId, _keyTuple, 0, bytes((value)));
-  }
-
-  /**
    * @notice Set value.
    */
   function set(bytes32 key, string memory value) internal {
@@ -213,16 +174,6 @@ library Username {
     _keyTuple[0] = key;
 
     StoreCore.setDynamicField(_tableId, _keyTuple, 0, bytes((value)));
-  }
-
-  /**
-   * @notice Set value (using the specified store).
-   */
-  function set(IStore _store, bytes32 key, string memory value) internal {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = key;
-
-    _store.setDynamicField(_tableId, _keyTuple, 0, bytes((value)));
   }
 
   /**
@@ -252,19 +203,6 @@ library Username {
   }
 
   /**
-   * @notice Get the length of value (using the specified store).
-   */
-  function lengthValue(IStore _store, bytes32 key) internal view returns (uint256) {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = key;
-
-    uint256 _byteLength = _store.getDynamicFieldLength(_tableId, _keyTuple, 0);
-    unchecked {
-      return _byteLength / 1;
-    }
-  }
-
-  /**
    * @notice Get the length of value.
    */
   function length(bytes32 key) internal view returns (uint256) {
@@ -285,19 +223,6 @@ library Username {
     _keyTuple[0] = key;
 
     uint256 _byteLength = StoreCore.getDynamicFieldLength(_tableId, _keyTuple, 0);
-    unchecked {
-      return _byteLength / 1;
-    }
-  }
-
-  /**
-   * @notice Get the length of value (using the specified store).
-   */
-  function length(IStore _store, bytes32 key) internal view returns (uint256) {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = key;
-
-    uint256 _byteLength = _store.getDynamicFieldLength(_tableId, _keyTuple, 0);
     unchecked {
       return _byteLength / 1;
     }
@@ -332,20 +257,6 @@ library Username {
   }
 
   /**
-   * @notice Get an item of value (using the specified store).
-   * @dev Reverts with Store_IndexOutOfBounds if `_index` is out of bounds for the array.
-   */
-  function getItemValue(IStore _store, bytes32 key, uint256 _index) internal view returns (string memory) {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = key;
-
-    unchecked {
-      bytes memory _blob = _store.getDynamicFieldSlice(_tableId, _keyTuple, 0, _index * 1, (_index + 1) * 1);
-      return (string(_blob));
-    }
-  }
-
-  /**
    * @notice Get an item of value.
    * @dev Reverts with Store_IndexOutOfBounds if `_index` is out of bounds for the array.
    */
@@ -374,20 +285,6 @@ library Username {
   }
 
   /**
-   * @notice Get an item of value (using the specified store).
-   * @dev Reverts with Store_IndexOutOfBounds if `_index` is out of bounds for the array.
-   */
-  function getItem(IStore _store, bytes32 key, uint256 _index) internal view returns (string memory) {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = key;
-
-    unchecked {
-      bytes memory _blob = _store.getDynamicFieldSlice(_tableId, _keyTuple, 0, _index * 1, (_index + 1) * 1);
-      return (string(_blob));
-    }
-  }
-
-  /**
    * @notice Push a slice to value.
    */
   function pushValue(bytes32 key, string memory _slice) internal {
@@ -405,16 +302,6 @@ library Username {
     _keyTuple[0] = key;
 
     StoreCore.pushToDynamicField(_tableId, _keyTuple, 0, bytes((_slice)));
-  }
-
-  /**
-   * @notice Push a slice to value (using the specified store).
-   */
-  function pushValue(IStore _store, bytes32 key, string memory _slice) internal {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = key;
-
-    _store.pushToDynamicField(_tableId, _keyTuple, 0, bytes((_slice)));
   }
 
   /**
@@ -438,16 +325,6 @@ library Username {
   }
 
   /**
-   * @notice Push a slice to value (using the specified store).
-   */
-  function push(IStore _store, bytes32 key, string memory _slice) internal {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = key;
-
-    _store.pushToDynamicField(_tableId, _keyTuple, 0, bytes((_slice)));
-  }
-
-  /**
    * @notice Pop a slice from value.
    */
   function popValue(bytes32 key) internal {
@@ -468,16 +345,6 @@ library Username {
   }
 
   /**
-   * @notice Pop a slice from value (using the specified store).
-   */
-  function popValue(IStore _store, bytes32 key) internal {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = key;
-
-    _store.popFromDynamicField(_tableId, _keyTuple, 0, 1);
-  }
-
-  /**
    * @notice Pop a slice from value.
    */
   function pop(bytes32 key) internal {
@@ -495,16 +362,6 @@ library Username {
     _keyTuple[0] = key;
 
     StoreCore.popFromDynamicField(_tableId, _keyTuple, 0, 1);
-  }
-
-  /**
-   * @notice Pop a slice from value (using the specified store).
-   */
-  function pop(IStore _store, bytes32 key) internal {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = key;
-
-    _store.popFromDynamicField(_tableId, _keyTuple, 0, 1);
   }
 
   /**
@@ -530,19 +387,6 @@ library Username {
     unchecked {
       bytes memory _encoded = bytes((_slice));
       StoreCore.spliceDynamicData(_tableId, _keyTuple, 0, uint40(_index * 1), uint40(_encoded.length), _encoded);
-    }
-  }
-
-  /**
-   * @notice Update a slice of value (using the specified store) at `_index`.
-   */
-  function updateValue(IStore _store, bytes32 key, uint256 _index, string memory _slice) internal {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = key;
-
-    unchecked {
-      bytes memory _encoded = bytes((_slice));
-      _store.spliceDynamicData(_tableId, _keyTuple, 0, uint40(_index * 1), uint40(_encoded.length), _encoded);
     }
   }
 
@@ -573,19 +417,6 @@ library Username {
   }
 
   /**
-   * @notice Update a slice of value (using the specified store) at `_index`.
-   */
-  function update(IStore _store, bytes32 key, uint256 _index, string memory _slice) internal {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = key;
-
-    unchecked {
-      bytes memory _encoded = bytes((_slice));
-      _store.spliceDynamicData(_tableId, _keyTuple, 0, uint40(_index * 1), uint40(_encoded.length), _encoded);
-    }
-  }
-
-  /**
    * @notice Delete all data for given keys.
    */
   function deleteRecord(bytes32 key) internal {
@@ -603,16 +434,6 @@ library Username {
     _keyTuple[0] = key;
 
     StoreCore.deleteRecord(_tableId, _keyTuple, _fieldLayout);
-  }
-
-  /**
-   * @notice Delete all data for given keys (using the specified store).
-   */
-  function deleteRecord(IStore _store, bytes32 key) internal {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = key;
-
-    _store.deleteRecord(_tableId, _keyTuple);
   }
 
   /**
