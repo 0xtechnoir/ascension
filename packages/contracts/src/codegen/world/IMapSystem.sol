@@ -12,9 +12,5 @@ interface IMapSystem {
 
   function leaveGame(uint256 _timestamp, uint32 _gameId) external;
 
-  function move(uint256 timestamp, uint32 _x, uint32 _y, uint32 _gameId) external;
-
-  function queryPosition(uint32 _x, uint32 _y, uint32 _gameId) external view returns (bytes32[][] memory);
-
-  function queryisLive(uint32 _x, uint32 _y, uint32 _gameId) external view returns (bytes32[][] memory);
+  function move(uint256 timestamp, int32 deltaX, int32 deltaY, uint32 _gameId) external;
 }

@@ -163,6 +163,9 @@ importers:
       '@typechain/ethers-v5':
         specifier: ^10.2.0
         version: 10.2.0(@ethersproject/abi@5.7.0)(@ethersproject/bytes@5.7.0)(@ethersproject/providers@5.7.2)(ethers@5.7.2)(typechain@8.1.1)(typescript@5.1.6)
+      '@types/debug':
+        specifier: ^4.1.10
+        version: 4.1.10
       '@types/node':
         specifier: ^18.15.11
         version: 18.15.11
@@ -1583,8 +1586,18 @@ packages:
       typescript: 5.1.6
     dev: true
 
+  /@types/debug@4.1.10:
+    resolution: {integrity: sha512-tOSCru6s732pofZ+sMv9o4o3Zc+Sa8l3bxd/tweTQudFn06vAzb13ZX46Zi6m6EJ+RUbRTHvgQJ1gBtSgkaUYA==}
+    dependencies:
+      '@types/ms': 0.7.33
+    dev: true
+
   /@types/json-schema@7.0.13:
     resolution: {integrity: sha512-RbSSoHliUbnXj3ny0CNFOoxrIDV6SUGyStHsvDqosw6CkdPV8TtWGlfecuK4ToyMEAql6pzNxgCFKanovUzlgQ==}
+    dev: true
+
+  /@types/ms@0.7.33:
+    resolution: {integrity: sha512-AuHIyzR5Hea7ij0P9q7vx7xu4z0C28ucwjAZC0ja7JhINyCnOw8/DnvAPQQ9TfOlCtZAmCERKQX9+o1mgQhuOQ==}
     dev: true
 
   /@types/node@18.15.11:

@@ -83,29 +83,6 @@ export function createSystemCalls(
     const res = await waitForTransaction(tx);
   };
 
-  const moveTo = async (inputX: number, inputY: number, gameId: number) => {
-    if (!playerEntity) {
-      throw new Error("no player");
-    }
-    const [x, y] = wrapPosition(inputX, inputY);
-    const positionId = uuid();
-    Position.addOverride(positionId, {
-      entity: playerEntity,
-      value: { x, y },
-    });
-
-    try {
-      const bigIntTimestamp = BigInt(Date.now());
-      const tx = await worldContract.write.move([bigIntTimestamp, x, y, gameId]);
-      await waitForTransaction(tx);
-    } catch (error) {
-      console.log("error: ", error);
-      throw error;
-    } finally {
-      Position.removeOverride(positionId);
-    }
-  };
-
   const moveBy = async (deltaX: number, deltaY: number, gameId: number) => {
     if (!playerEntity) {
       throw new Error("no player");
@@ -116,7 +93,30 @@ export function createSystemCalls(
       console.warn("cannot moveBy without a player position, not yet spawned?");
       return;
     }
-    await moveTo(playerPosition.x + deltaX, playerPosition.y + deltaY, gameId);
+
+    // optimitsic render
+    const [x, y] = wrapPosition(playerPosition.x + deltaX, playerPosition.y + deltaY);
+    const positionId = uuid();
+    try {
+      Position.addOverride(positionId, {
+        entity: playerEntity,
+        value: { x, y },
+      });
+    } catch (error) {
+      console.log("Optimistic render error: ", error);
+      throw error;
+    }
+
+    try {
+      const bigIntTimestamp = BigInt(Date.now());
+      const tx = await worldContract.write.move([bigIntTimestamp, deltaX, deltaY, gameId]);
+      await waitForTransaction(tx);
+    } catch (error) {
+      console.log("error: ", error);
+      throw error;
+    } finally {
+      Position.removeOverride(positionId);
+    }
   };
 
   const spawn = async (username: string, gameId: number) => {

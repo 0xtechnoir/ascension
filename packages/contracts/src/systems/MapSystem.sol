@@ -29,6 +29,7 @@ import { MoveExecuted, MoveExecutedData } from "../codegen/Tables.sol";
 import { PlayerSpawned, PlayerSpawnedData } from "../codegen/Tables.sol";
 import { PlayerLeftGame, PlayerLeftGameData } from "../codegen/Tables.sol";
 import { PackedCounter } from "@latticexyz/store/src/PackedCounter.sol";
+import { console } from "forge-std/console.sol";
 
 contract MapSystem is System {
 
@@ -38,7 +39,6 @@ contract MapSystem is System {
   }
   
   function spawn(uint256 _timestamp, string memory _username, uint32 _gameId) public {
-
     uint16 x;
     uint16 y;
 
@@ -115,41 +115,47 @@ contract MapSystem is System {
     }));
   }
 
-  function move(uint256 timestamp, uint32 _x, uint32 _y, uint32 _gameId) public {
+  function move(uint256 timestamp, int32 deltaX, int32 deltaY, uint32 _gameId) public {
 
     bytes32 player = addressToEntityKey(_msgSender());
-    
     require(GameSession.getIsLive(_gameId), "Match hasn't started yet");
     require(Movable.get(player), "Moving disabled");
     require(Alive.get(player), "You are dead");
     uint32 currentActionPoints = ActionPoint.get(player);
     require(currentActionPoints > 0, "An Action point is required to move");
-
+    require(
+        isValidDelta(deltaX, deltaY),
+        "Invalid movement: Either deltaX or deltaY must be non-zero, and the other must be zero."
+    );
+  
     // retrieve the players current position
     (uint32 fromX, uint32 fromY) = Position.get(player);
+    console.log("fromX: ", fromX, ", fromY: ", fromY);
+    console.log("deltaX: ");
+    console.logInt(deltaX);
+    console.log("deltaY: ");
+    console.logInt(deltaY);
+    uint32 toX = uint32(int32(fromX) + deltaX);
+    uint32 toY = uint32(int32(fromY) + deltaY);
+    console.log("toX: ", toX, ", toY: ", toY);
+    checkForValidMove(fromX, fromY, deltaX, deltaY);
 
-    require(distance(fromX, fromY, _x, _y) == 1, "You can only move to adjacent spaces");
-
-    // Constrain position to map size, wrapping around if necessary
-    (uint32 width, uint32 height ) = MapConfig.get();
-    _x = (_x + width) % width;
-    _y = (_y + height) % height;
 
     PlayerAtPosition.deleteRecord(_gameId, fromX, fromY);
     
-    bytes32 playerAtPosition = PlayerAtPosition.get(_gameId, _x, _y);
+    bytes32 playerAtPosition = PlayerAtPosition.get(_gameId, toX, toY);
     require(playerAtPosition == bytes32(0), "There is already a player at the given position in the same game");
 
-    string memory username = Username.get(player);
-    Position.set(player, _x, _y); // TODO - PlayerAtPosition might make this redundent
-    PlayerAtPosition.set(_gameId, _x, _y, player);
+    Position.set(player, toX, toY); // TODO - PlayerAtPosition might make this redundent
+    PlayerAtPosition.set(_gameId, toX, toY, player);
 
+    string memory username = Username.get(player);
      MoveExecuted.set(timestamp, MoveExecutedData({
       timestamp: timestamp,
       fromX: fromX, 
       fromY: fromY, 
-      toX: _x, 
-      toY: _y,
+      toX: toX, 
+      toY: toY,
       gameId: _gameId,
       player: username
     }));
@@ -157,22 +163,25 @@ contract MapSystem is System {
     ActionPoint.set(player, currentActionPoints - 1);
   }
 
-  function queryPosition(uint32 _x, uint32 _y, uint32 _gameId) public view returns (bytes32[][] memory) {
-    QueryFragment[] memory fragments = new QueryFragment[](2);
-    fragments[0] = QueryFragment(QueryType.HasValue, InGameTableId, abi.encode(_gameId));
-    fragments[1] = QueryFragment(QueryType.HasValue, PositionTableId, abi.encode(_x, _y));
-    return query(fragments);
-  }
-  function queryisLive(uint32 _x, uint32 _y, uint32 _gameId) public view returns (bytes32[][] memory) {
-    QueryFragment[] memory fragments = new QueryFragment[](2);
-    fragments[0] = QueryFragment(QueryType.HasValue, InGameTableId, abi.encode(_gameId));
-    fragments[1] = QueryFragment(QueryType.HasValue, PositionTableId, abi.encode(_x, _y));
-    return query(fragments);
-  }
+  function isValidDelta(int32 deltaX, int32 deltaY) private pure returns (bool) {
+    // Check if both deltaX and deltaY are within the valid range (-1, 0, 1)
+    bool deltaXValid = (deltaX == 1 || deltaX == -1 || deltaX == 0);
+    bool deltaYValid = (deltaY == 1 || deltaY == -1 || deltaY == 0);
 
-  function distance(uint32 fromX, uint32 fromY, uint32 toX, uint32 toY) internal pure returns (uint32) {
-    uint32 deltaX = fromX > toX ? fromX - toX : toX - fromX;
-    uint32 deltaY = fromY > toY ? fromY - toY : toY - fromY;
-    return deltaX + deltaY;
-  }
+    // Ensure that if one is non-zero, the other must be zero
+    bool mutuallyExclusive = (deltaX != 0 && deltaY == 0) || (deltaY != 0 && deltaX == 0);
+
+    return deltaXValid && deltaYValid && mutuallyExclusive;
+}
+
+  function checkForValidMove(uint32 fromX, uint32 fromY, int32 deltaX, int32 deltaY) internal view {
+    (uint32 width, uint32 height) = MapConfig.get();
+
+    if ((fromX == 0 && deltaX == -1) ||
+        (fromX == width - 1 && deltaX == 1) ||
+        (fromY == 0 && deltaY == -1) || 
+        (fromY == height - 1 && deltaY == 1)) {
+        revert("Cannot move off the map");
+    }
+}
 }
