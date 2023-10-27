@@ -104,16 +104,42 @@ export const GameBoard: React.FC<GameBoardProps> = ({
     );
   }
   const { width, height } = mapConfig;
-
   return (
-    <div className="h-full border border-gray-500 rounded-md">
-      <GameMap
-        width={width}
-        height={height}
-        onTileClick={selectPlayer}
-        players={mappedPlayers}
-        highlightedPlayer={highlightedPlayer}
-      />
+    <div className="h-full border border-gray-500 rounded-md relative">
+      {/* Top numbers */}
+      <div className="absolute left-0 top-0" style={{ transform: 'translateX(30px)' }}>
+        {Array.from({ length: width }, (_, i) => (
+          <div
+            key={`top-${i}`}
+            className="w-12 flex items-center justify-center"
+            style={{ height: '24px', lineHeight: '24px', position: 'absolute', left: `${i * 48}px` }}
+          >
+            {i}
+          </div>
+        ))}
+      </div>
+
+      {/* Side numbers */}
+      <div className="absolute left-0 top-0" style={{ transform: 'translateY(30px)' }}>
+        {Array.from({ length: height }, (_, i) => (
+          <div
+            key={`side-${i}`}
+            className="h-12 flex items-center justify-center"
+            style={{ width: '24px', lineHeight: '48px', position: 'absolute', top: `${i * 48}px` }}
+          >
+            {i}
+          </div>
+        ))}
+      </div>
+      <div className="flex p-6 box-border w-full h-full bg-slate-700">
+        <GameMap
+          width={width}
+          height={height}
+          onTileClick={selectPlayer}
+          players={mappedPlayers}
+          highlightedPlayer={highlightedPlayer}
+        />
+      </div>
     </div>
   );
 };
