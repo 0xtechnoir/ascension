@@ -114,7 +114,7 @@ export const App = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-space-bg">
-      <div className="w-4/5 h-full">
+      <div className="flex justify-center">
         {!showGameBoard ? (
           <Lobby
             setShowGameBoard={setShowGameBoard}
@@ -131,75 +131,76 @@ export const App = () => {
               showSpawnModal ? "blur-md" : ""
             } w-full h-full`}
           >
-            <div className="w-full h-full flex items-start border border-gray-500 p-3 rounded-md bg-slate-900">
-              {showSpawnButton ? (
-                <button className="btn-sci-fi" onClick={handleSpawnClick}>
-                  Spawn
-                </button>
-              ) : (
+              <div className="m-2 flex items-start border border-gray-700 p-3 rounded-md bg-slate-900">
+                {showSpawnButton ? (
+                  <button className="btn-sci-fi" onClick={handleSpawnClick}>
+                    Spawn
+                  </button>
+                ) : (
+                  <button
+                    onClick={start}
+                    className={`text-white  ${
+                      gameIsLive ? "btn-active" : "btn-sci-fi"
+                    }`}
+                    disabled={gameStarted}
+                  >
+                    {gameIsLive ? "Match Started" : "Start Match"}
+                  </button>
+                )}
+                {showLeaveGameButton && (
+                  <button className="btn-sci-fi" onClick={handleLeaveGameClick}>
+                    Leave Game
+                  </button>
+                )}
                 <button
-                  onClick={start}
-                  className={`text-white  ${
-                    gameIsLive ? "btn-active" : "btn-sci-fi"
-                  }`}
-                  disabled={gameStarted}
+                  className="btn-sci-fi"
+                  onClick={() => setShowGameBoard(false)}
                 >
-                  {gameIsLive ? "Match Started" : "Start Match"}
+                  Back to Lobby
                 </button>
-              )}
-              {showLeaveGameButton && (
-                <button className="btn-sci-fi" onClick={handleLeaveGameClick}>
-                  Leave Game
+                <button
+                  className="btn-sci-fi"
+                  onClick={() => setShowRulesModal(true)}
+                >
+                  Rules
                 </button>
-              )}
-              <button
-                className="btn-sci-fi"
-                onClick={() => setShowGameBoard(false)}
-              >
-                Back to Lobby
-              </button>
-              <button
-                className="btn-sci-fi"
-                onClick={() => setShowRulesModal(true)}
-              >
-                Rules
-              </button>
-              <br />
-              {currentGameID ? (
-                <>
-                  <p>
-                    Game ID:{" "}
-                    <strong className="text-orange-500 bg-gray-800 p-1 rounded-md">
-                      {currentGameID}
-                    </strong>
-                    (Share this with other players so they can join your game)
-                  </p>
-                </>
-              ) : (
-                <p>Spawn to get a sharable game ID</p>
-              )}
-            </div>
-            <div className="flex h-full">
-              <div className="w-1/3 max-h-[34rem] overflow-y-auto bg-slate-900 m-4 border border-gray-500">
-                <PlayersList
-                  players={allPlayers}
-                  highlightedPlayer={highlightedPlayer}
-                  setHighlightedPlayer={setHighlightedPlayer}
-                />
-              </div>
-              <div className="w-1/3 h-full flex flex-col items-center m-4">
-                <GameBoard
-                  players={allPlayers}
-                  highlightedPlayer={highlightedPlayer}
-                  setHighlightedPlayer={setHighlightedPlayer}
-                  setGameStarted={setGameStarted}
-                />
                 <br />
+                {currentGameID ? (
+                  <>
+                    <p>
+                      Game ID:{" "}
+                      <strong className="text-orange-500 bg-gray-800 p-1 rounded-md">
+                        {currentGameID}
+                      </strong>
+                      (Share this with other players so they can join your game)
+                    </p>
+                  </>
+                ) : (
+                  <p>Spawn to get a sharable game ID</p>
+                )}
               </div>
-              <div className="w-1/3 max-h-[34rem] overflow-y-auto bg-slate-900 m-4 border border-gray-500">
-                <ActivityLogComponent />
-              </div>
-            </div>
+              <div className="flex justify-center">
+                <div className="m-2 flex-col w-1/3 bg-slate-900 border border-gray-700 p-2 min-w-[23rem]">
+                  <PlayersList
+                    players={allPlayers}
+                    highlightedPlayer={highlightedPlayer}
+                    setHighlightedPlayer={setHighlightedPlayer}
+                  />
+                </div>
+                <div className="m-2 bg-slate-900 border border-gray-700 p-2">
+
+                  <GameBoard
+                    players={allPlayers}
+                    highlightedPlayer={highlightedPlayer}
+                    setHighlightedPlayer={setHighlightedPlayer}
+                    setGameStarted={setGameStarted}
+                  />
+                  <br />
+                </div>
+                <div className="m-2 w-1/3 bg-slate-900 border border-gray-700 p-2 min-w-[23rem]">
+                  <ActivityLogComponent />
+                </div>
+              </div>                        
             <SpawnModal
               showSpawnModal={showSpawnModal}
               setShowSpawnModal={setShowSpawnModal}

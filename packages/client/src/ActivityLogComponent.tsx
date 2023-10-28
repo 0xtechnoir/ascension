@@ -257,7 +257,7 @@ const ActivityLogComponent = () => {
   }, [allMoveLogs, allAttackLogs, allSendActionPointLogs, allRangeIncreaseLogs, gameStarted, gameEnded, allPlayerSpawnedLogs, allPlayerLeftGameLogs, allPlayerDiedLogs, allActionPointClaimExecutedLogs, allVoteExecutedLogs, allVotingPointClaimExecutedLogs, playerWon]);
 
   return (
-    <div className="h-full items-start p-3 rounded-md custom-scrollbar bg-slate-900">
+    <div className="h-full items-start p-3 rounded-md">
       <h1 className="text-2xl font-bold text-white mb-4">Ships Log:</h1>
       <ul className="list-decimal text-white">
         {mappedLogs
