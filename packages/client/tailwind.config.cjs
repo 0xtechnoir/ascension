@@ -7,6 +7,20 @@ module.exports = {
           'space-bg': "url('/assets/space-bg.png')",
         }),
       },
+      animation: {
+        flashGreen: 'flashGreen 2s',
+        flashRed: 'flashRed 2s',
+      },
+      keyframes: {
+        flashGreen: {
+          '0%': { color: 'green' },
+          '100%': { color: 'white' },
+        },
+        flashRed: {
+          '0%': { color: 'red' },
+          '100%': { color: 'white' },
+        },
+      },
     },
     plugins: [
       function ({ addComponents }) {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useComponentValue, useEntityQuery } from "@latticexyz/react";
 import { GameMap } from "./GameMap";
 import { useMUD } from "./MUDContext";
@@ -11,31 +11,76 @@ import {
 } from "@latticexyz/recs";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
 import { useGameContext } from "./GameContext";
+import { Player as PlayerComponet } from "./Player";
 
 interface GameBoardProps {
   players: Entity[];
-  highlightedPlayer: Entity | null;
-  setHighlightedPlayer: (player: Entity | null) => void;
   setGameStarted: (gameStarted: boolean) => void;
+}
+
+interface ContextMenuState {
+  visible: boolean;
+  x: number;
+  y: number;
+  playerEntity: Entity | null;
 }
 
 export const GameBoard: React.FC<GameBoardProps> = ({
   players,
-  highlightedPlayer,
-  setHighlightedPlayer,
 }) => {
   const [showUsernameInput, setShowUsernameInput] = useState(false);
-
-  const { displayMessage } = useGameContext();
+  const [contextMenu, setContextMenu] = useState<ContextMenuState>({
+    visible: false,
+    x: 0,
+    y: 0,
+    playerEntity: null,
+  });
+  const { displayMessage, highlightedPlayer, setHighlightedPlayer } = useGameContext();
+  const containerRef = useRef<HTMLDivElement>(null); // Create a ref for the container
   const {
-    components: {
-      MapConfig,
-      Player,
-      Position,
-      Alive,
-    },
+    components: { MapConfig, Player, Position, Alive },
     network: { playerEntity },
   } = useMUD();
+
+  const closeContextMenu = () => {
+    setContextMenu({ visible: false, x: 0, y: 0, playerEntity: null });
+  };
+
+  const onRightClickPlayer = (
+    event: React.MouseEvent,
+    clickedPlayerEntity: Entity | null
+  ) => {
+    if (clickedPlayerEntity === playerEntity) {
+      return;
+    }
+
+    if (clickedPlayerEntity === null) {
+      return;
+    }
+
+    event.preventDefault();
+    setHighlightedPlayer(clickedPlayerEntity);
+    // Get the bounding rectangle of the container
+    const containerRect = containerRef.current?.getBoundingClientRect();
+    if (containerRect) {
+      // Calculate the position relative to the container
+      const x = event.clientX - containerRect.left + 50;
+      const y = event.clientY - containerRect.top;
+      setContextMenu({
+        visible: true,
+        x: x,
+        y: y,
+        playerEntity: clickedPlayerEntity,
+      });
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("click", closeContextMenu);
+    return () => {
+      document.removeEventListener("click", closeContextMenu);
+    };
+  }, []);
 
   const deadPlayers = useEntityQuery([
     Has(Player),
@@ -104,15 +149,27 @@ export const GameBoard: React.FC<GameBoardProps> = ({
     );
   }
   const { width, height } = mapConfig;
+
   return (
-    <div className="h-full border border-gray-500 rounded-md relative">
+    <div
+      ref={containerRef}
+      className="h-full border border-gray-500 rounded-md relative"
+    >
       {/* Top numbers */}
-      <div className="absolute left-0 top-0" style={{ transform: 'translateX(30px)' }}>
+      <div
+        className="absolute left-0 top-0"
+        style={{ transform: "translateX(30px)" }}
+      >
         {Array.from({ length: width }, (_, i) => (
           <div
             key={`top-${i}`}
             className="w-12 flex items-center justify-center"
-            style={{ height: '24px', lineHeight: '24px', position: 'absolute', left: `${i * 48}px` }}
+            style={{
+              height: "24px",
+              lineHeight: "24px",
+              position: "absolute",
+              left: `${i * 48}px`,
+            }}
           >
             {i}
           </div>
@@ -120,12 +177,20 @@ export const GameBoard: React.FC<GameBoardProps> = ({
       </div>
 
       {/* Side numbers */}
-      <div className="absolute left-0 top-0" style={{ transform: 'translateY(30px)' }}>
+      <div
+        className="absolute left-0 top-0"
+        style={{ transform: "translateY(32px)" }}
+      >
         {Array.from({ length: height }, (_, i) => (
           <div
             key={`side-${i}`}
             className="h-12 flex items-center justify-center"
-            style={{ width: '24px', lineHeight: '48px', position: 'absolute', top: `${i * 48}px` }}
+            style={{
+              width: "24px",
+              lineHeight: "50px",
+              position: "absolute",
+              top: `${i * 50}px`,
+            }}
           >
             {i}
           </div>
@@ -137,8 +202,22 @@ export const GameBoard: React.FC<GameBoardProps> = ({
           height={height}
           onTileClick={selectPlayer}
           players={mappedPlayers}
-          highlightedPlayer={highlightedPlayer}
+          onRightClickPlayer={onRightClickPlayer}
         />
+        {contextMenu.playerEntity && contextMenu.visible && (
+          <div
+            className="context-menu"
+            style={{
+              position: "absolute",
+              left: `${contextMenu.x}px`,
+              top: `${contextMenu.y}px`,
+            }}
+          >
+            <PlayerComponet
+              entity={contextMenu.playerEntity}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

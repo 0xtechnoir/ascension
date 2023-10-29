@@ -23,8 +23,7 @@ export const App = () => {
   }
 
   // Contexts
-  const { displayMessage, gameId, showGameBoard, setShowGameBoard } =
-    useGameContext();
+  const { displayMessage, gameId, showGameBoard, setShowGameBoard, highlightedPlayer, setHighlightedPlayer } = useGameContext();
   const {
     network: { playerEntity },
     components: { SyncProgress, Player, Position, GameSession, InGame },
@@ -59,9 +58,6 @@ export const App = () => {
   }
 
   // Hooks
-  const [highlightedPlayer, setHighlightedPlayer] = useState<Entity | null>(
-    null
-  );
   const [gameStarted, setGameStarted] = useState(false);
   const [showSpawnButton, setShowSpawnButton] = useState(true);
   const [showLeaveGameButton, setShowLeaveGameButton] = useState(true);
@@ -180,24 +176,20 @@ export const App = () => {
                 )}
               </div>
               <div className="flex justify-center">
-                <div className="m-2 flex-col w-1/3 bg-slate-900 border border-gray-700 p-2 min-w-[23rem]">
+                <div className="m-2 flex-col w-1/3 bg-slate-900 border border-gray-700 p-2 min-w-[30rem] max-h-[40rem] rounded-md overflow-auto">
                   <PlayersList
                     players={allPlayers}
-                    highlightedPlayer={highlightedPlayer}
-                    setHighlightedPlayer={setHighlightedPlayer}
                   />
                 </div>
-                <div className="m-2 bg-slate-900 border border-gray-700 p-2">
+                <div className="m-2 bg-slate-900 border border-gray-700 p-2 rounded-md">
 
                   <GameBoard
                     players={allPlayers}
-                    highlightedPlayer={highlightedPlayer}
-                    setHighlightedPlayer={setHighlightedPlayer}
                     setGameStarted={setGameStarted}
                   />
                   <br />
                 </div>
-                <div className="m-2 w-1/3 bg-slate-900 border border-gray-700 p-2 min-w-[23rem]">
+                <div className="m-2 w-1/3 bg-slate-900 border border-gray-700 p-2 min-w-[30rem] max-h-[40rem] rounded-md overflow-auto">
                   <ActivityLogComponent />
                 </div>
               </div>                        

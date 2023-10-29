@@ -23,7 +23,6 @@ const Lobby: React.FC<LobbyProps> = ({ setShowGameBoard, currentGameID }) => {
     const rec = getComponentValue(GameSession, entity);
     return rec?.gameId;
   });
-  console.log("allGameIds: ", allGameIds);
 
   const handleCreateGame = () => {
     // generate a unique 9-digit gameId

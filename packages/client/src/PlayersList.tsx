@@ -5,13 +5,11 @@ import { useMUD } from "./MUDContext";
 
 type PlayersListProps = {
   players: Entity[];
-  highlightedPlayer: Entity | null;
-  setHighlightedPlayer: (player: Entity | null) => void;
 };
 
 export const PlayersList: React.FC<
   PlayersListProps
-> = ({ players, highlightedPlayer, setHighlightedPlayer }) => {
+> = ({ players }) => {
   const {
     network: { playerEntity },
   } = useMUD();
@@ -33,8 +31,6 @@ export const PlayersList: React.FC<
           <Player
             key={entity}
             entity={entity}
-            setHighlightedPlayer={setHighlightedPlayer}
-            highlightedPlayer={highlightedPlayer}
           />
         );
       })}

@@ -1,8 +1,8 @@
-import { useState } from "react";
 import { useComponentValue } from "@latticexyz/react";
 import { Entity, getComponentValueStrict } from "@latticexyz/recs";
 import { twMerge } from "tailwind-merge";
 import { useMUD } from "./MUDContext";
+import { useGameContext } from "./GameContext";
 
 type Position = {
   x: number;
@@ -24,7 +24,10 @@ type Props = {
     emoji: string;
     entity: Entity | null;
   }[];
-  highlightedPlayer: Entity | null;
+  onRightClickPlayer: (
+    event: React.MouseEvent,
+    playerEntity: Entity | null
+  ) => void;
 };
 
 export const GameMap = ({
@@ -32,12 +35,14 @@ export const GameMap = ({
   height,
   onTileClick,
   players,
-  highlightedPlayer,
+  onRightClickPlayer,
 }: Props) => {
   const {
     network: { playerEntity },
     components: { Range, Position },
   } = useMUD();
+
+  const { highlightedPlayer } = useGameContext();
 
   let highlightedPlayerPosition: Position | null = null;
   if (highlightedPlayer) {
@@ -46,6 +51,14 @@ export const GameMap = ({
       highlightedPlayer
     );
   }
+
+  const handlePlayerRightClick = (
+    event: React.MouseEvent,
+    playerEntity: Entity | null
+  ) => {
+    event.preventDefault();
+    onRightClickPlayer(event, playerEntity);
+  };
 
   const rows = new Array(width).fill(0).map((_, i) => i);
   const columns = new Array(height).fill(0).map((_, i) => i);
@@ -63,7 +76,6 @@ export const GameMap = ({
               x === highlightedPlayerPosition.x &&
               y === highlightedPlayerPosition.y;
           }
-          const playersHere = players?.filter((p) => p.x === x && p.y === y);
 
           // Define the ships firing perimeter
           let totalDistance = 0;
@@ -77,6 +89,11 @@ export const GameMap = ({
             shipRange &&
             totalDistance <= shipRange &&
             totalDistance !== 0;
+
+          const playersHere = (players || []).filter(
+            (p) => p.x === x && p.y === y
+          );
+          const hasPlayers = playersHere.length > 0;
 
           return (
             <div
@@ -93,6 +110,12 @@ export const GameMap = ({
               onClick={() => {
                 onTileClick?.(x, y);
               }}
+              onContextMenu={
+                hasPlayers
+                  ? (event) =>
+                      handlePlayerRightClick(event, playersHere[0].entity)
+                  : undefined
+              }
             >
               <div className="flex flex-wrap gap-1 items-center justify-center relative">
                 <div className="relative">
@@ -108,4 +131,3 @@ export const GameMap = ({
     </div>
   );
 };
-

@@ -74,6 +74,7 @@ export function createSystemCalls(
   };
 
   const startMatch = async (gameId: number, playersSpawned: number, startTime: number) => {
+    console.log("startMatch called");
     const bigIntStartTime = BigInt(startTime);
     const tx = await worldContract.write.startMatch([
       gameId,

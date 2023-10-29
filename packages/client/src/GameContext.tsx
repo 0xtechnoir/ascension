@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState } from "react";
+import { Entity } from "@latticexyz/recs";
 import { MessageModal } from "./MessageModal";
 
 type GameContextProps = {
@@ -6,9 +7,11 @@ type GameContextProps = {
   gameId: number | null;
   gameIsWon: boolean;
   showGameBoard: boolean;
+  highlightedPlayer: Entity | null;
   setGameId: React.Dispatch<React.SetStateAction<number | null>>;
   setGameIsWon: React.Dispatch<React.SetStateAction<boolean>>;
   setShowGameBoard: React.Dispatch<React.SetStateAction<boolean>>;
+  setHighlightedPlayer: React.Dispatch<React.SetStateAction<Entity | null>>;
   displayMessage: (message: string) => void;
 };
 type GameProviderProps = { children?: React.ReactNode };
@@ -28,6 +31,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
   const [gameId, setGameId] = useState<number | null>(null);
   const [gameIsWon, setGameIsWon] = useState<boolean>(false);
   const [showGameBoard, setShowGameBoard] = useState(false);
+  const [highlightedPlayer, setHighlightedPlayer] = useState<Entity | null>(null);
 
   const displayMessage = (message: string) => {
     setMessage(message);
@@ -45,9 +49,11 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
     gameId: gameId,
     gameIsWon: gameIsWon,
     showGameBoard: showGameBoard,
+    highlightedPlayer: highlightedPlayer,
     setGameId: setGameId,
     setGameIsWon: setGameIsWon,
     setShowGameBoard: setShowGameBoard,
+    setHighlightedPlayer: setHighlightedPlayer,
     displayMessage,
   };
 

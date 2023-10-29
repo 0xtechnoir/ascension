@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 
 const ActivityLogComponent = () => {
   
-  const { gameId, displayMessage, setGameIsWon } = useGameContext();
+  const { gameId, displayMessage, setGameIsWon, setHighlightedPlayer } = useGameContext();
   const [mappedLogs, setMappedLogs] = useState<LogMessage[]>([]);
   
   const {
@@ -105,6 +105,7 @@ const ActivityLogComponent = () => {
   };
   
   const mapGameEndedLog = () => {
+    setHighlightedPlayer(null);
     return gameEnded.map((entity) => {
       const rec = getComponentValue(GameEnded, entity);
       const ts = rec?.timestamp;
@@ -263,10 +264,10 @@ const ActivityLogComponent = () => {
         {mappedLogs
           .sort((a, b) => b.timestamp - a.timestamp)
           .map((logObj) => (
-            <ul className="mb-1">
-              <span className="text-gray-400">{`${formatDate(logObj.timestamp)}`}</span>
-              <span className="text-orange-400"> : </span>
-              <span className="text-white">{logObj.message}</span>
+            <ul key={crypto.randomUUID()} className="mb-1">
+              <span className="text-gray-400 text-sm">{`${formatDate(logObj.timestamp)}`}</span>
+              <span className="text-orange-400 text-sm"> : </span>
+              <span className="text-white text-sm">{logObj.message}</span>
             </ul>
           ))}
       </ul>

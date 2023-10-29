@@ -8,14 +8,26 @@ import { Entity, Has, getComponentValue } from "@latticexyz/recs";
 
 type PlayerProps = {
   entity: Entity;
-  setHighlightedPlayer: (player: Entity | null) => void;
-  highlightedPlayer: Entity | null;
+};
+
+const flashGreen = {
+  animation: 'flashGreen 1s',
+  '@keyframes flashGreen': {
+    '0%': { backgroundColor: 'green' },
+    '100%': { backgroundColor: 'transparent' },
+  },
+};
+
+const flashRed = {
+  animation: 'flashRed 1s',
+  '@keyframes flashRed': {
+    '0%': { backgroundColor: 'red' },
+    '100%': { backgroundColor: 'transparent' },
+  },
 };
 
 export const Player: React.FC<PlayerProps> = ({
   entity,
-  setHighlightedPlayer,
-  highlightedPlayer,
 }) => {
   const {
     components: {
@@ -34,14 +46,47 @@ export const Player: React.FC<PlayerProps> = ({
     network: { playerEntity },
   } = useMUD();
 
-  const { gameId } = useGameContext();
-  const username = useComponentValue(Username, entity)?.value;
-  const health = useComponentValue(Health, entity)?.value;
-  const range = useComponentValue(Range, entity)?.value;
-  const ap = useComponentValue(ActionPoint, entity)?.value;
-  const vp = useComponentValue(VotingPoint, entity)?.value;
-  const alive = useComponentValue(Alive, entity)?.value;
-  const playerIsAlive = useComponentValue(Alive, playerEntity)?.value;
+  const { gameId, highlightedPlayer, setHighlightedPlayer } = useGameContext();
+  const username = useComponentValue(Username, entity)?.value || '';
+  const health = useComponentValue(Health, entity)?.value || 0;
+  const range = useComponentValue(Range, entity)?.value || 0;
+  const ap = useComponentValue(ActionPoint, entity)?.value || 0;
+  const vp = useComponentValue(VotingPoint, entity)?.value || 0; 
+  const alive = useComponentValue(Alive, entity)?.value || false;
+  const playerIsAlive = useComponentValue(Alive, playerEntity)?.value || false;
+
+  // State variables to track previous values
+  const [prevHealth, setPrevHealth] = useState(health);
+  const [prevRange, setPrevRange] = useState(range);
+  const [prevAP, setPrevAP] = useState(ap);
+
+  // State variables to track whether to show flash animation
+  const [showHealthFlash, setShowHealthFlash] = useState(false);
+  const [showRangeFlash, setShowRangeFlash] = useState(false);
+  const [showAPFlash, setShowAPFlash] = useState(false);
+
+  useEffect(() => {
+    if (health !== prevHealth) {
+      setShowHealthFlash(true);
+    }
+    if (range !== prevRange) {
+      setShowRangeFlash(true);
+    }
+    if (ap !== prevAP) {
+      setShowAPFlash(true);
+    }
+    // Reset flash states after 1 second
+    const timeoutId = setTimeout(() => {
+      setShowHealthFlash(false);
+      setShowRangeFlash(false);
+      setShowAPFlash(false);
+      setPrevHealth(health);
+      setPrevRange(range);
+      setPrevAP(ap);
+    }, 1000);
+    
+    return () => clearTimeout(timeoutId);
+  }, [health, range, ap]);
 
   // is the game live yet? 
   const gameSessions = useEntityQuery([Has(GameSession)]);
@@ -124,9 +169,15 @@ export const Player: React.FC<PlayerProps> = ({
           <p>Status: {alive ? `Alive` : `Dead`}</p>
           {alive ? (
             <>
-              <p>Health: {health}</p>
-              <p>Range: {range}</p>
-              <p>Action Points: {ap}</p>
+              <p className={`Health: ${health} ${showHealthFlash ? (health > prevHealth ? 'animate-flashGreen' : 'animate-flashRed') : ''}`}>
+                  Health: {health}
+              </p>
+              <p className={`Range: ${range} ${showRangeFlash ? (range > prevRange ? 'animate-flashGreen' : 'animate-flashRed') : ''}`}>
+                  Range: {range}
+              </p>
+              <p className={`Action Points: ${ap} ${showAPFlash ? (ap > prevAP ? 'animate-flashGreen' : 'animate-flashRed') : ''}`}>
+                  Action Points: {ap}
+              </p>
             </>
           ) : (
             <p>Voting Points: {vp}</p>
@@ -173,9 +224,17 @@ export const Player: React.FC<PlayerProps> = ({
       >
         <p>Name: {username} 🛸</p>
         <p>Status: {alive ? `Alive` : `Dead`}</p>
-        <p>Health: {health}</p>
-        <p>Range: {range}</p>
-        <p>Action Points: {ap}</p>
+        <>
+          <p className={`Health: ${health} ${showHealthFlash ? (health > prevHealth ? 'animate-flashGreen' : 'animate-flashRed') : ''}`}>
+              Health: {health}
+          </p>
+          <p className={`Range: ${range} ${showRangeFlash ? (range > prevRange ? 'animate-flashGreen' : 'animate-flashRed') : ''}`}>
+              Range: {range}
+          </p>
+          <p className={`Action Points: ${ap} ${showAPFlash ? (ap > prevAP ? 'animate-flashGreen' : 'animate-flashRed') : ''}`}>
+              Action Points: {ap}
+          </p>
+        </>
         <div className="flex">
         {gameIsLive && (
           <>
