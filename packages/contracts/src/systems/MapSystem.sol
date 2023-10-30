@@ -71,9 +71,10 @@ contract MapSystem is System {
     }
 
     // Game Session attributes
-
     GameSession.setGameId(_gameId, _gameId);
     GameSession.setPlayers(_gameId, GameSession.getPlayers(_gameId) + 1);
+    GameSession.setIsLive(_gameId, false);
+    GameSession.setIsWon(_gameId, false);
     
     // set the players attributes
     Alive.set(player, true);

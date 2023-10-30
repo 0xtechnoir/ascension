@@ -22,6 +22,7 @@ export default mudConfig({
         startTime: "uint256",
         gameId: "uint32",
         players: "uint8",
+        isWon: "bool",
       }
     },
     ClaimInterval: {

@@ -7,9 +7,7 @@ type PlayersListProps = {
   players: Entity[];
 };
 
-export const PlayersList: React.FC<
-  PlayersListProps
-> = ({ players }) => {
+export const PlayersList: React.FC<PlayersListProps> = ({ players }) => {
   const {
     network: { playerEntity },
   } = useMUD();
@@ -27,12 +25,7 @@ export const PlayersList: React.FC<
       <i>Click a player to highlight them on the map</i>
       {sortedPlayers.map((player) => {
         const entity = player;
-        return (
-          <Player
-            key={entity}
-            entity={entity}
-          />
-        );
+        return <Player key={entity} entity={entity} />;
       })}
     </div>
   );

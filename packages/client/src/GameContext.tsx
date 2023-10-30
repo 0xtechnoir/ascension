@@ -31,7 +31,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
   const [gameId, setGameId] = useState<number | null>(null);
   const [gameIsWon, setGameIsWon] = useState<boolean>(false);
   const [showGameBoard, setShowGameBoard] = useState(false);
-  const [highlightedPlayer, setHighlightedPlayer] = useState<Entity | null>(null);
+  const [highlightedPlayer, setHighlightedPlayer] = useState<Entity | null>(
+    null
+  );
 
   const displayMessage = (message: string) => {
     setMessage(message);
@@ -39,6 +41,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
 
   const closeMessageModal = () => {
     setMessage("");
+    console.log("closeMessageModal - gameIsWon: ", gameIsWon);
     if (gameIsWon) {
       setShowGameBoard(false);
     }

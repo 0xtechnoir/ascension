@@ -42,6 +42,7 @@ import { PlayerDied, PlayerDiedData } from "../codegen/Tables.sol";
 import { PackedCounter } from "@latticexyz/store/src/PackedCounter.sol";
 import { GameEnded, GameEndedData } from "../codegen/index.sol";
 import { PlayerWon, PlayerWonData } from "../codegen/index.sol";
+import { console } from "forge-std/console.sol";
 
 contract TurnSystem is System {
 
@@ -173,7 +174,8 @@ contract TurnSystem is System {
     }));
   }
 
-  function endGame(uint256 timestamp, bytes32 winningPlayer, uint32 gameId) private {
+  function endGame(uint256 timestamp, bytes32 winningPlayer, uint32 gameId) public {
+    GameSession.setIsLive(gameId, false);
     // emit events
     PlayerWon.set(gameId, PlayerWonData({
       timestamp: timestamp,
@@ -188,9 +190,14 @@ contract TurnSystem is System {
     // remove all players from current game session
     (bytes memory staticData, PackedCounter encodedLengths, bytes memory dynamicData) = InGame.encode(gameId);
     bytes32[] memory playerInSession = getKeysWithValue(InGameTableId, staticData, encodedLengths, dynamicData);
+    console.log("playerInSession: ");
+    console.log(playerInSession.length);
     for (uint8 i; i < playerInSession.length; i++) {
+      console.log("Player Entity to delete: ");
+      console.logBytes32(playerInSession[i]);
       InGame.deleteRecord(playerInSession[i]);
     }
+    GameSession.setIsWon(gameId, true);
   }
 
   function claimActionPoint(uint256 _timestamp, uint32 _gameId) public {

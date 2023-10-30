@@ -26,7 +26,7 @@ ResourceId constant _tableId = ResourceId.wrap(
 ResourceId constant GameSessionTableId = _tableId;
 
 FieldLayout constant _fieldLayout = FieldLayout.wrap(
-  0x0026040001200401000000000000000000000000000000000000000000000000
+  0x0027050001200401010000000000000000000000000000000000000000000000
 );
 
 struct GameSessionData {
@@ -34,6 +34,7 @@ struct GameSessionData {
   uint256 startTime;
   uint32 gameId;
   uint8 players;
+  bool isWon;
 }
 
 library GameSession {
@@ -61,11 +62,12 @@ library GameSession {
    * @return _valueSchema The value schema for the table.
    */
   function getValueSchema() internal pure returns (Schema) {
-    SchemaType[] memory _valueSchema = new SchemaType[](4);
+    SchemaType[] memory _valueSchema = new SchemaType[](5);
     _valueSchema[0] = SchemaType.BOOL;
     _valueSchema[1] = SchemaType.UINT256;
     _valueSchema[2] = SchemaType.UINT32;
     _valueSchema[3] = SchemaType.UINT8;
+    _valueSchema[4] = SchemaType.BOOL;
 
     return SchemaLib.encode(_valueSchema);
   }
@@ -84,11 +86,12 @@ library GameSession {
    * @return fieldNames An array of strings with the names of value fields.
    */
   function getFieldNames() internal pure returns (string[] memory fieldNames) {
-    fieldNames = new string[](4);
+    fieldNames = new string[](5);
     fieldNames[0] = "isLive";
     fieldNames[1] = "startTime";
     fieldNames[2] = "gameId";
     fieldNames[3] = "players";
+    fieldNames[4] = "isWon";
   }
 
   /**
@@ -274,6 +277,48 @@ library GameSession {
   }
 
   /**
+   * @notice Get isWon.
+   */
+  function getIsWon(uint32 id) internal view returns (bool isWon) {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(id));
+
+    bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 4, _fieldLayout);
+    return (_toBool(uint8(bytes1(_blob))));
+  }
+
+  /**
+   * @notice Get isWon.
+   */
+  function _getIsWon(uint32 id) internal view returns (bool isWon) {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(id));
+
+    bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 4, _fieldLayout);
+    return (_toBool(uint8(bytes1(_blob))));
+  }
+
+  /**
+   * @notice Set isWon.
+   */
+  function setIsWon(uint32 id, bool isWon) internal {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(id));
+
+    StoreSwitch.setStaticField(_tableId, _keyTuple, 4, abi.encodePacked((isWon)), _fieldLayout);
+  }
+
+  /**
+   * @notice Set isWon.
+   */
+  function _setIsWon(uint32 id, bool isWon) internal {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(id));
+
+    StoreCore.setStaticField(_tableId, _keyTuple, 4, abi.encodePacked((isWon)), _fieldLayout);
+  }
+
+  /**
    * @notice Get the full data.
    */
   function get(uint32 id) internal view returns (GameSessionData memory _table) {
@@ -306,8 +351,8 @@ library GameSession {
   /**
    * @notice Set the full data using individual values.
    */
-  function set(uint32 id, bool isLive, uint256 startTime, uint32 gameId, uint8 players) internal {
-    bytes memory _staticData = encodeStatic(isLive, startTime, gameId, players);
+  function set(uint32 id, bool isLive, uint256 startTime, uint32 gameId, uint8 players, bool isWon) internal {
+    bytes memory _staticData = encodeStatic(isLive, startTime, gameId, players, isWon);
 
     PackedCounter _encodedLengths;
     bytes memory _dynamicData;
@@ -321,8 +366,8 @@ library GameSession {
   /**
    * @notice Set the full data using individual values.
    */
-  function _set(uint32 id, bool isLive, uint256 startTime, uint32 gameId, uint8 players) internal {
-    bytes memory _staticData = encodeStatic(isLive, startTime, gameId, players);
+  function _set(uint32 id, bool isLive, uint256 startTime, uint32 gameId, uint8 players, bool isWon) internal {
+    bytes memory _staticData = encodeStatic(isLive, startTime, gameId, players, isWon);
 
     PackedCounter _encodedLengths;
     bytes memory _dynamicData;
@@ -337,7 +382,13 @@ library GameSession {
    * @notice Set the full data using the data struct.
    */
   function set(uint32 id, GameSessionData memory _table) internal {
-    bytes memory _staticData = encodeStatic(_table.isLive, _table.startTime, _table.gameId, _table.players);
+    bytes memory _staticData = encodeStatic(
+      _table.isLive,
+      _table.startTime,
+      _table.gameId,
+      _table.players,
+      _table.isWon
+    );
 
     PackedCounter _encodedLengths;
     bytes memory _dynamicData;
@@ -352,7 +403,13 @@ library GameSession {
    * @notice Set the full data using the data struct.
    */
   function _set(uint32 id, GameSessionData memory _table) internal {
-    bytes memory _staticData = encodeStatic(_table.isLive, _table.startTime, _table.gameId, _table.players);
+    bytes memory _staticData = encodeStatic(
+      _table.isLive,
+      _table.startTime,
+      _table.gameId,
+      _table.players,
+      _table.isWon
+    );
 
     PackedCounter _encodedLengths;
     bytes memory _dynamicData;
@@ -368,7 +425,7 @@ library GameSession {
    */
   function decodeStatic(
     bytes memory _blob
-  ) internal pure returns (bool isLive, uint256 startTime, uint32 gameId, uint8 players) {
+  ) internal pure returns (bool isLive, uint256 startTime, uint32 gameId, uint8 players, bool isWon) {
     isLive = (_toBool(uint8(Bytes.slice1(_blob, 0))));
 
     startTime = (uint256(Bytes.slice32(_blob, 1)));
@@ -376,6 +433,8 @@ library GameSession {
     gameId = (uint32(Bytes.slice4(_blob, 33)));
 
     players = (uint8(Bytes.slice1(_blob, 37)));
+
+    isWon = (_toBool(uint8(Bytes.slice1(_blob, 38))));
   }
 
   /**
@@ -389,7 +448,7 @@ library GameSession {
     PackedCounter,
     bytes memory
   ) internal pure returns (GameSessionData memory _table) {
-    (_table.isLive, _table.startTime, _table.gameId, _table.players) = decodeStatic(_staticData);
+    (_table.isLive, _table.startTime, _table.gameId, _table.players, _table.isWon) = decodeStatic(_staticData);
   }
 
   /**
@@ -420,9 +479,10 @@ library GameSession {
     bool isLive,
     uint256 startTime,
     uint32 gameId,
-    uint8 players
+    uint8 players,
+    bool isWon
   ) internal pure returns (bytes memory) {
-    return abi.encodePacked(isLive, startTime, gameId, players);
+    return abi.encodePacked(isLive, startTime, gameId, players, isWon);
   }
 
   /**
@@ -435,9 +495,10 @@ library GameSession {
     bool isLive,
     uint256 startTime,
     uint32 gameId,
-    uint8 players
+    uint8 players,
+    bool isWon
   ) internal pure returns (bytes memory, PackedCounter, bytes memory) {
-    bytes memory _staticData = encodeStatic(isLive, startTime, gameId, players);
+    bytes memory _staticData = encodeStatic(isLive, startTime, gameId, players, isWon);
 
     PackedCounter _encodedLengths;
     bytes memory _dynamicData;

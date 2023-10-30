@@ -11,24 +11,22 @@ type PlayerProps = {
 };
 
 const flashGreen = {
-  animation: 'flashGreen 1s',
-  '@keyframes flashGreen': {
-    '0%': { backgroundColor: 'green' },
-    '100%': { backgroundColor: 'transparent' },
+  animation: "flashGreen 1s",
+  "@keyframes flashGreen": {
+    "0%": { backgroundColor: "green" },
+    "100%": { backgroundColor: "transparent" },
   },
 };
 
 const flashRed = {
-  animation: 'flashRed 1s',
-  '@keyframes flashRed': {
-    '0%': { backgroundColor: 'red' },
-    '100%': { backgroundColor: 'transparent' },
+  animation: "flashRed 1s",
+  "@keyframes flashRed": {
+    "0%": { backgroundColor: "red" },
+    "100%": { backgroundColor: "transparent" },
   },
 };
 
-export const Player: React.FC<PlayerProps> = ({
-  entity,
-}) => {
+export const Player: React.FC<PlayerProps> = ({ entity }) => {
   const {
     components: {
       Health,
@@ -42,16 +40,23 @@ export const Player: React.FC<PlayerProps> = ({
       ClaimInterval,
       GameSession,
     },
-    systemCalls: { sendActionPoint, attack, increaseRange, claimActionPoint, vote, claimVotingPoint },
+    systemCalls: {
+      sendActionPoint,
+      attack,
+      increaseRange,
+      claimActionPoint,
+      vote,
+      claimVotingPoint,
+    },
     network: { playerEntity },
   } = useMUD();
 
   const { gameId, highlightedPlayer, setHighlightedPlayer } = useGameContext();
-  const username = useComponentValue(Username, entity)?.value || '';
+  const username = useComponentValue(Username, entity)?.value || "";
   const health = useComponentValue(Health, entity)?.value || 0;
   const range = useComponentValue(Range, entity)?.value || 0;
   const ap = useComponentValue(ActionPoint, entity)?.value || 0;
-  const vp = useComponentValue(VotingPoint, entity)?.value || 0; 
+  const vp = useComponentValue(VotingPoint, entity)?.value || 0;
   const alive = useComponentValue(Alive, entity)?.value || false;
   const playerIsAlive = useComponentValue(Alive, playerEntity)?.value || false;
 
@@ -59,11 +64,13 @@ export const Player: React.FC<PlayerProps> = ({
   const [prevHealth, setPrevHealth] = useState(health);
   const [prevRange, setPrevRange] = useState(range);
   const [prevAP, setPrevAP] = useState(ap);
+  const [prevVP, setPrevVP] = useState(vp);
 
   // State variables to track whether to show flash animation
   const [showHealthFlash, setShowHealthFlash] = useState(false);
   const [showRangeFlash, setShowRangeFlash] = useState(false);
   const [showAPFlash, setShowAPFlash] = useState(false);
+  const [showVPFlash, setShowVPFlash] = useState(false);
 
   useEffect(() => {
     if (health !== prevHealth) {
@@ -75,20 +82,28 @@ export const Player: React.FC<PlayerProps> = ({
     if (ap !== prevAP) {
       setShowAPFlash(true);
     }
+    if (vp !== prevVP) {
+      console.log("vp changed");
+      console.log("vp: ", vp);
+      console.log("prevVP: ", prevVP);
+      setShowVPFlash(true);
+    }
     // Reset flash states after 1 second
     const timeoutId = setTimeout(() => {
       setShowHealthFlash(false);
       setShowRangeFlash(false);
       setShowAPFlash(false);
+      setShowVPFlash(false);
       setPrevHealth(health);
       setPrevRange(range);
       setPrevAP(ap);
+      setPrevVP(vp);
     }, 1000);
-    
-    return () => clearTimeout(timeoutId);
-  }, [health, range, ap]);
 
-  // is the game live yet? 
+    return () => clearTimeout(timeoutId);
+  }, [health, range, ap, vp]);
+
+  // is the game live yet?
   const gameSessions = useEntityQuery([Has(GameSession)]);
   let gameIsLive = false;
   if (gameSessions) {
@@ -117,18 +132,23 @@ export const Player: React.FC<PlayerProps> = ({
     singletonEntity
   )?.value;
 
-  const [timeUntilNextAPClaim, setTimeUntilNextAPClaim] = useState<string>("Calculating...");
-  const [timeUntilNextVPClaim, setTimeUntilNextVPClaim] = useState<string>("Calculating...");
+  const [timeUntilNextAPClaim, setTimeUntilNextAPClaim] =
+    useState<string>("Calculating...");
+  const [timeUntilNextVPClaim, setTimeUntilNextVPClaim] =
+    useState<string>("Calculating...");
 
   useEffect(() => {
-    const updateTimer = (lastClaimTimestamp: bigint, setTimeFunc: React.Dispatch<React.SetStateAction<string>>) => {
+    const updateTimer = (
+      lastClaimTimestamp: bigint,
+      setTimeFunc: React.Dispatch<React.SetStateAction<string>>
+    ) => {
       const lastClaim = new Date(Number(lastClaimTimestamp));
       const interval = Number(claimInterval);
       const nextClaimDate = new Date(lastClaim.getTime() + interval);
-      
+
       const now = new Date();
       const timeLeft = nextClaimDate.getTime() - now.getTime();
-      
+
       if (timeLeft > 0) {
         const seconds = Math.floor((timeLeft / 1000) % 60);
         const minutes = Math.floor((timeLeft / (1000 * 60)) % 60);
@@ -138,16 +158,16 @@ export const Player: React.FC<PlayerProps> = ({
         setTimeFunc("Now!");
       }
     };
-  
+
     const intervalId = setInterval(() => {
       updateTimer(lastActionPointClaim!, setTimeUntilNextAPClaim);
       updateTimer(lastVotingPointClaim!, setTimeUntilNextVPClaim);
     }, 1000);
-  
+
     // Update the timer immediately
     updateTimer(lastActionPointClaim!, setTimeUntilNextAPClaim);
     updateTimer(lastVotingPointClaim!, setTimeUntilNextVPClaim);
-  
+
     return () => clearInterval(intervalId);
   }, [lastActionPointClaim, lastVotingPointClaim, claimInterval]);
 
@@ -165,47 +185,86 @@ export const Player: React.FC<PlayerProps> = ({
           }`}
           onClick={() => setHighlightedPlayer(entity)}
         >
-          <p>Name: {username} (You {alive ? "🚀": "💀"})</p>
+          <p>
+            Name: {username} (You {alive ? "🚀" : "💀"})
+          </p>
           <p>Status: {alive ? `Alive` : `Dead`}</p>
           {alive ? (
             <>
-              <p className={`Health: ${health} ${showHealthFlash ? (health > prevHealth ? 'animate-flashGreen' : 'animate-flashRed') : ''}`}>
-                  Health: {health}
+              <p
+                className={`Health: ${health} ${
+                  showHealthFlash
+                    ? health > prevHealth
+                      ? "animate-flashGreen"
+                      : "animate-flashRed"
+                    : ""
+                }`}
+              >
+                Health: {health}
               </p>
-              <p className={`Range: ${range} ${showRangeFlash ? (range > prevRange ? 'animate-flashGreen' : 'animate-flashRed') : ''}`}>
-                  Range: {range}
+              <p
+                className={`Range: ${range} ${
+                  showRangeFlash
+                    ? range > prevRange
+                      ? "animate-flashGreen"
+                      : "animate-flashRed"
+                    : ""
+                }`}
+              >
+                Range: {range}
               </p>
-              <p className={`Action Points: ${ap} ${showAPFlash ? (ap > prevAP ? 'animate-flashGreen' : 'animate-flashRed') : ''}`}>
-                  Action Points: {ap}
+              <p
+                className={`Action Points: ${ap} ${
+                  showAPFlash
+                    ? ap > prevAP
+                      ? "animate-flashGreen"
+                      : "animate-flashRed"
+                    : ""
+                }`}
+              >
+                Action Points: {ap}
               </p>
             </>
           ) : (
-            <p>Voting Points: {vp}</p>
+            <p
+              className={`Voting Points: ${vp} ${
+                showVPFlash
+                  ? vp > prevVP
+                    ? "animate-flashGreen"
+                    : "animate-flashRed"
+                  : ""
+              }`}
+            >
+              Voting Points: {vp}
+            </p>
           )}
-        {gameIsLive && (
-          playerIsAlive ? (
-            <>
-              <ActionButton
-                label="Boost Range"
-                action={() => () => increaseRange(gameId!)}
-                buttonStyle="btn-sci-fi"
-              />
-              <ActionButton 
-                label={`Claim AP: ${timeUntilNextAPClaim}`}
-                action={() => () => claimActionPoint(gameId!)} 
-                buttonStyle={timeUntilNextAPClaim === "Now!" ? "btn-cta" : "btn-sci-fi"}
-              />
-            </>
-          ) : (
-            <>
-              <ActionButton 
-                label={`Claim VP: ${timeUntilNextVPClaim}`} 
-                action={() => () => claimVotingPoint(gameId!)} 
-                buttonStyle={timeUntilNextVPClaim === "Now!" ? "btn-cta" : "btn-sci-fi"}
-              />
-            </>
-          )
-        )}
+          {gameIsLive &&
+            (playerIsAlive ? (
+              <>
+                <ActionButton
+                  label="Boost Range"
+                  action={() => () => increaseRange(gameId!)}
+                  buttonStyle="btn-sci-fi"
+                />
+                <ActionButton
+                  label={`Claim AP: ${timeUntilNextAPClaim}`}
+                  action={() => () => claimActionPoint(gameId!)}
+                  buttonStyle={
+                    timeUntilNextAPClaim === "Now!" ? "btn-cta" : "btn-sci-fi"
+                  }
+                />
+              </>
+            ) : (
+              <>
+                <ActionButton
+                  label={`Claim VP: ${timeUntilNextVPClaim}`}
+                  action={() => () => claimVotingPoint(gameId!)}
+                  buttonStyle={
+                    timeUntilNextVPClaim === "Now!" ? "btn-cta" : "btn-sci-fi"
+                  }
+                />
+              </>
+            ))}
         </div>
       </>
     );
@@ -225,42 +284,66 @@ export const Player: React.FC<PlayerProps> = ({
         <p>Name: {username} 🛸</p>
         <p>Status: {alive ? `Alive` : `Dead`}</p>
         <>
-          <p className={`Health: ${health} ${showHealthFlash ? (health > prevHealth ? 'animate-flashGreen' : 'animate-flashRed') : ''}`}>
-              Health: {health}
+          <p
+            className={`Health: ${health} ${
+              showHealthFlash
+                ? health > prevHealth
+                  ? "animate-flashGreen"
+                  : "animate-flashRed"
+                : ""
+            }`}
+          >
+            Health: {health}
           </p>
-          <p className={`Range: ${range} ${showRangeFlash ? (range > prevRange ? 'animate-flashGreen' : 'animate-flashRed') : ''}`}>
-              Range: {range}
+          <p
+            className={`Range: ${range} ${
+              showRangeFlash
+                ? range > prevRange
+                  ? "animate-flashGreen"
+                  : "animate-flashRed"
+                : ""
+            }`}
+          >
+            Range: {range}
           </p>
-          <p className={`Action Points: ${ap} ${showAPFlash ? (ap > prevAP ? 'animate-flashGreen' : 'animate-flashRed') : ''}`}>
-              Action Points: {ap}
+          <p
+            className={`Action Points: ${ap} ${
+              showAPFlash
+                ? ap > prevAP
+                  ? "animate-flashGreen"
+                  : "animate-flashRed"
+                : ""
+            }`}
+          >
+            Action Points: {ap}
           </p>
         </>
         <div className="flex">
-        {gameIsLive && (
-          <>
-            {playerIsAlive && alive && (
-              <>
+          {gameIsLive && (
+            <>
+              {playerIsAlive && alive && (
+                <>
+                  <ActionButton
+                    label="Send AP"
+                    action={() => () => sendActionPoint(entity, gameId!)}
+                    buttonStyle="btn-sci-fi"
+                  />
+                  <ActionButton
+                    label="Attack"
+                    action={() => () => attack(entity, gameId!)}
+                    buttonStyle="btn-sci-fi"
+                  />
+                </>
+              )}
+              {!playerIsAlive && alive && (
                 <ActionButton
-                  label="Send AP"
-                  action={() => () => sendActionPoint(entity, gameId!)}
+                  label="Vote"
+                  action={() => () => vote(entity, gameId!)}
                   buttonStyle="btn-sci-fi"
                 />
-                <ActionButton
-                  label="Attack"
-                  action={() => () => attack(entity, gameId!)}
-                  buttonStyle="btn-sci-fi"
-                />
-              </>
-            )}
-            {!playerIsAlive && alive && (
-              <ActionButton
-                label="Vote"
-                action={() => () => vote(entity, gameId!)}
-                buttonStyle="btn-sci-fi"
-              />
-            )}
-          </>
-        )}
+              )}
+            </>
+          )}
         </div>
       </div>
     );

@@ -1,5 +1,5 @@
 import "tailwindcss/tailwind.css";
-import './index.css';
+import "./index.css";
 import "react-toastify/dist/ReactToastify.css";
 import ReactDOM from "react-dom/client";
 import { App } from "./App";
@@ -19,11 +19,15 @@ setup().then(async (result) => {
     <MUDProvider value={result}>
       <GameProvider>
         <App />
-        <ToastContainer position="bottom-right" draggable={false} theme="dark" />
+        <ToastContainer
+          position="bottom-right"
+          draggable={false}
+          theme="dark"
+        />
       </GameProvider>
     </MUDProvider>
-  )
-  
+  );
+
   // https://vitejs.dev/guide/env-and-mode.html
   if (import.meta.env.DEV) {
     const { mount: mountDevTools } = await import("@latticexyz/dev-tools");

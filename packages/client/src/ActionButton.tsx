@@ -4,13 +4,13 @@ import { useGameContext } from "./GameContext";
 type ActionButtonProps = {
   label: string;
   action: () => () => Promise<void>;
-  buttonStyle?: string,
+  buttonStyle?: string;
 };
 
 export const ActionButton: React.FC<ActionButtonProps> = ({
   label,
   action,
-  buttonStyle = '',
+  buttonStyle = "",
 }) => {
   const { displayMessage, gameId } = useGameContext();
   return (
@@ -18,8 +18,7 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
       className={buttonStyle}
       type="button"
       onClick={async () => {
-        
-        if(!gameId) {
+        if (!gameId) {
           displayMessage("No game ID found. Have you joined a game?");
           return;
         }

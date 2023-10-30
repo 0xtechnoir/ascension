@@ -1,9 +1,9 @@
 export interface ErrorWithShortMessage {
   cause: {
-    data : {
-      args: string[]
-    }
-  }
+    data: {
+      args: string[];
+    };
+  };
 }
 
 export interface LogMessage {

@@ -15,7 +15,6 @@ import { Player as PlayerComponet } from "./Player";
 
 interface GameBoardProps {
   players: Entity[];
-  setGameStarted: (gameStarted: boolean) => void;
 }
 
 interface ContextMenuState {
@@ -25,9 +24,7 @@ interface ContextMenuState {
   playerEntity: Entity | null;
 }
 
-export const GameBoard: React.FC<GameBoardProps> = ({
-  players,
-}) => {
+export const GameBoard: React.FC<GameBoardProps> = ({ players }) => {
   const [showUsernameInput, setShowUsernameInput] = useState(false);
   const [contextMenu, setContextMenu] = useState<ContextMenuState>({
     visible: false,
@@ -35,7 +32,8 @@ export const GameBoard: React.FC<GameBoardProps> = ({
     y: 0,
     playerEntity: null,
   });
-  const { displayMessage, highlightedPlayer, setHighlightedPlayer } = useGameContext();
+  const { displayMessage, highlightedPlayer, setHighlightedPlayer } =
+    useGameContext();
   const containerRef = useRef<HTMLDivElement>(null); // Create a ref for the container
   const {
     components: { MapConfig, Player, Position, Alive },
@@ -213,9 +211,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
               top: `${contextMenu.y}px`,
             }}
           >
-            <PlayerComponet
-              entity={contextMenu.playerEntity}
-            />
+            <PlayerComponet entity={contextMenu.playerEntity} />
           </div>
         )}
       </div>

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import Modal from '@material-ui/core/Modal';
+import React, { useState } from "react";
+import Modal from "@material-ui/core/Modal";
 import { useGameContext } from "./GameContext";
 import { useMUD } from "./MUDContext";
 import { ErrorWithShortMessage } from "./CustomTypes";
@@ -15,67 +15,66 @@ const SpawnModal: React.FC<SpawnModalProps> = ({
   setShowSpawnModal: setShowSpawnModal,
   setShowSpawnButton,
 }) => {
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [enteredUsername, setEnteredUsername] = useState("");
+  const { gameId } = useGameContext();
 
-    const [error, setError] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
-    const [enteredUsername, setEnteredUsername] = useState("");
-    const { gameId } = useGameContext();
+  // Contexts
+  const { displayMessage } = useGameContext();
+  const {
+    systemCalls: { spawn },
+  } = useMUD();
 
-      // Contexts
-    const { displayMessage } = useGameContext();
-    const {
-        systemCalls: { spawn },
-        components: { GameSession },
-    } = useMUD();
+  const sanitizeInput = (input: string) => {
+    let sanitized = input.trim();
+    if (sanitized.length < 3 || sanitized.length > 20) {
+      setError("Username must be between 3 and 20 characters.");
+      return null;
+    }
+    if (/[^a-zA-Z0-9_]/.test(sanitized)) {
+      // Only allow alphanumeric and underscore
+      setError("Username can only contain letters, numbers, and underscores.");
+      return null;
+    }
+    return sanitized;
+  };
 
-    const sanitizeInput = (input: string) => {
-        let sanitized = input.trim();
-        if (sanitized.length < 3 || sanitized.length > 20) {
-            setError('Username must be between 3 and 20 characters.');
-            return null;
-        }
-        if (/[^a-zA-Z0-9_]/.test(sanitized)) { // Only allow alphanumeric and underscore
-            setError('Username can only contain letters, numbers, and underscores.');
-            return null;
-        }
-        return sanitized;
-    };
+  const onSubmit = async () => {
+    setError("");
+    setIsLoading(true);
+    const sanitizedUsername = sanitizeInput(enteredUsername);
 
-    const onSubmit = async () => {
-        setError("");
-        setIsLoading(true);
-        const sanitizedUsername = sanitizeInput(enteredUsername);
+    if (!sanitizedUsername) {
+      setIsLoading(false);
+      return; // Stop if invalid
+    }
+    try {
+      if (!gameId) {
+        throw new Error("No game ID found");
+      }
+      await spawn(sanitizedUsername, gameId);
+      setShowSpawnButton(false);
+    } catch (error) {
+      console.log("handleModalSubmit error: ", error);
+      if (typeof error === "object" && error !== null) {
+        const message = (error as ErrorWithShortMessage).cause.data.args[0];
+        displayMessage(message);
+      }
+    } finally {
+      setIsLoading(false);
+      setShowSpawnModal(false);
+    }
+  };
 
-        if (!sanitizedUsername) {
-            setIsLoading(false);
-            return; // Stop if invalid
-          }
-        try {
-            if (!gameId) {
-              throw new Error("No game ID found");
-            }
-            await spawn(sanitizedUsername, gameId);
-            setShowSpawnButton(false);
-          } catch (error) {
-            console.log("handleModalSubmit error: ", error);
-            if (typeof error === "object" && error !== null) {
-              const message = (error as ErrorWithShortMessage).cause.data.args[0];
-              displayMessage(message);
-            }
-          } finally {
-            setIsLoading(false);
-            setShowSpawnModal(false);
-          }
-      };
+  const dismissError = () => {
+    setError("");
+  };
 
-      const dismissError = () => {
-        setError("");
-      };
-    
-      const handleCloseSpawnModal = () => {
-        setShowSpawnModal(false);
-        dismissError();
-      };
+  const handleCloseSpawnModal = () => {
+    setShowSpawnModal(false);
+    dismissError();
+  };
 
   return (
     <Modal
@@ -84,8 +83,8 @@ const SpawnModal: React.FC<SpawnModalProps> = ({
       className="flex items-center justify-center"
     >
       <div className="bg-white rounded-lg p-8 shadow-lg w-96 text-black relative">
-        <button 
-          onClick={handleCloseSpawnModal} 
+        <button
+          onClick={handleCloseSpawnModal}
           className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 bg-white rounded-full p-1"
         >
           X
@@ -96,10 +95,7 @@ const SpawnModal: React.FC<SpawnModalProps> = ({
             {error}
             <br />
             <br />
-            <button 
-              onClick={dismissError} 
-              className="btn-sci-fi"
-            >
+            <button onClick={dismissError} className="btn-sci-fi">
               Try Again
             </button>
           </div>
@@ -108,11 +104,11 @@ const SpawnModal: React.FC<SpawnModalProps> = ({
         ) : (
           <div>
             <input
-              type='text'
-              autoFocus  // Set autofocus here
+              type="text"
+              autoFocus // Set autofocus here
               onChange={(e) => setEnteredUsername(e.target.value)}
               onKeyUp={(e) => {
-                if (e.key === 'Enter' && enteredUsername.trim() !== '') {
+                if (e.key === "Enter" && enteredUsername.trim() !== "") {
                   onSubmit();
                 }
               }}
@@ -120,10 +116,7 @@ const SpawnModal: React.FC<SpawnModalProps> = ({
             />
             <br />
             <br />
-            <button
-              onClick={onSubmit}
-              className="btn-sci-fi"
-            >
+            <button onClick={onSubmit} className="btn-sci-fi">
               Submit
             </button>
           </div>

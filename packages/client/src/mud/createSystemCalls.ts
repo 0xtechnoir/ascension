@@ -35,8 +35,6 @@ export function createSystemCalls(
   };
 
   const sendActionPoint = async (recipient: Entity, gameId: number) => {
-    console.log("sendActionPoint called with recipient: ", recipient);
-    console.log("sendActionPoint called with gameId: ", gameId);
     if (!playerEntity) {
       throw new Error("no player");
     }
@@ -69,11 +67,18 @@ export function createSystemCalls(
       throw new Error("no player");
     }
     const bigIntTimestamp = BigInt(Date.now());
-    const tx = await worldContract.write.increaseRange([bigIntTimestamp, gameId]);
+    const tx = await worldContract.write.increaseRange([
+      bigIntTimestamp,
+      gameId,
+    ]);
     await waitForTransaction(tx);
   };
 
-  const startMatch = async (gameId: number, playersSpawned: number, startTime: number) => {
+  const startMatch = async (
+    gameId: number,
+    playersSpawned: number,
+    startTime: number
+  ) => {
     console.log("startMatch called");
     const bigIntStartTime = BigInt(startTime);
     const tx = await worldContract.write.startMatch([
@@ -96,7 +101,10 @@ export function createSystemCalls(
     }
 
     // optimitsic render
-    const [x, y] = wrapPosition(playerPosition.x + deltaX, playerPosition.y + deltaY);
+    const [x, y] = wrapPosition(
+      playerPosition.x + deltaX,
+      playerPosition.y + deltaY
+    );
     const positionId = uuid();
     try {
       Position.addOverride(positionId, {
@@ -110,7 +118,12 @@ export function createSystemCalls(
 
     try {
       const bigIntTimestamp = BigInt(Date.now());
-      const tx = await worldContract.write.move([bigIntTimestamp, deltaX, deltaY, gameId]);
+      const tx = await worldContract.write.move([
+        bigIntTimestamp,
+        deltaX,
+        deltaY,
+        gameId,
+      ]);
       await waitForTransaction(tx);
     } catch (error) {
       console.log("error: ", error);
@@ -132,7 +145,11 @@ export function createSystemCalls(
     });
 
     try {
-      const tx = await worldContract.write.spawn([bigIntTimestamp, username, gameId]);
+      const tx = await worldContract.write.spawn([
+        bigIntTimestamp,
+        username,
+        gameId,
+      ]);
       await waitForTransaction(tx);
     } catch (error) {
       throw error;
@@ -140,7 +157,7 @@ export function createSystemCalls(
       Player.removeOverride(playerId);
     }
   };
-  
+
   const leaveGame = async (gameId: number) => {
     if (!playerEntity) {
       throw new Error("no player");
@@ -162,7 +179,10 @@ export function createSystemCalls(
       throw new Error("no player found");
     }
     const bigIntTimestamp = BigInt(Date.now());
-    const tx = await worldContract.write.claimActionPoint([bigIntTimestamp, gameId]);
+    const tx = await worldContract.write.claimActionPoint([
+      bigIntTimestamp,
+      gameId,
+    ]);
     await waitForTransaction(tx);
   };
 
@@ -172,7 +192,10 @@ export function createSystemCalls(
       throw new Error("no player");
     }
     const bigIntTimestamp = BigInt(Date.now());
-    const tx = await worldContract.write.claimVotingPoint([bigIntTimestamp, gameId]);
+    const tx = await worldContract.write.claimVotingPoint([
+      bigIntTimestamp,
+      gameId,
+    ]);
     await waitForTransaction(tx);
   };
 

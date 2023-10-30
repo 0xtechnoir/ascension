@@ -7,10 +7,9 @@ import { useGameContext } from "./GameContext";
 import { useEffect, useState } from "react";
 
 const ActivityLogComponent = () => {
-  
-  const { gameId, displayMessage, setGameIsWon, setHighlightedPlayer } = useGameContext();
+  const { gameId, displayMessage, setHighlightedPlayer } = useGameContext();
   const [mappedLogs, setMappedLogs] = useState<LogMessage[]>([]);
-  
+
   const {
     components: {
       MoveExecuted,
@@ -25,7 +24,7 @@ const ActivityLogComponent = () => {
       VotingPointClaimExecuted,
       PlayerDied,
       PlayerLeftGame,
-      PlayerWon
+      PlayerWon,
     },
   } = useMUD();
 
@@ -103,7 +102,7 @@ const ActivityLogComponent = () => {
       return mappedLog;
     });
   };
-  
+
   const mapGameEndedLog = () => {
     setHighlightedPlayer(null);
     return gameEnded.map((entity) => {
@@ -133,7 +132,7 @@ const ActivityLogComponent = () => {
       return mappedLog;
     });
   };
-  
+
   const mapPlayerLeftGameLogs = () => {
     return allPlayerLeftGameLogs.map((entity) => {
       const rec = getComponentValue(PlayerLeftGame, entity);
@@ -147,7 +146,7 @@ const ActivityLogComponent = () => {
       return mappedLog;
     });
   };
-  
+
   const mapPlayerDiedLogs = () => {
     return allPlayerDiedLogs.map((entity) => {
       const rec = getComponentValue(PlayerDied, entity);
@@ -206,8 +205,8 @@ const ActivityLogComponent = () => {
   };
 
   const mapPlayerWonLogs = () => {
-    const winner = playerWon[0]
-    if(playerWon.length > 0) {
+    const winner = playerWon[0];
+    if (playerWon.length > 0) {
       const rec = getComponentValue(PlayerWon, winner);
       const player = rec?.player;
       const ts = rec?.timestamp;
@@ -216,7 +215,6 @@ const ActivityLogComponent = () => {
         timestamp: numTs,
         message: `${player} won the game`,
       };
-      setGameIsWon(true);
       displayMessage(`Game over, ${player} won the game`);
       return [mappedLog];
     } else {
@@ -224,20 +222,46 @@ const ActivityLogComponent = () => {
     }
   };
 
-  const allMoveLogs = useEntityQuery([HasValue(MoveExecuted, { gameId: gameId ?? undefined })]);
-  const allAttackLogs = useEntityQuery([HasValue(AttackExecuted, { gameId: gameId ?? undefined })]);
-  const allSendActionPointLogs = useEntityQuery([HasValue(SendActionPointExecuted, { gameId: gameId ?? undefined })]);
-  const allRangeIncreaseLogs = useEntityQuery([HasValue(RangeIncreaseExecuted, { gameId: gameId ?? undefined })]);
-  const allPlayerSpawnedLogs = useEntityQuery([HasValue(PlayerSpawned, { gameId: gameId ?? undefined })]);
-  const allPlayerLeftGameLogs = useEntityQuery([HasValue(PlayerLeftGame, { gameId: gameId ?? undefined })]);
-  const allPlayerDiedLogs = useEntityQuery([HasValue(PlayerDied, { gameId: gameId ?? undefined })]);
-  const allActionPointClaimExecutedLogs = useEntityQuery([HasValue(ActionPointClaimExecuted, { gameId: gameId ?? undefined })]);
-  const allVotingPointClaimExecutedLogs = useEntityQuery([HasValue(VotingPointClaimExecuted, { gameId: gameId ?? undefined })]);
-  const allVoteExecutedLogs = useEntityQuery([HasValue(VoteExecuted, { gameId: gameId ?? undefined })]);
-  const gameStarted = useEntityQuery([HasValue(GameStarted, { gameId: gameId ?? undefined })]);
-  const gameEnded = useEntityQuery([HasValue(GameEnded, { gameId: gameId ?? undefined })]);
-  const playerWon = useEntityQuery([HasValue(PlayerWon, { gameId: gameId ?? undefined })]);
-  
+  const allMoveLogs = useEntityQuery([
+    HasValue(MoveExecuted, { gameId: gameId ?? undefined }),
+  ]);
+  const allAttackLogs = useEntityQuery([
+    HasValue(AttackExecuted, { gameId: gameId ?? undefined }),
+  ]);
+  const allSendActionPointLogs = useEntityQuery([
+    HasValue(SendActionPointExecuted, { gameId: gameId ?? undefined }),
+  ]);
+  const allRangeIncreaseLogs = useEntityQuery([
+    HasValue(RangeIncreaseExecuted, { gameId: gameId ?? undefined }),
+  ]);
+  const allPlayerSpawnedLogs = useEntityQuery([
+    HasValue(PlayerSpawned, { gameId: gameId ?? undefined }),
+  ]);
+  const allPlayerLeftGameLogs = useEntityQuery([
+    HasValue(PlayerLeftGame, { gameId: gameId ?? undefined }),
+  ]);
+  const allPlayerDiedLogs = useEntityQuery([
+    HasValue(PlayerDied, { gameId: gameId ?? undefined }),
+  ]);
+  const allActionPointClaimExecutedLogs = useEntityQuery([
+    HasValue(ActionPointClaimExecuted, { gameId: gameId ?? undefined }),
+  ]);
+  const allVotingPointClaimExecutedLogs = useEntityQuery([
+    HasValue(VotingPointClaimExecuted, { gameId: gameId ?? undefined }),
+  ]);
+  const allVoteExecutedLogs = useEntityQuery([
+    HasValue(VoteExecuted, { gameId: gameId ?? undefined }),
+  ]);
+  const gameStarted = useEntityQuery([
+    HasValue(GameStarted, { gameId: gameId ?? undefined }),
+  ]);
+  const gameEnded = useEntityQuery([
+    HasValue(GameEnded, { gameId: gameId ?? undefined }),
+  ]);
+  const playerWon = useEntityQuery([
+    HasValue(PlayerWon, { gameId: gameId ?? undefined }),
+  ]);
+
   useEffect(() => {
     const newMappedLogs = [
       ...mapMoveLogs(),
@@ -252,10 +276,24 @@ const ActivityLogComponent = () => {
       ...mapActionPointClaimExecutedLogs(),
       ...mapVoteExecutedLogs(),
       ...mapVotingPointClaimExecutedLogs(),
-      ...mapPlayerWonLogs()
-    ]
-    setMappedLogs(newMappedLogs);    
-  }, [allMoveLogs, allAttackLogs, allSendActionPointLogs, allRangeIncreaseLogs, gameStarted, gameEnded, allPlayerSpawnedLogs, allPlayerLeftGameLogs, allPlayerDiedLogs, allActionPointClaimExecutedLogs, allVoteExecutedLogs, allVotingPointClaimExecutedLogs, playerWon]);
+      ...mapPlayerWonLogs(),
+    ];
+    setMappedLogs(newMappedLogs);
+  }, [
+    allMoveLogs,
+    allAttackLogs,
+    allSendActionPointLogs,
+    allRangeIncreaseLogs,
+    gameStarted,
+    gameEnded,
+    allPlayerSpawnedLogs,
+    allPlayerLeftGameLogs,
+    allPlayerDiedLogs,
+    allActionPointClaimExecutedLogs,
+    allVoteExecutedLogs,
+    allVotingPointClaimExecutedLogs,
+    playerWon,
+  ]);
 
   return (
     <div className="h-full items-start p-3 rounded-md">
@@ -265,7 +303,9 @@ const ActivityLogComponent = () => {
           .sort((a, b) => b.timestamp - a.timestamp)
           .map((logObj) => (
             <ul key={crypto.randomUUID()} className="mb-1">
-              <span className="text-gray-400 text-sm">{`${formatDate(logObj.timestamp)}`}</span>
+              <span className="text-gray-400 text-sm">{`${formatDate(
+                logObj.timestamp
+              )}`}</span>
               <span className="text-orange-400 text-sm"> : </span>
               <span className="text-white text-sm">{logObj.message}</span>
             </ul>
