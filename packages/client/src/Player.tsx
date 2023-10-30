@@ -172,6 +172,7 @@ export const Player: React.FC<PlayerProps> = ({ entity }) => {
   }, [lastActionPointClaim, lastVotingPointClaim, claimInterval]);
 
   if (entity === playerEntity) {
+    // if this is your player
     return (
       <>
         <div
@@ -270,6 +271,7 @@ export const Player: React.FC<PlayerProps> = ({ entity }) => {
     );
   } else {
     return (
+      // other players
       <div
         key={entity}
         className={`p-2 cursor-pointer border border-gray-400 rounded-md m-1 ${
@@ -283,68 +285,82 @@ export const Player: React.FC<PlayerProps> = ({ entity }) => {
       >
         <p>Name: {username} 🛸</p>
         <p>Status: {alive ? `Alive` : `Dead`}</p>
-        <>
-          <p
-            className={`Health: ${health} ${
-              showHealthFlash
-                ? health > prevHealth
-                  ? "animate-flashGreen"
-                  : "animate-flashRed"
-                : ""
-            }`}
-          >
-            Health: {health}
-          </p>
-          <p
-            className={`Range: ${range} ${
-              showRangeFlash
-                ? range > prevRange
-                  ? "animate-flashGreen"
-                  : "animate-flashRed"
-                : ""
-            }`}
-          >
-            Range: {range}
-          </p>
-          <p
-            className={`Action Points: ${ap} ${
-              showAPFlash
-                ? ap > prevAP
-                  ? "animate-flashGreen"
-                  : "animate-flashRed"
-                : ""
-            }`}
-          >
-            Action Points: {ap}
-          </p>
-        </>
-        <div className="flex">
-          {gameIsLive && (
-            <>
-              {playerIsAlive && alive && (
+        {alive ? (
+          <>
+            <p
+              className={`Health: ${health} ${
+                showHealthFlash
+                  ? health > prevHealth
+                    ? "animate-flashGreen"
+                    : "animate-flashRed"
+                  : ""
+              }`}
+            >
+              Health: {health}
+            </p>
+            <p
+              className={`Range: ${range} ${
+                showRangeFlash
+                  ? range > prevRange
+                    ? "animate-flashGreen"
+                    : "animate-flashRed"
+                  : ""
+              }`}
+            >
+              Range: {range}
+            </p>
+            <p
+              className={`Action Points: ${ap} ${
+                showAPFlash
+                  ? ap > prevAP
+                    ? "animate-flashGreen"
+                    : "animate-flashRed"
+                  : ""
+              }`}
+            >
+              Action Points: {ap}
+            </p>
+            <div className="flex">
+              {gameIsLive && (
                 <>
-                  <ActionButton
-                    label="Send AP"
-                    action={() => () => sendActionPoint(entity, gameId!)}
-                    buttonStyle="btn-sci-fi"
-                  />
-                  <ActionButton
-                    label="Attack"
-                    action={() => () => attack(entity, gameId!)}
-                    buttonStyle="btn-sci-fi"
-                  />
+                  {playerIsAlive && alive && (
+                    <>
+                      <ActionButton
+                        label="Send AP"
+                        action={() => () => sendActionPoint(entity, gameId!)}
+                        buttonStyle="btn-sci-fi"
+                      />
+                      <ActionButton
+                        label="Attack"
+                        action={() => () => attack(entity, gameId!)}
+                        buttonStyle="btn-sci-fi"
+                      />
+                    </>
+                  )}
+                  {!playerIsAlive && alive && (
+                    <ActionButton
+                      label="Vote"
+                      action={() => () => vote(entity, gameId!)}
+                      buttonStyle="btn-sci-fi"
+                    />
+                  )}
                 </>
               )}
-              {!playerIsAlive && alive && (
-                <ActionButton
-                  label="Vote"
-                  action={() => () => vote(entity, gameId!)}
-                  buttonStyle="btn-sci-fi"
-                />
-              )}
-            </>
-          )}
-        </div>
+            </div>
+          </>
+        ) : (
+          <p
+            className={`Voting Points: ${vp} ${
+              showVPFlash
+                ? vp > prevVP
+                  ? "animate-flashGreen"
+                  : "animate-flashRed"
+                : ""
+            }`}
+          >
+            Voting Points: {vp}
+          </p>
+        )}
       </div>
     );
   }

@@ -47,7 +47,6 @@ export const App = () => {
 
   const gameSessions = useEntityQuery([Has(GameSession)]);
   const currentGameID = useComponentValue(InGame, playerEntity)?.value;
-  console.log("App.tsx - currentGameID: ", currentGameID);
 
   const allPlayers = useEntityQuery([
     HasValue(InGame, { value: gameId! }),
@@ -63,7 +62,6 @@ export const App = () => {
   });
 
   let gameIsLive = false;
-  console.log("App.tsx - gameSessions: ", gameSessions);
   if (gameSessions) {
     // loop through gameSessions and find the one with the matching gameId
     for (let i = 0; i < gameSessions.length; i++) {
@@ -73,7 +71,6 @@ export const App = () => {
       if (rec?.gameId === gameId) {
         gameIsLive = rec.isLive;
         setGameIsWon(rec.isWon);
-        console.log("App.tsx - gameIsWon: ", gameIsWon);
       }
     }
   }
