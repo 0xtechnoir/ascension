@@ -1,8 +1,8 @@
 import { useComponentValue } from "@latticexyz/react";
 import { Entity, getComponentValueStrict } from "@latticexyz/recs";
 import { twMerge } from "tailwind-merge";
-import { useMUD } from "./MUDContext";
-import { useGameContext } from "./GameContext";
+import { useMUD } from "../MUDContext";
+import { useGameContext } from "../hooks/GameContext";
 
 type Position = {
   x: number;

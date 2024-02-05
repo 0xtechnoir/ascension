@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import Modal from "@material-ui/core/Modal";
-import { useGameContext } from "./GameContext";
-import { useMUD } from "./MUDContext";
-import { ErrorWithShortMessage } from "./CustomTypes";
+import { useGameContext } from "../hooks/GameContext";
+import { useMUD } from "../MUDContext";
+import { ErrorWithShortMessage } from "../CustomTypes";
 
 type SpawnModalProps = {
   showSpawnModal: boolean;

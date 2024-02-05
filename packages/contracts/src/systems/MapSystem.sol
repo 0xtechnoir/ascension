@@ -76,16 +76,16 @@ contract MapSystem is System {
     GameSession.setIsLive(_gameId, false);
     GameSession.setIsWon(_gameId, false);
     
-    // set the players attributes
-    Alive.set(player, true);
+
     Player.set(player, true);
-    Username.set(player, _username);
-    Position.set(player, x, y);  // TODO - PlayerAtPosition might make this redundent
+    InGame.set(player, _gameId);
+    Position.set(player, x, y);
     PlayerAtPosition.set(_gameId, x, y, player);
+    Username.set(player, _username);
+    Alive.set(player, true);
     Movable.set(player, true);
     Health.set(player, 3);
     Range.set(player, 2);
-    InGame.set(player, _gameId);
     ActionPoint.set(player, 3);
     LastActionPointClaim.set(player, 0); 
 

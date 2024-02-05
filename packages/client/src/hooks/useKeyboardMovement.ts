@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useMUD } from "./MUDContext";
-import { ErrorWithShortMessage } from "./CustomTypes";
+import { useMUD } from "../MUDContext";
+import { ErrorWithShortMessage } from "../CustomTypes";
 import { useGameContext } from "./GameContext";
 
 export const useKeyboardMovement = () => {
@@ -19,16 +19,16 @@ export const useKeyboardMovement = () => {
     const listener = async (e: KeyboardEvent) => {
       try {
         if (gameId) {
-          if (e.key === "ArrowUp") {
+          if (e.key === "ArrowUp" || e.key === "w") {
             await moveBy(0, -1, gameId);
           }
-          if (e.key === "ArrowDown") {
+          if (e.key === "ArrowDown" || e.key === "s") {
             await moveBy(0, 1, gameId);
           }
-          if (e.key === "ArrowLeft") {
+          if (e.key === "ArrowLeft" || e.key === "a") {
             await moveBy(-1, 0, gameId);
           }
-          if (e.key === "ArrowRight") {
+          if (e.key === "ArrowRight" || e.key === "d") {
             await moveBy(1, 0, gameId);
           }
         }

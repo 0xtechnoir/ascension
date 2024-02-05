@@ -1,8 +1,8 @@
 import { useEffect, useState, useRef } from "react";
 import { useComponentValue, useEntityQuery } from "@latticexyz/react";
 import { GameMap } from "./GameMap";
-import { useMUD } from "./MUDContext";
-import { useKeyboardMovement } from "./useKeyboardMovement";
+import { useMUD } from "../MUDContext";
+import { useKeyboardMovement } from "../hooks/useKeyboardMovement";
 import {
   Entity,
   getComponentValueStrict,
@@ -10,7 +10,7 @@ import {
   HasValue,
 } from "@latticexyz/recs";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
-import { useGameContext } from "./GameContext";
+import { useGameContext } from "../hooks/GameContext";
 import { Player as PlayerComponet } from "./Player";
 
 interface GameBoardProps {
@@ -84,6 +84,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ players }) => {
     Has(Player),
     HasValue(Alive, { value: false }),
   ]);
+  
   const mappedPlayers = players.map((entity) => {
     const position = getComponentValueStrict(Position, entity);
     let emoji = "";

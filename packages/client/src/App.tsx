@@ -3,15 +3,16 @@ import { useComponentValue, useEntityQuery } from "@latticexyz/react";
 import { useMUD } from "./MUDContext";
 import { Entity, Has, HasValue, getComponentValue } from "@latticexyz/recs";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
-import { GameBoard } from "./GameBoard";
-import { PlayersList } from "./PlayersList";
+import { GameBoard } from "./components/GameBoard";
+import { PlayersList } from "./components/PlayersList";
 import { ErrorWithShortMessage } from "./CustomTypes";
-import ActivityLogComponent from "./ActivityLogComponent";
-import { useGameContext } from "./GameContext";
-import SpawnModal from "./SpawnModal";
-import LeaveGameModal from "./LeaveGameModal";
-import RulesModal from "./RulesModal";
-import Lobby from "./Lobby";
+import ActivityLogComponent from "./components/ActivityLogComponent";
+import { useGameContext } from "./hooks/GameContext";
+import SpawnModal from "./modals/SpawnModal";
+import LeaveGameModal from "./modals/LeaveGameModal";
+import RulesModal from "./modals/RulesModal";
+import Lobby from "./components/Lobby";
+import logo from "../assets/mud-logo.png";
 
 export const App = () => {
   // Custom Types
@@ -120,7 +121,8 @@ export const App = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-space-bg">
-      <div className="flex justify-center">
+    <img src={logo} alt="Logo" className="absolute top-0 right-0 m-4 w-40 h-30 z-0" />
+      <div className="flex justify-center z-10">
         {!showGameBoard ? (
           <Lobby
             setShowGameBoard={setShowGameBoard}

@@ -1,5 +1,5 @@
-import { ErrorWithShortMessage } from "./CustomTypes";
-import { useGameContext } from "./GameContext";
+import { ErrorWithShortMessage } from "../CustomTypes";
+import { useGameContext } from "../hooks/GameContext";
 
 type ActionButtonProps = {
   label: string;

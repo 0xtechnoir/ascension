@@ -1,7 +1,7 @@
 import React from "react";
 import { Entity } from "@latticexyz/recs";
 import { Player } from "./Player";
-import { useMUD } from "./MUDContext";
+import { useMUD } from "../MUDContext";
 
 type PlayersListProps = {
   players: Entity[];

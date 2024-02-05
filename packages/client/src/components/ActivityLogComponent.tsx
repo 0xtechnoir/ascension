@@ -1,9 +1,9 @@
 import { getComponentValue, HasValue } from "@latticexyz/recs";
 import { useEntityQuery } from "@latticexyz/react";
-import { useMUD } from "./MUDContext";
-import { LogMessage } from "./CustomTypes";
-import { formatDate } from "./utils";
-import { useGameContext } from "./GameContext";
+import { useMUD } from "../MUDContext";
+import { LogMessage } from "../CustomTypes";
+import { formatDate } from "../utils";
+import { useGameContext } from "../hooks/GameContext";
 import { useEffect, useState } from "react";
 
 const ActivityLogComponent = () => {

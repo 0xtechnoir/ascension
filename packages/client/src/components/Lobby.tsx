@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { useGameContext } from "./GameContext";
+import { useGameContext } from "../hooks/GameContext";
 import { useEntityQuery } from "@latticexyz/react";
 import { getComponentValue, Has } from "@latticexyz/recs";
-import { useMUD } from "./MUDContext";
+import { useMUD } from "../MUDContext";
 
 interface LobbyProps {
   setShowGameBoard: React.Dispatch<React.SetStateAction<boolean>>;

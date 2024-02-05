@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { useMUD } from "./MUDContext";
+import { useMUD } from "../MUDContext";
 import { useComponentValue, useEntityQuery } from "@latticexyz/react";
 import { singletonEntity } from "@latticexyz/store-sync/recs";
 import { ActionButton } from "./ActionButton";
-import { useGameContext } from "./GameContext";
+import { useGameContext } from "../hooks/GameContext";
 import { Entity, Has, getComponentValue } from "@latticexyz/recs";
 
 type PlayerProps = {

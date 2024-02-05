@@ -7,7 +7,7 @@ import { setup } from "./mud/setup";
 import { MUDProvider } from "./MUDContext";
 import mudConfig from "contracts/mud.config";
 import { ToastContainer } from "react-toastify";
-import { GameProvider } from "./GameContext";
+import { GameProvider } from "./hooks/GameContext";
 
 const rootElement = document.getElementById("react-root");
 if (!rootElement) throw new Error("React root not found");

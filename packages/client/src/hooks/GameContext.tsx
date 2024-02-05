@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState } from "react";
 import { Entity } from "@latticexyz/recs";
-import { MessageModal } from "./MessageModal";
+import { MessageModal } from "../modals/MessageModal";
 
 type GameContextProps = {
   message: string;
